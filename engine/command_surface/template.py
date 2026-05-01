@@ -152,7 +152,28 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
 </aside>
 <main class="center"><div class="scene-shell">$wildlife_atmosphere_markup<div class="legend"><div class="chip">Green ring = best sit</div><div class="chip">Gold ring = backup sit</div><div class="chip">Amber ring = fringe option</div><div class="chip">PAD-US glow follows the terrain</div><div id="modeStatusChip" class="chip">Terrain + Cover Read</div><div id="coverKeyLegend" class="cover-key"><div class="chip cover-chip"><span class="cover-swatch cover-swatch-dense"></span>Dense cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-moderate"></span>Moderate cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-open"></span>Open / exposed</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-bowl"></span>Sheltered bowl</div></div></div><div class="scene-tools"><div style="margin-bottom:8px">
 
-</div><a class="scene-tool-btn" href="/">Back to Box / Launch</a></div><div id="viewer"></div><div class="cursor-hud" id="cursorHud"><strong>Cursor terrain read</strong><div id="cursorCoords">Move over the terrain to read live GPS.</div><div class="micro-copy">Reads the current terrain point under your cursor.</div></div><div class="hud-strip"><div class="hud-card"><span class="label">Primary sit</span><strong>$primary_title</strong></div><div class="hud-card"><span class="label">Confidence</span><strong>$confidence_label</strong> · $confidence</div><div class="hud-card" id="selectedSiteHud"><span class="label">Selected sit coordinates</span><strong id="selectedSiteTitle">$primary_title</strong><div id="selectedSiteCoords">Loading coordinates…</div><button id="copyCoordsBtn" type="button">Copy coordinates</button></div><div class="hud-card" id="liveWindHud"><span class="label">Live wind near primary sit</span><strong id="liveWindHudSummary">Loading live wind…</strong><div id="liveWindHudMeta" class="micro-copy">Fetching current direction and speed.</div></div><div class="hud-card approach-hud" id="invisibleApproachHud"><span class="label">Invisible Approach</span><strong id="invisibleApproachSummary">Layer off</strong><div id="invisibleApproachMeta" class="micro-copy">Toggle to show approach risk from Access Entry to the selected sit.</div></div></div></div></main>
+</div><a class="scene-tool-btn" href="/">Back to Box / Launch</a></div><div id="viewer"></div>
+<style>
+.hud-strip {
+    position: absolute !important;
+    bottom: 20px !important;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    max-height: 140px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 8px;
+}
+.hud-strip:hover {
+    max-height: 320px;
+    overflow-y: auto;
+}
+</style>
+
+<div class="cursor-hud" id="cursorHud"><strong>Cursor terrain read</strong><div id="cursorCoords">Move over the terrain to read live GPS.</div><div class="micro-copy">Reads the current terrain point under your cursor.</div></div><div class="hud-strip"><div class="hud-card"><span class="label">Primary sit</span><strong>$primary_title</strong></div><div class="hud-card"><span class="label">Confidence</span><strong>$confidence_label</strong> · $confidence</div><div class="hud-card" id="selectedSiteHud"><span class="label">Selected sit coordinates</span><strong id="selectedSiteTitle">$primary_title</strong><div id="selectedSiteCoords">Loading coordinates…</div><button id="copyCoordsBtn" type="button">Copy coordinates</button></div><div class="hud-card" id="liveWindHud"><span class="label">Live wind near primary sit</span><strong id="liveWindHudSummary">Loading live wind…</strong><div id="liveWindHudMeta" class="micro-copy">Fetching current direction and speed.</div></div><div class="hud-card approach-hud" id="invisibleApproachHud"><span class="label">Invisible Approach</span><strong id="invisibleApproachSummary">Layer off</strong><div id="invisibleApproachMeta" class="micro-copy">Toggle to show approach risk from Access Entry to the selected sit.</div></div></div></div></main>
 <aside class="right"><div class="side-rail">$hunter_core_spotlight_markup<div class="block" id="fieldAnchorGuide" style="margin-bottom:8px;border-color:rgba(94,200,255,.22);background:rgba(8,18,28,.78)">
   <h3 style="margin-bottom:6px">Field Anchors</h3>
   <div class="note">

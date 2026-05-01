@@ -454,7 +454,7 @@ small { color:#8ea0ac; }
 
   <div class="layout">
     <div class="card">
-      <h2>Draw your hunting box</h2>
+      <h2>Draw your hunting box <span style="font-size:14px; opacity:0.7;">(3D render may take 5–10 seconds)</span></h2>
       <div class="search-row">
         <input id="place_search" type="text" placeholder="Search address, town, road, camp, or landmark">
         <button class="secondary" type="button" onclick="searchPlace()">Find place</button>
