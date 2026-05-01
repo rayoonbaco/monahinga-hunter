@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 import json
 import math
 import os
 import shutil
+import threading
+import time
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
@@ -251,6 +254,85 @@ def _quarantine_bad_run(run_root: Path, reason: str) -> None:
         pass
 
 
+def _cache_key_for_run(
+    *,
+    bbox: BBox,
+    width: int,
+    height: int,
+    operator_context: dict,
+) -> str:
+    """Create a stable cache key for repeat public runs.
+
+    Same box + same species + same wind + same grid can reuse a previously
+    validated command surface instead of rebuilding terrain from scratch.
+    """
+    species = str(
+        operator_context.get("selected_species")
+        or operator_context.get("target_species")
+        or "default"
+    ).strip().lower()
+    wind = str(operator_context.get("wind_direction") or "").strip().upper()
+
+    raw = "|".join([
+        f"{float(bbox.min_lon):.5f}",
+        f"{float(bbox.min_lat):.5f}",
+        f"{float(bbox.max_lon):.5f}",
+        f"{float(bbox.max_lat):.5f}",
+        str(int(width)),
+        str(int(height)),
+        species,
+        wind,
+    ])
+    digest = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
+    return f"cache_{digest}"
+
+
+def _cache_root_for_key(cache_key: str) -> Path:
+    return RUNS_DIR / "_smart_cache" / cache_key
+
+
+def _try_cached_run(
+    *,
+    cache_key: str,
+    bbox: BBox,
+) -> dict | None:
+    """Return a cached successful run if it still validates.
+
+    Cache is intentionally conservative: if anything smells wrong, we ignore it
+    and rebuild normally. Fake terrain success is still not allowed.
+    """
+    cache_root = _cache_root_for_key(cache_key)
+    command_surface = cache_root / "command_surface" / "index.html"
+    if not cache_root.exists() or not command_surface.exists():
+        return None
+
+    try:
+        validation = _validate_terrain_run(cache_root, bbox)
+    except Exception:
+        return None
+
+    validation["cache_hit"] = True
+    return {
+        "run_id": cache_key,
+        "run_root": cache_root,
+        "terrain_validation": validation,
+        "command_surface_path": "command_surface/index.html",
+    }
+
+
+def _save_successful_run_to_cache(*, run_root: Path, cache_key: str) -> Path | None:
+    """Copy a successful validated run into smart cache for instant reuse."""
+    cache_root = _cache_root_for_key(cache_key)
+    try:
+        cache_root.parent.mkdir(parents=True, exist_ok=True)
+        if cache_root.exists():
+            shutil.rmtree(cache_root, ignore_errors=True)
+        shutil.copytree(run_root, cache_root)
+        return cache_root
+    except Exception:
+        return None
+
+
 def _build_and_validate_once(
     *,
     bbox: BBox,
@@ -277,7 +359,7 @@ def _safe_run_dimensions(width: int, height: int) -> tuple[int, int]:
     not punish users with slow first impressions. Override with
     MONAHINGA_MAX_RENDER_GRID if needed.
     """
-    max_grid = int(os.getenv("MONAHINGA_MAX_RENDER_GRID", "512"))
+    max_grid = int(os.getenv("MONAHINGA_MAX_RENDER_GRID", "384"))
     safe_width = max(256, min(int(width or 512), max_grid))
     safe_height = max(256, min(int(height or 512), max_grid))
     return safe_width, safe_height
@@ -292,6 +374,26 @@ def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = No
     bbox.validate_us_hunting_box()
     width, height = _safe_run_dimensions(width, height)
     operator_context = dict(operator_context or {})
+
+    cache_key = _cache_key_for_run(
+        bbox=bbox,
+        width=width,
+        height=height,
+        operator_context=operator_context,
+    )
+    cached = _try_cached_run(cache_key=cache_key, bbox=bbox)
+    if cached:
+        RUN_COUNT += 1
+        return {
+            "ok": True,
+            "run_id": cached["run_id"],
+            "run_folder": str(cached["run_root"]),
+            "decision_contract": f"/runs/_smart_cache/{cache_key}/terrain_truth/decision/decision_contract.json",
+            "command_surface_url": f"/runs/_smart_cache/{cache_key}/{cached['command_surface_path']}",
+            "runs_remaining": MAX_RUNS - RUN_COUNT,
+            "terrain_validation": cached["terrain_validation"],
+            "cache_hit": True,
+        }
 
     first_run_id = f"run_{uuid4().hex[:10]}"
     first_run_root = RUNS_DIR / first_run_id
@@ -358,6 +460,11 @@ def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = No
     if retry_notes:
         terrain_validation["retry_notes"] = retry_notes
 
+    cached_copy = _save_successful_run_to_cache(run_root=run_root, cache_key=cache_key)
+    if cached_copy is not None:
+        terrain_validation["cache_saved"] = True
+        terrain_validation["cache_key"] = cache_key
+
     return {
         "ok": True,
         "run_id": run_id,
@@ -366,7 +473,62 @@ def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = No
         "command_surface_url": f"/runs/{run_id}/{contract.command_surface.path}",
         "runs_remaining": MAX_RUNS - RUN_COUNT,
         "terrain_validation": terrain_validation,
+        "cache_hit": False,
     }
+
+
+def _prewarm_default_cache() -> None:
+    """Warm the terrain stack once after server startup.
+
+    This is intentionally best-effort. If it fails, users can still run normally.
+    It does not count against the user run limit.
+    """
+    try:
+        if str(os.getenv("MONAHINGA_PREWARM_CACHE", "1")).strip().lower() in {"0", "false", "no", "off"}:
+            return
+
+        # Let the server finish binding before we start heavy work.
+        time.sleep(float(os.getenv("MONAHINGA_PREWARM_DELAY_SECONDS", "2.0")))
+
+        width, height = _safe_run_dimensions(384, 384)
+        operator_context = {
+            "wind_direction": "",
+            "notes": "startup prewarm cache",
+            "mode": "hunter",
+            "selected_species": "whitetail",
+            "target_species": "whitetail",
+        }
+        cache_key = _cache_key_for_run(
+            bbox=DEFAULT_BBOX,
+            width=width,
+            height=height,
+            operator_context=operator_context,
+        )
+        if _try_cached_run(cache_key=cache_key, bbox=DEFAULT_BBOX):
+            return
+
+        prewarm_root = RUNS_DIR / "_prewarm" / f"prewarm_{uuid4().hex[:8]}"
+        contract, terrain_validation = _build_and_validate_once(
+            bbox=DEFAULT_BBOX,
+            run_root=prewarm_root,
+            width=width,
+            height=height,
+            operator_context=operator_context,
+        )
+        cached_copy = _save_successful_run_to_cache(run_root=prewarm_root, cache_key=cache_key)
+        if cached_copy is not None:
+            terrain_validation["prewarm_cache_saved"] = True
+
+    except Exception:
+        # Never let prewarm kill production startup.
+        return
+
+
+@app.on_event("startup")
+def startup_prewarm_cache() -> None:
+    """Start cache prewarm in a background thread so Render becomes responsive first."""
+    thread = threading.Thread(target=_prewarm_default_cache, daemon=True)
+    thread.start()
 
 
 @app.get("/", response_class=HTMLResponse)
