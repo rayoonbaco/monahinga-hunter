@@ -498,11 +498,11 @@ small { color:#8ea0ac; }
         </div>
         <div class="field">
           <label>Width</label>
-          <input id="width" value="768">
+          <input id="width" value="512">
         </div>
         <div class="field">
           <label>Height</label>
-          <input id="height" value="768">
+          <input id="height" value="512">
         </div>
         <div class="field">
           <label>Wind Direction</label>
@@ -550,7 +550,7 @@ small { color:#8ea0ac; }
         <button class="ghost" type="button" onclick="applyDefault()">Reset to default box</button>
         <button class="ghost" type="button" onclick="window.location='/instructions'">Open instructions</button>
       </div>
-      <div style="margin-top:12px"><small>Tip: keep width and height at 768 unless you have a strong reason to push the grid higher. Wind is optional. Mode stays locked to hunter so the output stays focused.</small></div>
+      <div style="margin-top:12px"><small>Tip: keep width and height at 512 for public web speed; use 768 only for slower high-detail testing. Wind is optional. Mode stays locked to hunter so the output stays focused.</small></div>
     </div>
   </div>
 
@@ -997,7 +997,7 @@ async function runCustom() {
     setStatus('FAILED\n\nMove the hunt box back inside the lower-48 hunting footprint before running.');
     return;
   }
-  setStatus('Running the lower-48 hunting pipeline for the selected box... Please wait.');
+  setStatus('Building fast public terrain read... This may take a moment on first cloud run, but the web grid is now capped for speed.');
   try {
     const res = await fetch('/run-terrain-truth', {
       method: 'POST',
@@ -1073,8 +1073,8 @@ if (speciesSelect) {
 def render_home_page(default_bbox: BBox) -> str:
     defaults = {
         **default_bbox.to_form_defaults(),
-        "width": 768,
-        "height": 768,
+        "width": 512,
+        "height": 512,
         "wind_direction": "",
         "notes": "",
         "mode": "hunter",

@@ -66,6 +66,7 @@ class RunRequest(BaseModel):
     wind_direction: str = Field(default="")
     notes: str = Field(default="")
     mode: str = Field(default="hunter")
+    selected_species: str = Field(default="default")
 
 
 class TerrainValidationError(RuntimeError):
@@ -269,6 +270,19 @@ def _build_and_validate_once(
     return contract, terrain_validation
 
 
+def _safe_run_dimensions(width: int, height: int) -> tuple[int, int]:
+    """Keep public web runs responsive while preserving terrain truth.
+
+    Local testing can still request larger values, but public launch flow should
+    not punish users with slow first impressions. Override with
+    MONAHINGA_MAX_RENDER_GRID if needed.
+    """
+    max_grid = int(os.getenv("MONAHINGA_MAX_RENDER_GRID", "512"))
+    safe_width = max(256, min(int(width or 512), max_grid))
+    safe_height = max(256, min(int(height or 512), max_grid))
+    return safe_width, safe_height
+
+
 def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = None) -> dict:
     global RUN_COUNT
 
@@ -276,6 +290,7 @@ def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = No
         return {"redirect": "/checkout"}
 
     bbox.validate_us_hunting_box()
+    width, height = _safe_run_dimensions(width, height)
     operator_context = dict(operator_context or {})
 
     first_run_id = f"run_{uuid4().hex[:10]}"
@@ -437,6 +452,8 @@ def run_terrain_truth(req: RunRequest):
                 "wind_direction": req.wind_direction,
                 "notes": req.notes,
                 "mode": req.mode or "hunter",
+                "selected_species": req.selected_species or "default",
+                "target_species": req.selected_species or "default",
             },
         )
 
