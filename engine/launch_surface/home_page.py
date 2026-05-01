@@ -997,7 +997,11 @@ async function runCustom() {
     setStatus('FAILED\n\nMove the hunt box back inside the lower-48 hunting footprint before running.');
     return;
   }
-  setStatus('Building fast public terrain read... This may take a moment on first cloud run, but the web grid is now capped for speed.');
+  setStatus('Reading terrain, elevation, wind, and cover...\nBuilding your 3D hunting intelligence (5–10 seconds)');
+
+  setTimeout(() => {
+  setStatus('Analyzing terrain structure and movement patterns...\nSelecting optimal stand locations...');
+}, 1800);
   try {
     const res = await fetch('/run-terrain-truth', {
       method: 'POST',
