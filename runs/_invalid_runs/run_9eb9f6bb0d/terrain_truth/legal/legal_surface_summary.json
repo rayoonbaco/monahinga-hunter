@@ -1,0 +1,9 @@
+{
+  "provider": "padus_arcgis",
+  "feature_count": 1,
+  "legal_feature_count": 1,
+  "restricted_feature_count": 0,
+  "unknown_feature_count": 0,
+  "configured": true,
+  "skipped": false
+}

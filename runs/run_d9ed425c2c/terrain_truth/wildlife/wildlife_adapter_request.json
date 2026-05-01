@@ -1,0 +1,92 @@
+{
+  "adapter_version": "1.0.0",
+  "source_system": "MONAHINGA",
+  "source_run_root": "C:\\Users\\Owner\\Desktop\\ENOUGH\\HUNTER (speed enhanced)\\HUNTER\\runs\\run_d9ed425c2c\\terrain_truth",
+  "bbox_authority": {
+    "min_lon": -78.089916,
+    "min_lat": 41.884358,
+    "max_lon": -78.058737,
+    "max_lat": 41.907102,
+    "authority": "terrain_truth_bbox",
+    "required": true
+  },
+  "terrain_bundle": {
+    "terrain_contract_path": "C:\\Users\\Owner\\Desktop\\ENOUGH\\HUNTER (speed enhanced)\\HUNTER\\runs\\run_d9ed425c2c\\terrain_truth\\terrain_contract.json",
+    "dem_path": "C:\\Users\\Owner\\Desktop\\ENOUGH\\HUNTER (speed enhanced)\\HUNTER\\runs\\run_d9ed425c2c\\terrain_truth\\terrain\\dem.tif",
+    "dem_source": "dem.tif",
+    "cell_size_m": null,
+    "crs": null,
+    "required": true
+  },
+  "derived_layers": {
+    "precomputed": {
+      "slope": null,
+      "aspect": null,
+      "local_relief": null,
+      "medium_relief": null,
+      "relative_elevation": null,
+      "ridge_tendency": null,
+      "valley_tendency": null,
+      "bench_index": null,
+      "drainage_index": null,
+      "thermal_cover": null,
+      "road_exposure": null,
+      "human_pressure": null
+    },
+    "runtime_derivable": {
+      "slope": true,
+      "aspect": true,
+      "local_relief": true,
+      "ridge_tendency_proxy": true,
+      "bench_index_proxy": true,
+      "edge_proximity": true,
+      "terrain_shape_tags": true
+    }
+  },
+  "legal_context": {
+    "legal_features_path": "C:\\Users\\Owner\\Desktop\\ENOUGH\\HUNTER (speed enhanced)\\HUNTER\\runs\\run_d9ed425c2c\\terrain_truth\\legal\\legal_surface.geojson",
+    "features_inline": null,
+    "required_feature_property": "monahinga_legal_class",
+    "allowed_hunt_class": "legal",
+    "coverage_inside_bbox_pct": null,
+    "ground_name_fields": [
+      "Unit_Nm",
+      "MngNm_Desc",
+      "ManagerName",
+      "BndryName"
+    ],
+    "required": true
+  },
+  "conditions": {
+    "wind_direction_deg": null,
+    "wind_direction_label": null,
+    "wind_speed_mph": null,
+    "time_of_day": null,
+    "hours_before_sunset": null,
+    "temperature_f": null,
+    "pressure_state": null,
+    "input_condition_quality": "partial"
+  },
+  "pressure_proxies": {
+    "edge_exposure": null,
+    "interior_security": null,
+    "verified_legal_access": null,
+    "boundary_hunt_risk": null,
+    "road_exposure": null,
+    "human_pressure": null,
+    "proxy_quality": "minimal"
+  },
+  "metadata": {
+    "run_id": "terrain_truth",
+    "generated_at": null,
+    "viewer_context_available": true,
+    "selected_box_label": null,
+    "operator_notes": "",
+    "source_artifacts": [
+      "terrain_contract.json",
+      "terrain/*.tif",
+      "legal/legal_surface.geojson",
+      "viewer status fields"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+Monahinga Pass 2 replacements
+
+Files touched:
+- apps/api/main.py: included to keep the API entry point aligned; no behavior change.
+- engine/launch_surface/home_page.py: adds first-free-view messaging and a simple browser prompt to send returning users to checkout after their first free run.
+- engine/launch_surface/instructions_page.py: replaces the instruction page with organized dropdown sections covering the launch flow, Base Camp, pins, GPS cursor readout, layers, buttons, downloads, screenshots, Version 1 feedback, brand notes, and Reel concept.
+- engine/command_surface/render.py: routes the Page 2 checkout button through /checkout and keeps the offer language consistent.
+
+Safe because:
+- Page 2 template.py / 3D terrain code was not touched.
+- Stripe secrets are still only read from environment variables by /checkout.
+- The first-free prompt uses local browser storage only; it does not change terrain rendering.
+
+Rollback:
+- Replace these four files with your prior copies.

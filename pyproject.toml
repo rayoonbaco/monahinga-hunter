@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "monahinga-vnext"
+version = "0.4.0"
+description = "Monahinga vNext operator-first terrain intelligence command surface"
+requires-python = ">=3.10"
+dependencies = [
+  "requests>=2.31.0",
+  "fastapi>=0.115.0",
+  "uvicorn>=0.30.0",
+  "pydantic>=2.7.0",
+  "numpy>=1.26.0",
+  "Pillow>=10.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["engine*", "apps*"]

@@ -1,0 +1,13 @@
+{
+  "elevation_min_m": 480.0432434082031,
+  "elevation_max_m": 700.0857543945312,
+  "elevation_range_m": 220.04251098632812,
+  "structure_bias": "low-relief terrain",
+  "width": 768,
+  "height": 768,
+  "terrain_render_path": "terrain_render.png",
+  "hillshade_path": "hillshade.png",
+  "slope_path": "slope.png",
+  "local_relief_path": "local_relief.png",
+  "heightmap_path": "heightmap.json"
+}

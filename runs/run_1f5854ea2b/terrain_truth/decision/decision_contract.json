@@ -1,0 +1,235 @@
+{
+  "primary": {
+    "rank": 1,
+    "tier": "primary",
+    "title": "Primary Sit \u2014 Core Converge",
+    "score": 145,
+    "lon": -78.0743265,
+    "lat": 41.89376924317458,
+    "elevation_m": 586.0087890625,
+    "slope_bias": "bench",
+    "legality_status": "legal",
+    "source_name": "State Game Land 204",
+    "reasoning": "Win strength: Narrow. Breaks if: bedding pressure settles deeper toward the backup option. State Game Land 204 stays legal here; 586 m on a mid-slope bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Species tuning: Whitetail Deer modifier +26.9. Feature-aware signals: bench, edge, cover (+9.5). Dominant-trait read: edge density, cover density, food source, crop edge shaped this species call (+5.4). Whitetail will favor low-pressure edges, bedding cover, mast or crop food, wind-safe access, and terrain funnels that let deer move without exposing themselves. Feature read: active=bench, edge, cover; inactive=ridge, open. Whitetail weighting favors bench-edge-cover security and penalizes exposed open ground. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Behavior Profiles v2: edge-security optimizer adjusted this final selection (+9.7; flow=0.35, security=0.93, visibility=0.09, food=0.71, broken=0.29, low=0.52, flow_offset=0.5). Competitive read: this is a narrow win over the nearest backup because it carries slightly cleaner total terrain fit. Conditional read: this stays viable unless bedding pressure settles deeper toward the backup option.",
+    "features": {
+      "ridge": false,
+      "bench": true,
+      "edge": true,
+      "open": false,
+      "cover": true
+    },
+    "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. Whitetail weighting favors bench-edge-cover security and penalizes exposed open ground."
+  },
+  "alternates": [
+    {
+      "rank": 2,
+      "tier": "alternate",
+      "title": "Alternate Sit #2 \u2014 South West Spur",
+      "score": 144,
+      "lon": -78.08118588,
+      "lat": 41.89123544693527,
+      "elevation_m": 658.156982421875,
+      "slope_bias": "bench",
+      "legality_status": "legal",
+      "source_name": "State Game Land 204",
+      "reasoning": "State Game Land 204 stays legal here; 658 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Species tuning: Whitetail Deer modifier +23.6. Feature-aware signals: bench, edge, cover (+9.5). Dominant-trait read: edge density, cover density, food source, crop edge shaped this species call (+2.1). Whitetail will favor low-pressure edges, bedding cover, mast or crop food, wind-safe access, and terrain funnels that let deer move without exposing themselves. Feature read: active=bench, edge, cover; inactive=ridge, open. Whitetail weighting favors bench-edge-cover security and penalizes exposed open ground. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Behavior Profiles v2: edge-security optimizer adjusted this final selection (+9.4; flow=0.35, security=0.88, visibility=0.15, food=0.64, broken=0.24, low=0.18, flow_offset=0.5).",
+      "features": {
+        "ridge": false,
+        "bench": true,
+        "edge": true,
+        "open": false,
+        "cover": true
+      },
+      "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. Whitetail weighting favors bench-edge-cover security and penalizes exposed open ground."
+    },
+    {
+      "rank": 3,
+      "tier": "alternate",
+      "title": "Alternate Sit #3 \u2014 South Bench",
+      "score": 142,
+      "lon": -78.07276755,
+      "lat": 41.88978756336995,
+      "elevation_m": 658.6067504882812,
+      "slope_bias": "bench",
+      "legality_status": "legal",
+      "source_name": "State Game Land 204",
+      "reasoning": "State Game Land 204 stays legal here; 659 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Species tuning: Whitetail Deer modifier +23.6. Feature-aware signals: bench, edge, cover (+9.5). Dominant-trait read: edge density, cover density, food source, crop edge shaped this species call (+2.1). Whitetail will favor low-pressure edges, bedding cover, mast or crop food, wind-safe access, and terrain funnels that let deer move without exposing themselves. Feature read: active=bench, edge, cover; inactive=ridge, open. Whitetail weighting favors bench-edge-cover security and penalizes exposed open ground. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Behavior Profiles v2: edge-security optimizer adjusted this final selection (+9.4; flow=0.35, security=0.88, visibility=0.15, food=0.64, broken=0.27, low=0.18, flow_offset=0.5).",
+      "features": {
+        "ridge": false,
+        "bench": true,
+        "edge": true,
+        "open": false,
+        "cover": true
+      },
+      "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. Whitetail weighting favors bench-edge-cover security and penalizes exposed open ground."
+    },
+    {
+      "rank": 4,
+      "tier": "alternate",
+      "title": "Alternate Sit #4 \u2014 Core Converge",
+      "score": 136,
+      "lon": -78.06964965,
+      "lat": 41.89268333050059,
+      "elevation_m": 695.4884643554688,
+      "slope_bias": "bench",
+      "legality_status": "legal",
+      "source_name": "State Game Land 204",
+      "reasoning": "State Game Land 204 stays legal here; 695 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Species tuning: Whitetail Deer modifier +17.8. Feature-aware signals: bench, cover (+6.4). Dominant-trait read: edge density, cover density, food source, crop edge shaped this species call (-0.4). Whitetail will favor low-pressure edges, bedding cover, mast or crop food, wind-safe access, and terrain funnels that let deer move without exposing themselves. Feature read: active=bench, cover; inactive=ridge, edge, open. Whitetail weighting favors bench-edge-cover security and penalizes exposed open ground. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Behavior Profiles v2: edge-security optimizer adjusted this final selection (+3.5; flow=0.17, security=0.85, visibility=0.18, food=0.38, broken=0.14, low=0.01, flow_offset=0.5).",
+      "features": {
+        "ridge": false,
+        "bench": true,
+        "edge": false,
+        "open": false,
+        "cover": true
+      },
+      "feature_readout": "Feature read: active=bench, cover; inactive=ridge, edge, open. Whitetail weighting favors bench-edge-cover security and penalizes exposed open ground."
+    }
+  ],
+  "near_misses": [],
+  "corridors": [
+    {
+      "name": "Dominant Corridor",
+      "strength": "dominant",
+      "points": [
+        [
+          -78.0743265,
+          41.89376924317458
+        ],
+        [
+          -78.07775619,
+          41.89376924317458
+        ],
+        [
+          -78.08118588,
+          41.89123544693527
+        ]
+      ],
+      "reasoning": "Main travel line between the strongest legal sit positions along upper structure.",
+      "features": {},
+      "feature_readout": ""
+    },
+    {
+      "name": "Secondary Corridor A",
+      "strength": "secondary",
+      "points": [
+        [
+          -78.08118588,
+          41.89123544693527
+        ],
+        [
+          -78.076976715,
+          41.89051150515261
+        ],
+        [
+          -78.07276755,
+          41.88978756336995
+        ]
+      ],
+      "reasoning": "Fallback connection between alternate sits when the primary lane is compromised.",
+      "features": {},
+      "feature_readout": ""
+    }
+  ],
+  "notes": [
+    "Selected bbox is enforced as a hard analysis fence before ranking and viewer payload generation.",
+    "Only legal areas can surface primary or alternate sits when verified legal candidates exist.",
+    "Restricted and unknown areas remain visible as suppressed near-misses.",
+    "Ranking now adds relative terrain trust logic so convergence, shoulder, funnel, bench, and edge reads come from the DEM instead of presentation-only phrasing.",
+    "Ranking blends terrain structure, legal gating, timing fit, and wind guard logic.",
+    "When no verified legal candidates exist inside the selected bbox, the system falls back to terrain-only review mode instead of crashing.",
+    "Provider health now reduces confidence and score when terrain or legal data is degraded.",
+    "Vegetation classification now meaningfully changes concealment, bedding confidence, and weak-cover penalties inside sit scoring."
+  ],
+  "summary": {
+    "analysis_mode": "legal_hunt",
+    "terrain_only_fallback": false,
+    "mode": "hunter",
+    "legal_state": "strong",
+    "legal_state_label": "Strong verified legal hunting land",
+    "preferred_wind": "S",
+    "current_wind": "",
+    "wind_fit": null,
+    "confidence": 98,
+    "confidence_label": "High",
+    "trust_tags": [
+      "Bench Travel",
+      "Full Legal Setup",
+      "Cover Advantage"
+    ],
+    "readiness": "Huntable",
+    "best_time_label": "Evening destination window",
+    "best_time_window": "2.5 hours before sunset through last light",
+    "cluster_summary": [
+      {
+        "title": "Primary Sit \u2014 Core Converge",
+        "score": 145,
+        "why": "Bench Bedding Edge \u00b7 Support Whitetail Deer Tune / Cover Advantage \u00b7 Travel 72 \u00b7 Bedding 81"
+      },
+      {
+        "title": "Alternate Sit #2 \u2014 South West Spur",
+        "score": 144,
+        "why": "Bench Bedding Edge \u00b7 Support Whitetail Deer Tune / Cover Advantage \u00b7 Travel 70 \u00b7 Bedding 87 \u00b7 Narrow pressure behind the next stronger sit: sits just behind the stronger lane."
+      },
+      {
+        "title": "Alternate Sit #3 \u2014 South Bench",
+        "score": 142,
+        "why": "Bench Bedding Edge \u00b7 Support Whitetail Deer Tune / Cover Advantage \u00b7 Travel 71 \u00b7 Bedding 87 \u00b7 Narrow pressure behind the next stronger sit: sits just behind the stronger lane."
+      }
+    ],
+    "operator_notes": "",
+    "bbox_enforced": true,
+    "provider_reliability_reasons": [],
+    "vegetation_classification": "shrub",
+    "selected_species": "deer_whitetail",
+    "species_label": "Whitetail Deer",
+    "species_profile": {
+      "profile_id": "deer_whitetail",
+      "label": "Whitetail Deer",
+      "regions_supported": [
+        "northeast",
+        "mid_atlantic",
+        "southeast",
+        "appalachia",
+        "great_lakes",
+        "midwest",
+        "great_plains",
+        "texas_south_central"
+      ],
+      "confidence": 0.95,
+      "deltas": {
+        "edge_density_weight": 3,
+        "cover_density_weight": 3,
+        "open_visibility_weight": -2,
+        "saddle_weight": 2,
+        "bench_weight": 2,
+        "draw_drainage_weight": 2,
+        "water_proximity_weight": 1,
+        "food_source_weight": 3,
+        "crop_edge_weight": 3,
+        "mast_hardwood_weight": 3,
+        "bedding_cover_weight": 3,
+        "wind_discipline_weight": 3,
+        "thermal_behavior_weight": 2,
+        "human_pressure_avoidance_weight": 3,
+        "access_route_risk_weight": 3,
+        "time_of_day_bias": 2,
+        "seasonal_phase_bias": 3,
+        "nocturnal_bias": 2,
+        "funnel_corridor_weight": 3
+      },
+      "positive_hook": "Whitetail will favor low-pressure edges, bedding cover, mast or crop food, wind-safe access, and terrain funnels that let deer move without exposing themselves.",
+      "caution_hook": "For whitetail, downgrade easy-looking spots when wind, human pressure, access exposure, or legal confidence is weak.",
+      "region_key": "northeast",
+      "region_supported": true,
+      "effective_multiplier": 1.0
+    },
+    "species_region_key": "northeast",
+    "species_region_supported": true,
+    "invalidators": [
+      "Wind drifts into the preferred approach lane.",
+      "Access pressure rises on the legal edge.",
+      "The route forces you through the hot corridor instead of offsetting from it.",
+      "Terrain quality or legal verification is too weak to trust the sit call."
+    ]
+  }
+}

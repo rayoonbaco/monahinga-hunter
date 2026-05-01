@@ -1,0 +1,13 @@
+
+cdse:
+  token_url: https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token
+  process_url: https://sh.dataspace.copernicus.eu/api/v1/process
+  dem_collection: DEM_COPERNICUS_30
+  output_format: image/tiff
+
+padus:
+  # Set this in your environment for the exact PAD-US layer you want to query.
+  # Example: PADUS_PUBLIC_ACCESS_FEATURESERVER_URL=https://.../FeatureServer/0
+  feature_server_url_env: PADUS_PUBLIC_ACCESS_FEATURESERVER_URL
+  spatial_reference: 4326
+  result_record_count: 2000

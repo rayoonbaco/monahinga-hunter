@@ -1,0 +1,206 @@
+{
+  "primary": {
+    "rank": 1,
+    "tier": "primary",
+    "title": "Primary Sit \u2014 Core Converge",
+    "score": 114,
+    "lon": -78.06964965,
+    "lat": 41.89268333050059,
+    "elevation_m": 695.4884643554688,
+    "slope_bias": "bench",
+    "legality_status": "legal",
+    "source_name": "State Game Land 204",
+    "reasoning": "Win strength: Narrow. Breaks if: movement loads harder into the backup lane than this shelf. State Game Land 204 stays legal here; 695 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, cover; inactive=ridge, edge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Competitive read: this is a narrow win over the nearest backup because it carries slightly cleaner total terrain fit. Conditional read: this stays viable unless movement loads harder into the backup lane than this shelf.",
+    "features": {
+      "ridge": false,
+      "bench": true,
+      "edge": false,
+      "open": false,
+      "cover": true
+    },
+    "feature_readout": "Feature read: active=bench, cover; inactive=ridge, edge, open. General weighting keeps the base terrain read dominant."
+  },
+  "alternates": [
+    {
+      "rank": 2,
+      "tier": "alternate",
+      "title": "Alternate Sit #2 \u2014 South West Spur",
+      "score": 111,
+      "lon": -78.08118588,
+      "lat": 41.89123544693527,
+      "elevation_m": 658.156982421875,
+      "slope_bias": "bench",
+      "legality_status": "legal",
+      "source_name": "State Game Land 204",
+      "reasoning": "State Game Land 204 stays legal here; 658 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.",
+      "features": {
+        "ridge": false,
+        "bench": true,
+        "edge": true,
+        "open": false,
+        "cover": true
+      },
+      "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant."
+    },
+    {
+      "rank": 3,
+      "tier": "alternate",
+      "title": "Alternate Sit #3 \u2014 South Bench",
+      "score": 109,
+      "lon": -78.07276755,
+      "lat": 41.88978756336995,
+      "elevation_m": 658.6067504882812,
+      "slope_bias": "bench",
+      "legality_status": "legal",
+      "source_name": "State Game Land 204",
+      "reasoning": "State Game Land 204 stays legal here; 659 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.",
+      "features": {
+        "ridge": false,
+        "bench": true,
+        "edge": true,
+        "open": false,
+        "cover": true
+      },
+      "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant."
+    },
+    {
+      "rank": 4,
+      "tier": "alternate",
+      "title": "Alternate Sit #4 \u2014 Core Converge",
+      "score": 108,
+      "lon": -78.0743265,
+      "lat": 41.89376924317458,
+      "elevation_m": 586.0087890625,
+      "slope_bias": "bench",
+      "legality_status": "legal",
+      "source_name": "State Game Land 204",
+      "reasoning": "State Game Land 204 stays legal here; 586 m on a mid-slope bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.",
+      "features": {
+        "ridge": false,
+        "bench": true,
+        "edge": true,
+        "open": false,
+        "cover": true
+      },
+      "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant."
+    }
+  ],
+  "near_misses": [],
+  "corridors": [
+    {
+      "name": "Dominant Corridor",
+      "strength": "dominant",
+      "points": [
+        [
+          -78.06964965,
+          41.89268333050059
+        ],
+        [
+          -78.075417765,
+          41.89268333050059
+        ],
+        [
+          -78.08118588,
+          41.89123544693527
+        ]
+      ],
+      "reasoning": "Main travel line between the strongest legal sit positions along upper structure.",
+      "features": {},
+      "feature_readout": ""
+    },
+    {
+      "name": "Secondary Corridor A",
+      "strength": "secondary",
+      "points": [
+        [
+          -78.08118588,
+          41.89123544693527
+        ],
+        [
+          -78.076976715,
+          41.89051150515261
+        ],
+        [
+          -78.07276755,
+          41.88978756336995
+        ]
+      ],
+      "reasoning": "Fallback connection between alternate sits when the primary lane is compromised.",
+      "features": {},
+      "feature_readout": ""
+    }
+  ],
+  "notes": [
+    "Selected bbox is enforced as a hard analysis fence before ranking and viewer payload generation.",
+    "Only legal areas can surface primary or alternate sits when verified legal candidates exist.",
+    "Restricted and unknown areas remain visible as suppressed near-misses.",
+    "Ranking now adds relative terrain trust logic so convergence, shoulder, funnel, bench, and edge reads come from the DEM instead of presentation-only phrasing.",
+    "Ranking blends terrain structure, legal gating, timing fit, and wind guard logic.",
+    "When no verified legal candidates exist inside the selected bbox, the system falls back to terrain-only review mode instead of crashing.",
+    "Provider health now reduces confidence and score when terrain or legal data is degraded.",
+    "Vegetation classification now meaningfully changes concealment, bedding confidence, and weak-cover penalties inside sit scoring."
+  ],
+  "summary": {
+    "analysis_mode": "legal_hunt",
+    "terrain_only_fallback": false,
+    "mode": "hunter",
+    "legal_state": "strong",
+    "legal_state_label": "Strong verified legal hunting land",
+    "preferred_wind": "NE",
+    "current_wind": "",
+    "wind_fit": null,
+    "confidence": 92,
+    "confidence_label": "High",
+    "trust_tags": [
+      "Bench Travel",
+      "Full Legal Setup",
+      "Cover Advantage"
+    ],
+    "readiness": "Huntable",
+    "best_time_label": "Evening destination window",
+    "best_time_window": "2.5 hours before sunset through last light",
+    "cluster_summary": [
+      {
+        "title": "Primary Sit \u2014 Core Converge",
+        "score": 114,
+        "why": "Bench Bedding Edge \u00b7 Support Cover Advantage / Mixed Cover \u00b7 Travel 54 \u00b7 Bedding 85"
+      },
+      {
+        "title": "Alternate Sit #2 \u2014 South West Spur",
+        "score": 111,
+        "why": "Bench Bedding Edge \u00b7 Support Cover Advantage / Mixed Cover \u00b7 Travel 64 \u00b7 Bedding 82 \u00b7 Narrow pressure behind the next stronger sit: sits just behind the stronger lane."
+      },
+      {
+        "title": "Alternate Sit #3 \u2014 South Bench",
+        "score": 109,
+        "why": "Bench Bedding Edge \u00b7 Support Cover Advantage / Mixed Cover \u00b7 Travel 65 \u00b7 Bedding 82 \u00b7 Narrow pressure behind the next stronger sit: sits just behind the stronger lane."
+      }
+    ],
+    "operator_notes": "",
+    "bbox_enforced": true,
+    "provider_reliability_reasons": [],
+    "vegetation_classification": "shrub",
+    "selected_species": "general_terrain_read",
+    "species_label": "General Terrain Read",
+    "species_profile": {
+      "profile_id": "general_terrain_read",
+      "label": "General Terrain Read",
+      "regions_supported": [],
+      "confidence": 1.0,
+      "deltas": {},
+      "positive_hook": "General terrain read is active, so Monahinga\u2122 is using the normal terrain-first scoring without species tuning.",
+      "caution_hook": "Select a target species only when you want the terrain read tuned to animal-specific behavior.",
+      "region_key": "northeast",
+      "region_supported": true,
+      "effective_multiplier": 0.0
+    },
+    "species_region_key": "northeast",
+    "species_region_supported": true,
+    "invalidators": [
+      "Wind drifts into the preferred approach lane.",
+      "Access pressure rises on the legal edge.",
+      "The route forces you through the hot corridor instead of offsetting from it.",
+      "Terrain quality or legal verification is too weak to trust the sit call."
+    ]
+  }
+}

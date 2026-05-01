@@ -1,0 +1,336 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+
+GENERAL_SPECIES_ID = "general_terrain_read"
+
+
+@dataclass(frozen=True)
+class SpeciesProfile:
+    profile_id: str
+    label: str
+    regions_supported: tuple[str, ...]
+    confidence: float
+    deltas: dict[str, int]
+    positive_hook: str
+    caution_hook: str
+
+
+SPECIES_PROFILES: dict[str, SpeciesProfile] = {
+    GENERAL_SPECIES_ID: SpeciesProfile(
+        profile_id=GENERAL_SPECIES_ID,
+        label="General Terrain Read",
+        regions_supported=(),
+        confidence=1.0,
+        deltas={},
+        positive_hook="General terrain read is active, so Monahinga™ is using the normal terrain-first scoring without species tuning.",
+        caution_hook="Select a target species only when you want the terrain read tuned to animal-specific behavior.",
+    ),
+    "deer_whitetail": SpeciesProfile(
+        profile_id="deer_whitetail",
+        label="Whitetail Deer",
+        regions_supported=("northeast", "mid_atlantic", "southeast", "appalachia", "great_lakes", "midwest", "great_plains", "texas_south_central"),
+        confidence=0.95,
+        deltas={
+            "edge_density_weight": 3,
+            "cover_density_weight": 3,
+            "open_visibility_weight": -2,
+            "saddle_weight": 2,
+            "bench_weight": 2,
+            "draw_drainage_weight": 2,
+            "water_proximity_weight": 1,
+            "food_source_weight": 3,
+            "crop_edge_weight": 3,
+            "mast_hardwood_weight": 3,
+            "bedding_cover_weight": 3,
+            "wind_discipline_weight": 3,
+            "thermal_behavior_weight": 2,
+            "human_pressure_avoidance_weight": 3,
+            "access_route_risk_weight": 3,
+            "time_of_day_bias": 2,
+            "seasonal_phase_bias": 3,
+            "nocturnal_bias": 2,
+            "funnel_corridor_weight": 3,
+        },
+        positive_hook="Whitetail will favor low-pressure edges, bedding cover, mast or crop food, wind-safe access, and terrain funnels that let deer move without exposing themselves.",
+        caution_hook="For whitetail, downgrade easy-looking spots when wind, human pressure, access exposure, or legal confidence is weak.",
+    ),
+    "deer_mule": SpeciesProfile(
+        profile_id="deer_mule",
+        label="Mule Deer",
+        regions_supported=("great_plains", "southwest", "rocky_mountains", "california_coastal_west", "texas_south_central"),
+        confidence=0.92,
+        deltas={
+            "open_visibility_weight": 2,
+            "elevation_position_weight": 3,
+            "slope_weight": 2,
+            "ridge_weight": 2,
+            "saddle_weight": 2,
+            "bench_weight": 3,
+            "draw_drainage_weight": 3,
+            "water_proximity_weight": 2,
+            "food_source_weight": 2,
+            "bedding_cover_weight": 2,
+            "wind_discipline_weight": 2,
+            "thermal_behavior_weight": 2,
+            "human_pressure_avoidance_weight": 3,
+            "access_route_risk_weight": 3,
+            "seasonal_phase_bias": 3,
+            "glassing_visibility_weight": 3,
+            "funnel_corridor_weight": 2,
+            "escape_terrain_weight": 2,
+            "shade_heat_refuge_weight": 2,
+        },
+        positive_hook="Mule deer will favor glassable broken country, benches, draws, elevation position, and escape terrain over dense flat cover.",
+        caution_hook="For mule deer, be cautious when the terrain lacks visibility, slope position, or practical escape routes.",
+    ),
+    "elk": SpeciesProfile(
+        profile_id="elk",
+        label="Elk",
+        regions_supported=("rocky_mountains", "pacific_northwest", "california_coastal_west", "appalachia", "great_lakes"),
+        confidence=0.93,
+        deltas={
+            "cover_density_weight": 2,
+            "open_visibility_weight": 1,
+            "elevation_position_weight": 3,
+            "slope_weight": 2,
+            "ridge_weight": 2,
+            "saddle_weight": 3,
+            "bench_weight": 3,
+            "draw_drainage_weight": 2,
+            "water_proximity_weight": 3,
+            "food_source_weight": 2,
+            "bedding_cover_weight": 2,
+            "wallow_mud_water_weight": 3,
+            "wind_discipline_weight": 3,
+            "thermal_behavior_weight": 3,
+            "human_pressure_avoidance_weight": 3,
+            "access_route_risk_weight": 3,
+            "seasonal_phase_bias": 3,
+            "group_movement_bias": 3,
+            "glassing_visibility_weight": 2,
+            "funnel_corridor_weight": 3,
+            "escape_terrain_weight": 2,
+            "shade_heat_refuge_weight": 2,
+        },
+        positive_hook="Elk will favor benches, saddles, thermal-stable travel corridors, water or wallow context, and pressure refuge that supports herd movement.",
+        caution_hook="For elk, downgrade easy-access openings when escape cover, wind control, or pressure refuge is missing.",
+    ),
+    "turkey": SpeciesProfile(
+        profile_id="turkey",
+        label="Wild Turkey",
+        regions_supported=("northeast", "mid_atlantic", "southeast", "appalachia", "great_lakes", "midwest", "great_plains", "texas_south_central", "pacific_northwest", "california_coastal_west"),
+        confidence=0.90,
+        deltas={
+            "edge_density_weight": 2,
+            "cover_density_weight": 1,
+            "open_visibility_weight": 2,
+            "ridge_weight": 2,
+            "water_proximity_weight": 2,
+            "food_source_weight": 2,
+            "crop_edge_weight": 1,
+            "mast_hardwood_weight": 2,
+            "roost_tree_weight": 3,
+            "human_pressure_avoidance_weight": 2,
+            "access_route_risk_weight": 2,
+            "time_of_day_bias": 3,
+            "seasonal_phase_bias": 3,
+            "nocturnal_bias": -2,
+            "group_movement_bias": 2,
+        },
+        positive_hook="Turkey will favor roost-to-feed structure, visibility, open timber, field or oak edges, and morning movement routes that connect cover to feeding.",
+        caution_hook="For turkey, be cautious with dense cover unless it clearly connects roosting trees, openings, feeding sign, and quiet calling setups.",
+    ),
+    "feral_hog": SpeciesProfile(
+        profile_id="feral_hog",
+        label="Feral Hog",
+        regions_supported=("southeast", "texas_south_central", "california_coastal_west", "midwest", "great_plains"),
+        confidence=0.90,
+        deltas={
+            "edge_density_weight": 2,
+            "cover_density_weight": 3,
+            "open_visibility_weight": -1,
+            "draw_drainage_weight": 3,
+            "water_proximity_weight": 3,
+            "food_source_weight": 3,
+            "crop_edge_weight": 3,
+            "mast_hardwood_weight": 2,
+            "bedding_cover_weight": 3,
+            "wallow_mud_water_weight": 3,
+            "wind_discipline_weight": 3,
+            "thermal_behavior_weight": 2,
+            "human_pressure_avoidance_weight": 3,
+            "access_route_risk_weight": 3,
+            "nocturnal_bias": 3,
+            "group_movement_bias": 2,
+            "shade_heat_refuge_weight": 3,
+        },
+        positive_hook="Feral hog will favor water, wallows, crop or mast food, dense escape cover, shaded refuge, and nighttime pressure-sensitive movement.",
+        caution_hook="For feral hog, downgrade dry open terrain when water, food, wallow sign, or thick daytime cover is absent.",
+    ),
+    "black_bear": SpeciesProfile(
+        profile_id="black_bear",
+        label="Black Bear",
+        regions_supported=("northeast", "mid_atlantic", "southeast", "appalachia", "great_lakes", "rocky_mountains", "pacific_northwest", "california_coastal_west", "southwest"),
+        confidence=0.90,
+        deltas={
+            "edge_density_weight": 2,
+            "cover_density_weight": 3,
+            "bench_weight": 2,
+            "draw_drainage_weight": 3,
+            "water_proximity_weight": 2,
+            "food_source_weight": 3,
+            "crop_edge_weight": 1,
+            "mast_hardwood_weight": 3,
+            "bedding_cover_weight": 3,
+            "wind_discipline_weight": 2,
+            "thermal_behavior_weight": 2,
+            "human_pressure_avoidance_weight": 3,
+            "access_route_risk_weight": 3,
+            "time_of_day_bias": 2,
+            "seasonal_phase_bias": 3,
+            "nocturnal_bias": 2,
+            "group_movement_bias": -1,
+            "shade_heat_refuge_weight": 2,
+        },
+        positive_hook="Black bear will favor seasonal food, mast, shaded drainages, secure cover, and low-pressure travel routes between cover and feeding areas.",
+        caution_hook="For black bear, be cautious with generic forest unless food source, cover security, drainage travel, and season timing support the read.",
+    ),
+    "javelina": SpeciesProfile(
+        profile_id="javelina",
+        label="Javelina",
+        regions_supported=("southwest", "texas_south_central"),
+        confidence=0.88,
+        deltas={
+            "edge_density_weight": 1,
+            "cover_density_weight": 3,
+            "open_visibility_weight": -1,
+            "slope_weight": 1,
+            "bench_weight": 1,
+            "draw_drainage_weight": 3,
+            "water_proximity_weight": 2,
+            "food_source_weight": 3,
+            "bedding_cover_weight": 3,
+            "wind_discipline_weight": 2,
+            "thermal_behavior_weight": 3,
+            "human_pressure_avoidance_weight": 2,
+            "access_route_risk_weight": 2,
+            "time_of_day_bias": 2,
+            "seasonal_phase_bias": 2,
+            "nocturnal_bias": 1,
+            "group_movement_bias": 3,
+            "shade_heat_refuge_weight": 3,
+        },
+        positive_hook="Javelina will favor brush, washes, cactus or desert food, water context, shade, heat refuge, and group movement through protected cover.",
+        caution_hook="For javelina, downgrade exposed desert flats when brush, shade, drainage, water, or shelter is missing.",
+    ),
+    "bighorn_sheep": SpeciesProfile(
+        profile_id="bighorn_sheep",
+        label="Bighorn Sheep",
+        regions_supported=("rocky_mountains", "southwest", "california_coastal_west"),
+        confidence=0.89,
+        deltas={
+            "edge_density_weight": -1,
+            "cover_density_weight": -3,
+            "open_visibility_weight": 3,
+            "elevation_position_weight": 3,
+            "slope_weight": 3,
+            "ridge_weight": 3,
+            "saddle_weight": 1,
+            "bench_weight": 1,
+            "draw_drainage_weight": 1,
+            "water_proximity_weight": 3,
+            "food_source_weight": 1,
+            "crop_edge_weight": -3,
+            "mast_hardwood_weight": -2,
+            "wind_discipline_weight": 1,
+            "thermal_behavior_weight": 1,
+            "human_pressure_avoidance_weight": 2,
+            "access_route_risk_weight": 2,
+            "time_of_day_bias": 2,
+            "seasonal_phase_bias": 3,
+            "nocturnal_bias": -2,
+            "group_movement_bias": 2,
+            "glassing_visibility_weight": 3,
+            "funnel_corridor_weight": 1,
+            "escape_terrain_weight": 3,
+            "shade_heat_refuge_weight": 2,
+        },
+        positive_hook="Bighorn sheep will favor steep open rocky terrain, visibility, ridgelines, escape slopes, and desert water context over timber or crop-edge habitat.",
+        caution_hook="For bighorn sheep, be cautious with dense timber, crop edges, flat lowland cover, or terrain that lacks escape slope and visibility.",
+    ),
+    "predator_coyote": SpeciesProfile(
+        profile_id="predator_coyote",
+        label="Predator — Coyote",
+        regions_supported=("northeast", "mid_atlantic", "southeast", "appalachia", "great_lakes", "midwest", "great_plains", "texas_south_central", "southwest", "rocky_mountains", "pacific_northwest", "california_coastal_west"),
+        confidence=0.87,
+        deltas={
+            "edge_density_weight": 2,
+            "cover_density_weight": 1,
+            "open_visibility_weight": 2,
+            "ridge_weight": 2,
+            "draw_drainage_weight": 3,
+            "food_source_weight": 2,
+            "wind_discipline_weight": 3,
+            "human_pressure_avoidance_weight": 2,
+            "access_route_risk_weight": 3,
+            "time_of_day_bias": 2,
+            "nocturnal_bias": 3,
+            "glassing_visibility_weight": 2,
+            "funnel_corridor_weight": 2,
+        },
+        positive_hook="Coyote will favor wind discipline, visibility, draws, edge travel, and controlled downwind approach lanes that let a predator check terrain safely.",
+        caution_hook="For coyote, downgrade setups with poor visibility, sloppy wind, or an approach lane that lets scent leak into the calling area.",
+    ),
+}
+
+
+SPECIES_DROPDOWN_OPTIONS: tuple[tuple[str, str], ...] = tuple(
+    (profile.profile_id, profile.label)
+    for profile in SPECIES_PROFILES.values()
+)
+
+
+def normalize_species_id(value: object) -> str:
+    raw = str(value or "").strip().lower().replace(" ", "_").replace("-", "_")
+    aliases = {
+        "": GENERAL_SPECIES_ID,
+        "default": GENERAL_SPECIES_ID,
+        "general": GENERAL_SPECIES_ID,
+        "general_terrain": GENERAL_SPECIES_ID,
+        "general_terrain_read": GENERAL_SPECIES_ID,
+        "whitetail": "deer_whitetail",
+        "whitetail_deer": "deer_whitetail",
+        "mule_deer": "deer_mule",
+        "muley": "deer_mule",
+        "wild_turkey": "turkey",
+        "hog": "feral_hog",
+        "hogs": "feral_hog",
+        "bear": "black_bear",
+        "bighorn": "bighorn_sheep",
+        "sheep": "bighorn_sheep",
+        "coyote": "predator_coyote",
+        "predator": "predator_coyote",
+    }
+    candidate = aliases.get(raw, raw)
+    if candidate in SPECIES_PROFILES:
+        return candidate
+    return GENERAL_SPECIES_ID
+
+
+def get_species_profile(value: object) -> SpeciesProfile:
+    return SPECIES_PROFILES[normalize_species_id(value)]
+
+
+def species_profile_to_dict(profile: SpeciesProfile) -> dict[str, Any]:
+    return {
+        "profile_id": profile.profile_id,
+        "label": profile.label,
+        "regions_supported": list(profile.regions_supported),
+        "confidence": profile.confidence,
+        "deltas": dict(profile.deltas),
+        "positive_hook": profile.positive_hook,
+        "caution_hook": profile.caution_hook,
+    }

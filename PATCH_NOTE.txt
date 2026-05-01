@@ -1,0 +1,54 @@
+HUNTER BASELINE LOCK NOTE
+
+This folder is the recovered and verified stable baseline of the HUNTER app.
+
+Status at time of lock:
+- Full pytest suite passes: 54 passed, 0 failed
+- Command-surface template tests aligned with current live UI
+- App starts successfully via START_MONAHINGA_SERVER.bat
+- Default terrain-truth run completes and renders command surface
+- Live wind endpoint working
+- Wildlife adapter request file is written during run
+
+Key corrections made during baseline recovery:
+- Removed stale test expectations for:
+  * sceneCompass
+  * presentationRadius
+- These elements are NOT present in the current command-surface UI
+- Tests now reflect actual live template behavior
+
+Current verified run contract:
+- terrain fetch
+- legal surface fetch
+- terrain derivatives
+- decision engine ranking
+- command-surface render
+
+Canonical artifact paths:
+- DEM file: terrain_truth/terrain/dem.tif
+- Command surface: command_surface/index.html
+- Wildlife adapter: terrain_truth/wildlife/wildlife_adapter_request.json
+
+Important rules for future work:
+1. This is the trusted baseline. Do not introduce large changes.
+2. Make only one small, testable change at a time.
+3. Do not modify engine/decision/build.py unless explicitly targeted.
+4. Do not change command-surface behavior without updating tests together.
+5. Keep tests and runtime behavior aligned at all times.
+6. Avoid reintroducing experimental drift.
+
+Deferred work (NOT part of this baseline):
+- Restoring or redesigning compass / camera framing UI
+- Wildlife system integration beyond adapter output
+- Terrain provider robustness improvements
+- Naming cleanup (HUNTER vs Monahinga)
+- Decision engine tuning or expansion
+
+Historical note:
+Previous failures in this repo were caused by drift between:
+- command-surface UI
+- test expectations
+This has now been resolved by aligning tests to the live UI.
+
+This file marks the point where the project returned to a clean, reliable state.
+All future work should build forward from here in controlled steps.

@@ -1,0 +1,1427 @@
+{
+  "run_id": "run_36f8003a60",
+  "bbox": [
+    -78.089916,
+    41.884358,
+    -78.058737,
+    41.907102
+  ],
+  "crs": "EPSG:4326",
+  "terrain": {
+    "provider": "usgs_3dep_cache",
+    "path": "terrain_truth\\terrain\\dem.tif",
+    "format": "image/tiff",
+    "pixel_dimensions": [
+      768,
+      768
+    ]
+  },
+  "terrain_derivatives": {
+    "hillshade_path": "terrain_truth\\terrain_derivatives\\terrain_render.png",
+    "summary_path": "terrain_truth\\terrain_derivatives\\terrain_summary.json",
+    "structure_bias": "low-relief terrain",
+    "elevation_min_m": 480.0432434082031,
+    "elevation_max_m": 700.0857543945312
+  },
+  "vegetation": {
+    "provider": "terrain_heuristic",
+    "classification": "shrub",
+    "notes": [
+      "Vegetation cache hit: reused prior cover classification.",
+      "Fast vegetation mode: live NLCD sampling skipped for launch speed. Set MONAHINGA_USE_NLCD=1 to enable live vegetation samples.",
+      "Heuristic fallback: mid-scale terrain window biased toward shrub or mixed cover."
+    ]
+  },
+  "legal_surface": {
+    "provider": "padus_arcgis_cache",
+    "path": "terrain_truth\\legal\\legal_surface.geojson",
+    "summary_path": "terrain_truth\\legal\\legal_surface_summary.json",
+    "legal_feature_count": 1,
+    "restricted_feature_count": 0,
+    "unknown_feature_count": 0
+  },
+  "decision": {
+    "path": "run_36f8003a60\\terrain_truth\\decision\\decision_contract.json",
+    "primary": {
+      "rank": 1,
+      "tier": "primary",
+      "title": "Primary Sit \u2014 Core Converge",
+      "score": 114,
+      "lon": -78.06964965,
+      "lat": 41.89268333050059,
+      "elevation_m": 695.4884643554688,
+      "slope_bias": "bench",
+      "legality_status": "legal",
+      "source_name": "State Game Land 204",
+      "reasoning": "Win strength: Narrow. Breaks if: movement loads harder into the backup lane than this shelf. State Game Land 204 stays legal here; 695 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, cover; inactive=ridge, edge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Competitive read: this is a narrow win over the nearest backup because it carries slightly cleaner total terrain fit. Conditional read: this stays viable unless movement loads harder into the backup lane than this shelf.",
+      "features": {
+        "ridge": false,
+        "bench": true,
+        "edge": false,
+        "open": false,
+        "cover": true
+      },
+      "feature_readout": "Feature read: active=bench, cover; inactive=ridge, edge, open. General weighting keeps the base terrain read dominant."
+    },
+    "alternates": [
+      {
+        "rank": 2,
+        "tier": "alternate",
+        "title": "Alternate Sit #2 \u2014 South West Spur",
+        "score": 111,
+        "lon": -78.08118588,
+        "lat": 41.89123544693527,
+        "elevation_m": 658.156982421875,
+        "slope_bias": "bench",
+        "legality_status": "legal",
+        "source_name": "State Game Land 204",
+        "reasoning": "State Game Land 204 stays legal here; 658 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.",
+        "features": {
+          "ridge": false,
+          "bench": true,
+          "edge": true,
+          "open": false,
+          "cover": true
+        },
+        "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant."
+      },
+      {
+        "rank": 3,
+        "tier": "alternate",
+        "title": "Alternate Sit #3 \u2014 South Bench",
+        "score": 109,
+        "lon": -78.07276755,
+        "lat": 41.88978756336995,
+        "elevation_m": 658.6067504882812,
+        "slope_bias": "bench",
+        "legality_status": "legal",
+        "source_name": "State Game Land 204",
+        "reasoning": "State Game Land 204 stays legal here; 659 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.",
+        "features": {
+          "ridge": false,
+          "bench": true,
+          "edge": true,
+          "open": false,
+          "cover": true
+        },
+        "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant."
+      },
+      {
+        "rank": 4,
+        "tier": "alternate",
+        "title": "Alternate Sit #4 \u2014 Core Converge",
+        "score": 108,
+        "lon": -78.0743265,
+        "lat": 41.89376924317458,
+        "elevation_m": 586.0087890625,
+        "slope_bias": "bench",
+        "legality_status": "legal",
+        "source_name": "State Game Land 204",
+        "reasoning": "State Game Land 204 stays legal here; 586 m on a mid-slope bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.",
+        "features": {
+          "ridge": false,
+          "bench": true,
+          "edge": true,
+          "open": false,
+          "cover": true
+        },
+        "feature_readout": "Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant."
+      }
+    ],
+    "near_misses": [],
+    "corridors": [
+      {
+        "name": "Dominant Corridor",
+        "strength": "dominant",
+        "points": [
+          [
+            -78.06964965,
+            41.89268333050059
+          ],
+          [
+            -78.075417765,
+            41.89268333050059
+          ],
+          [
+            -78.08118588,
+            41.89123544693527
+          ]
+        ],
+        "reasoning": "Main travel line between the strongest legal sit positions along upper structure.",
+        "features": {},
+        "feature_readout": ""
+      },
+      {
+        "name": "Secondary Corridor A",
+        "strength": "secondary",
+        "points": [
+          [
+            -78.08118588,
+            41.89123544693527
+          ],
+          [
+            -78.076976715,
+            41.89051150515261
+          ],
+          [
+            -78.07276755,
+            41.88978756336995
+          ]
+        ],
+        "reasoning": "Fallback connection between alternate sits when the primary lane is compromised.",
+        "features": {},
+        "feature_readout": ""
+      }
+    ],
+    "notes": [
+      "Selected bbox is enforced as a hard analysis fence before ranking and viewer payload generation.",
+      "Only legal areas can surface primary or alternate sits when verified legal candidates exist.",
+      "Restricted and unknown areas remain visible as suppressed near-misses.",
+      "Ranking now adds relative terrain trust logic so convergence, shoulder, funnel, bench, and edge reads come from the DEM instead of presentation-only phrasing.",
+      "Ranking blends terrain structure, legal gating, timing fit, and wind guard logic.",
+      "When no verified legal candidates exist inside the selected bbox, the system falls back to terrain-only review mode instead of crashing.",
+      "Provider health now reduces confidence and score when terrain or legal data is degraded.",
+      "Vegetation classification now meaningfully changes concealment, bedding confidence, and weak-cover penalties inside sit scoring."
+    ],
+    "summary": {
+      "analysis_mode": "legal_hunt",
+      "terrain_only_fallback": false,
+      "mode": "hunter",
+      "legal_state": "strong",
+      "legal_state_label": "Strong verified legal hunting land",
+      "preferred_wind": "NE",
+      "current_wind": "",
+      "wind_fit": null,
+      "confidence": 92,
+      "confidence_label": "High",
+      "trust_tags": [
+        "Bench Travel",
+        "Full Legal Setup",
+        "Cover Advantage"
+      ],
+      "readiness": "Huntable",
+      "best_time_label": "Evening destination window",
+      "best_time_window": "2.5 hours before sunset through last light",
+      "cluster_summary": [
+        {
+          "title": "Primary Sit \u2014 Core Converge",
+          "score": 114,
+          "why": "Bench Bedding Edge \u00b7 Support Cover Advantage / Mixed Cover \u00b7 Travel 54 \u00b7 Bedding 85"
+        },
+        {
+          "title": "Alternate Sit #2 \u2014 South West Spur",
+          "score": 111,
+          "why": "Bench Bedding Edge \u00b7 Support Cover Advantage / Mixed Cover \u00b7 Travel 64 \u00b7 Bedding 82 \u00b7 Narrow pressure behind the next stronger sit: sits just behind the stronger lane."
+        },
+        {
+          "title": "Alternate Sit #3 \u2014 South Bench",
+          "score": 109,
+          "why": "Bench Bedding Edge \u00b7 Support Cover Advantage / Mixed Cover \u00b7 Travel 65 \u00b7 Bedding 82 \u00b7 Narrow pressure behind the next stronger sit: sits just behind the stronger lane."
+        }
+      ],
+      "operator_notes": "",
+      "bbox_enforced": true,
+      "provider_reliability_reasons": [],
+      "vegetation_classification": "shrub",
+      "selected_species": "general_terrain_read",
+      "species_label": "General Terrain Read",
+      "species_profile": {
+        "profile_id": "general_terrain_read",
+        "label": "General Terrain Read",
+        "regions_supported": [],
+        "confidence": 1.0,
+        "deltas": {},
+        "positive_hook": "General terrain read is active, so Monahinga\u2122 is using the normal terrain-first scoring without species tuning.",
+        "caution_hook": "Select a target species only when you want the terrain read tuned to animal-specific behavior.",
+        "region_key": "northeast",
+        "region_supported": true,
+        "effective_multiplier": 0.0
+      },
+      "species_region_key": "northeast",
+      "species_region_supported": true,
+      "invalidators": [
+        "Wind drifts into the preferred approach lane.",
+        "Access pressure rises on the legal edge.",
+        "The route forces you through the hot corridor instead of offsetting from it.",
+        "Terrain quality or legal verification is too weak to trust the sit call."
+      ]
+    }
+  },
+  "command_surface": {
+    "path": "command_surface\\index.html",
+    "format": "text/html"
+  },
+  "notes": [
+    "Terrain layer fetched from the preferred real provider path.",
+    "Vegetation layer now uses multi-sample NLCD with terrain heuristic fallback.",
+    "Wildlife atmosphere layer generated BBOX-driven species and method context without touching the 3D terrain core.",
+    "Decision layer consumed DEM-derived terrain structure and legal gating.",
+    "Command surface rendered a terrain-first operator view with intelligence controls.",
+    "Provider status: terrain=cache, legal=cache, vegetation=degraded",
+    "Terrain cache hit: reused DEM instead of refetching elevation data.",
+    "Legal cache hit: reused PAD-US legal surface instead of querying ArcGIS.",
+    "Terrain derivative cache hit: reused rendered terrain layers and heightmap JSON.",
+    "Vegetation cache hit: reused cover classification.",
+    "Hunter core generated ranked zone intelligence before the decision artifact was built.",
+    "Vegetation cache hit: reused prior cover classification.",
+    "Fast vegetation mode: live NLCD sampling skipped for launch speed. Set MONAHINGA_USE_NLCD=1 to enable live vegetation samples.",
+    "Heuristic fallback: mid-scale terrain window biased toward shrub or mixed cover.",
+    "Legal land output is an aid, not final authority. Always verify land access, ownership, boundaries, and hunting legality in the real world before hunting."
+  ],
+  "operator_context": {
+    "wind_direction": "",
+    "notes": "",
+    "mode": "hunter",
+    "vegetation_classification": "shrub",
+    "vegetation_provider": "terrain_heuristic",
+    "wildlife_atmosphere": {
+      "version": "wildlife_atmosphere_v2_bbox_deterministic",
+      "region_key": "appalachian",
+      "label": "Appalachian hardwood wildlife atmosphere",
+      "species_label": "White-tailed Deer \u00b7 Wild Turkey \u00b7 Black Bear",
+      "mood": "dark hardwood ridges, laurel cover, cold creek bottoms",
+      "story": "Timber folds, side-hill cover, and disciplined access. Current cover signal suggests mixed brush, edge cover, and broken visibility.",
+      "cover_read": "mixed brush, edge cover, and broken visibility",
+      "species": [
+        {
+          "name": "White-tailed Deer",
+          "role": "Primary terrain read",
+          "movement_read": "Side-hill benches, bedding edges, and access discipline drive the setup.",
+          "methods": [
+            "centerfire rifle / .30-06-class rifle where legal",
+            "muzzleloader season",
+            "archery / crossbow where legal"
+          ],
+          "visual_prompt": "realistic mature whitetail buck in Appalachian hardwood ridge, cinematic hunting scouting background"
+        },
+        {
+          "name": "Wild Turkey",
+          "role": "Secondary flock read",
+          "movement_read": "Open timber, roost-to-feed movement, and ridge transitions matter.",
+          "methods": [
+            "shotgun where legal",
+            "archery",
+            "state-season-specific method rules"
+          ],
+          "visual_prompt": "realistic wild turkey in Appalachian hardwood forest, mature outdoor visual"
+        },
+        {
+          "name": "Black Bear",
+          "role": "Bear-country read",
+          "movement_read": "Thick cover, food sources, and shaded drainages shape the read.",
+          "methods": [
+            "centerfire rifle / .30-06-class rifle where legal",
+            "muzzleloader where legal",
+            "archery where legal"
+          ],
+          "visual_prompt": "realistic black bear in Appalachian timber, serious hunter-focused scouting visual"
+        }
+      ],
+      "method_summary": [
+        "centerfire rifle / .30-06-class rifle where legal",
+        "muzzleloader season",
+        "archery / crossbow where legal",
+        "shotgun where legal",
+        "archery"
+      ],
+      "classification_method": "coordinate_rule_appalachian_hardwood",
+      "classification_confidence": 0.82,
+      "fallback_explanation": "",
+      "centroid": {
+        "lat": 41.89573,
+        "lon": -78.074326
+      },
+      "legal_note": "Hunting method labels are general context only. Always verify state, season, tag, weapon, access, and safety rules before hunting.",
+      "visual_style": "mature cinematic hunter scouting atmosphere; realistic animals; no cartoon icons; dark textured background; subtle weapon-category context"
+    },
+    "hunt_intelligence": {
+      "ok": true,
+      "version": "hunter_core_2_0_pass10_ui_role_labels",
+      "mode": "hunter",
+      "bbox": [
+        -78.089916,
+        41.884358,
+        -78.058737,
+        41.907102
+      ],
+      "runtime_ms": 424,
+      "inputs": {
+        "vegetation_classification": "shrub",
+        "wind_direction": "",
+        "wind_degrees": null,
+        "terrain_bias": "low-relief terrain",
+        "elevation_range_m": 220.04251098632812
+      },
+      "summary": "Best Setup: Lower Bench Below Ridge. This is the lead option at 76/100 because Bench/flat security signal supports bedding or staging behavior nearby.. Best move: enter low, stay off the obvious travel edge, and hunt the downwind side. Breaks if: Wind direction should be verified before trusting the final setup..",
+      "zones_considered": 18,
+      "top_zones": [
+        {
+          "id": "zone_16",
+          "label": "Lower Bench Below Ridge",
+          "score": 76,
+          "confidence": 85,
+          "lon": -78.058778,
+          "lat": 41.904641,
+          "best_time": "first_90_minutes_or_last_90_minutes",
+          "setup_type": "bedding_edge_observation",
+          "scores": {
+            "terrain_funnel": 13,
+            "wind_advantage": 10,
+            "thermal_behavior": 12,
+            "access_safety": 14,
+            "bedding_security": 10,
+            "food_water_route": 6,
+            "pressure_avoidance": 10,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Bench/flat security signal supports bedding or staging behavior nearby.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "Relief/drainage shape suggests thermals matter here, especially morning and evening.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_16",
+            "label": "Lower Bench Below Ridge",
+            "x": 0.9987,
+            "y": 0.1082,
+            "lon": -78.058778,
+            "lat": 41.904641,
+            "elevation_norm": 0.0485,
+            "slope_norm": 0.0,
+            "relief_norm": 0.998,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.9987,
+            "edge_signal": 0.4993
+          },
+          "original_label": "Lower Bench Below Ridge",
+          "ui_role": "Primary"
+        },
+        {
+          "id": "zone_01",
+          "label": "Leeward Ridge Edge",
+          "score": 65,
+          "confidence": 82,
+          "lon": -78.087558,
+          "lat": 41.885811,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 15,
+            "wind_advantage": 10,
+            "thermal_behavior": 10,
+            "access_safety": 10,
+            "bedding_security": 5,
+            "food_water_route": 5,
+            "pressure_avoidance": 8,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_01",
+            "label": "Leeward Ridge Edge",
+            "x": 0.0756,
+            "y": 0.9361,
+            "lon": -78.087558,
+            "lat": 41.885811,
+            "elevation_norm": 0.8938,
+            "slope_norm": 0.6647,
+            "relief_norm": 0.9557,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.3257,
+            "edge_signal": 0.8168
+          },
+          "original_label": "Leeward Ridge Edge",
+          "ui_role": "Backup"
+        },
+        {
+          "id": "zone_17",
+          "label": "Secondary Lower Bench Below Ridge",
+          "score": 76,
+          "confidence": 85,
+          "lon": -78.066542,
+          "lat": 41.884388,
+          "best_time": "first_90_minutes_or_last_90_minutes",
+          "setup_type": "bedding_edge_observation",
+          "scores": {
+            "terrain_funnel": 13,
+            "wind_advantage": 10,
+            "thermal_behavior": 12,
+            "access_safety": 14,
+            "bedding_security": 10,
+            "food_water_route": 6,
+            "pressure_avoidance": 10,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Bench/flat security signal supports bedding or staging behavior nearby.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "Relief/drainage shape suggests thermals matter here, especially morning and evening.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_17",
+            "label": "Lower Bench Below Ridge",
+            "x": 0.7497,
+            "y": 0.9987,
+            "lon": -78.066542,
+            "lat": 41.884388,
+            "elevation_norm": 0.1876,
+            "slope_norm": 0.0066,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.9934,
+            "edge_signal": 0.5033
+          },
+          "original_label": "Lower Bench Below Ridge",
+          "ui_role": "Secondary"
+        },
+        {
+          "id": "zone_05",
+          "label": "Lower Bench Below Ridge",
+          "score": 70,
+          "confidence": 78,
+          "lon": -78.077111,
+          "lat": 41.903306,
+          "best_time": "evening_transition",
+          "setup_type": "bedding_edge_observation",
+          "scores": {
+            "terrain_funnel": 12,
+            "wind_advantage": 10,
+            "thermal_behavior": 10,
+            "access_safety": 14,
+            "bedding_security": 7,
+            "food_water_route": 7,
+            "pressure_avoidance": 8,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Bench/flat security signal supports bedding or staging behavior nearby.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_05",
+            "label": "Lower Bench Below Ridge",
+            "x": 0.4107,
+            "y": 0.1669,
+            "lon": -78.077111,
+            "lat": 41.903306,
+            "elevation_norm": 0.0149,
+            "slope_norm": 0.2632,
+            "relief_norm": 0.708,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.597,
+            "edge_signal": 0.5294
+          },
+          "original_label": "Lower Bench Below Ridge",
+          "ui_role": "Alternate"
+        },
+        {
+          "id": "zone_18",
+          "label": "Leeward Ridge Edge",
+          "score": 64,
+          "confidence": 79,
+          "lon": -78.070444,
+          "lat": 41.898977,
+          "best_time": "evening_transition",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 15,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 10,
+            "bedding_security": 4,
+            "food_water_route": 7,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_18",
+            "label": "Leeward Ridge Edge",
+            "x": 0.6245,
+            "y": 0.3572,
+            "lon": -78.070444,
+            "lat": 41.898977,
+            "elevation_norm": 0.2119,
+            "slope_norm": 0.7465,
+            "relief_norm": 0.7773,
+            "ridge_signal": 0.9972,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.2168,
+            "edge_signal": 0.7949
+          },
+          "original_label": "Leeward Ridge Edge",
+          "ui_role": "Scout"
+        }
+      ],
+      "all_zones": [
+        {
+          "id": "zone_16",
+          "label": "Lower Bench Below Ridge",
+          "score": 76,
+          "confidence": 85,
+          "lon": -78.058778,
+          "lat": 41.904641,
+          "best_time": "first_90_minutes_or_last_90_minutes",
+          "setup_type": "bedding_edge_observation",
+          "scores": {
+            "terrain_funnel": 13,
+            "wind_advantage": 10,
+            "thermal_behavior": 12,
+            "access_safety": 14,
+            "bedding_security": 10,
+            "food_water_route": 6,
+            "pressure_avoidance": 10,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Bench/flat security signal supports bedding or staging behavior nearby.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "Relief/drainage shape suggests thermals matter here, especially morning and evening.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_16",
+            "label": "Lower Bench Below Ridge",
+            "x": 0.9987,
+            "y": 0.1082,
+            "lon": -78.058778,
+            "lat": 41.904641,
+            "elevation_norm": 0.0485,
+            "slope_norm": 0.0,
+            "relief_norm": 0.998,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.9987,
+            "edge_signal": 0.4993
+          }
+        },
+        {
+          "id": "zone_17",
+          "label": "Lower Bench Below Ridge",
+          "score": 76,
+          "confidence": 85,
+          "lon": -78.066542,
+          "lat": 41.884388,
+          "best_time": "first_90_minutes_or_last_90_minutes",
+          "setup_type": "bedding_edge_observation",
+          "scores": {
+            "terrain_funnel": 13,
+            "wind_advantage": 10,
+            "thermal_behavior": 12,
+            "access_safety": 14,
+            "bedding_security": 10,
+            "food_water_route": 6,
+            "pressure_avoidance": 10,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Bench/flat security signal supports bedding or staging behavior nearby.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "Relief/drainage shape suggests thermals matter here, especially morning and evening.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_17",
+            "label": "Lower Bench Below Ridge",
+            "x": 0.7497,
+            "y": 0.9987,
+            "lon": -78.066542,
+            "lat": 41.884388,
+            "elevation_norm": 0.1876,
+            "slope_norm": 0.0066,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.9934,
+            "edge_signal": 0.5033
+          }
+        },
+        {
+          "id": "zone_05",
+          "label": "Lower Bench Below Ridge",
+          "score": 70,
+          "confidence": 78,
+          "lon": -78.077111,
+          "lat": 41.903306,
+          "best_time": "evening_transition",
+          "setup_type": "bedding_edge_observation",
+          "scores": {
+            "terrain_funnel": 12,
+            "wind_advantage": 10,
+            "thermal_behavior": 10,
+            "access_safety": 14,
+            "bedding_security": 7,
+            "food_water_route": 7,
+            "pressure_avoidance": 8,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Bench/flat security signal supports bedding or staging behavior nearby.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_05",
+            "label": "Lower Bench Below Ridge",
+            "x": 0.4107,
+            "y": 0.1669,
+            "lon": -78.077111,
+            "lat": 41.903306,
+            "elevation_norm": 0.0149,
+            "slope_norm": 0.2632,
+            "relief_norm": 0.708,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.597,
+            "edge_signal": 0.5294
+          }
+        },
+        {
+          "id": "zone_01",
+          "label": "Leeward Ridge Edge",
+          "score": 65,
+          "confidence": 82,
+          "lon": -78.087558,
+          "lat": 41.885811,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 15,
+            "wind_advantage": 10,
+            "thermal_behavior": 10,
+            "access_safety": 10,
+            "bedding_security": 5,
+            "food_water_route": 5,
+            "pressure_avoidance": 8,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_01",
+            "label": "Leeward Ridge Edge",
+            "x": 0.0756,
+            "y": 0.9361,
+            "lon": -78.087558,
+            "lat": 41.885811,
+            "elevation_norm": 0.8938,
+            "slope_norm": 0.6647,
+            "relief_norm": 0.9557,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.3257,
+            "edge_signal": 0.8168
+          }
+        },
+        {
+          "id": "zone_11",
+          "label": "Leeward Ridge Edge",
+          "score": 64,
+          "confidence": 82,
+          "lon": -78.072396,
+          "lat": 41.903662,
+          "best_time": "evening_transition",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 8,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_11",
+            "label": "Leeward Ridge Edge",
+            "x": 0.5619,
+            "y": 0.1512,
+            "lon": -78.072396,
+            "lat": 41.903662,
+            "elevation_norm": 0.0055,
+            "slope_norm": 1.0,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0,
+            "edge_signal": 1.0
+          }
+        },
+        {
+          "id": "zone_18",
+          "label": "Leeward Ridge Edge",
+          "score": 64,
+          "confidence": 79,
+          "lon": -78.070444,
+          "lat": 41.898977,
+          "best_time": "evening_transition",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 15,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 10,
+            "bedding_security": 4,
+            "food_water_route": 7,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "Access score is acceptable because slope and relief are not punishing at this candidate point.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_18",
+            "label": "Leeward Ridge Edge",
+            "x": 0.6245,
+            "y": 0.3572,
+            "lon": -78.070444,
+            "lat": 41.898977,
+            "elevation_norm": 0.2119,
+            "slope_norm": 0.7465,
+            "relief_norm": 0.7773,
+            "ridge_signal": 0.9972,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.2168,
+            "edge_signal": 0.7949
+          }
+        },
+        {
+          "id": "zone_04",
+          "label": "Leeward Ridge Edge",
+          "score": 63,
+          "confidence": 82,
+          "lon": -78.081827,
+          "lat": 41.898147,
+          "best_time": "evening_transition",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 7,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_04",
+            "label": "Leeward Ridge Edge",
+            "x": 0.2595,
+            "y": 0.3937,
+            "lon": -78.081827,
+            "lat": 41.898147,
+            "elevation_norm": 0.2019,
+            "slope_norm": 0.9404,
+            "relief_norm": 0.9978,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0595,
+            "edge_signal": 0.9694
+          }
+        },
+        {
+          "id": "zone_08",
+          "label": "Leeward Ridge Edge",
+          "score": 63,
+          "confidence": 82,
+          "lon": -78.060851,
+          "lat": 41.900638,
+          "best_time": "evening_transition",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 7,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_08",
+            "label": "Leeward Ridge Edge",
+            "x": 0.9322,
+            "y": 0.2842,
+            "lon": -78.060851,
+            "lat": 41.900638,
+            "elevation_norm": 0.2884,
+            "slope_norm": 1.0,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0,
+            "edge_signal": 1.0
+          }
+        },
+        {
+          "id": "zone_02",
+          "label": "Leeward Ridge Edge",
+          "score": 62,
+          "confidence": 82,
+          "lon": -78.087436,
+          "lat": 41.896605,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 3,
+            "food_water_route": 5,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_02",
+            "label": "Leeward Ridge Edge",
+            "x": 0.0795,
+            "y": 0.4615,
+            "lon": -78.087436,
+            "lat": 41.896605,
+            "elevation_norm": 0.9074,
+            "slope_norm": 0.9202,
+            "relief_norm": 0.9986,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0798,
+            "edge_signal": 0.9596
+          }
+        },
+        {
+          "id": "zone_03",
+          "label": "Leeward Ridge Edge",
+          "score": 62,
+          "confidence": 82,
+          "lon": -78.083656,
+          "lat": 41.894677,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 3,
+            "food_water_route": 5,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_03",
+            "label": "Leeward Ridge Edge",
+            "x": 0.2008,
+            "y": 0.5463,
+            "lon": -78.083656,
+            "lat": 41.894677,
+            "elevation_norm": 0.9186,
+            "slope_norm": 0.9225,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0775,
+            "edge_signal": 0.9612
+          }
+        },
+        {
+          "id": "zone_06",
+          "label": "Leeward Ridge Edge",
+          "score": 62,
+          "confidence": 82,
+          "lon": -78.073209,
+          "lat": 41.887086,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 6,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_06",
+            "label": "Leeward Ridge Edge",
+            "x": 0.5359,
+            "y": 0.8801,
+            "lon": -78.073209,
+            "lat": 41.887086,
+            "elevation_norm": 0.7292,
+            "slope_norm": 0.9567,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0433,
+            "edge_signal": 0.9783
+          }
+        },
+        {
+          "id": "zone_12",
+          "label": "Leeward Ridge Edge",
+          "score": 62,
+          "confidence": 82,
+          "lon": -78.076135,
+          "lat": 41.892157,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 6,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_12",
+            "label": "Leeward Ridge Edge",
+            "x": 0.442,
+            "y": 0.6571,
+            "lon": -78.076135,
+            "lat": 41.892157,
+            "elevation_norm": 0.7322,
+            "slope_norm": 1.0,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0,
+            "edge_signal": 1.0
+          }
+        },
+        {
+          "id": "zone_14",
+          "label": "Leeward Ridge Edge",
+          "score": 62,
+          "confidence": 82,
+          "lon": -78.087111,
+          "lat": 41.891564,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 6,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_14",
+            "label": "Leeward Ridge Edge",
+            "x": 0.09,
+            "y": 0.6832,
+            "lon": -78.087111,
+            "lat": 41.891564,
+            "elevation_norm": 0.6533,
+            "slope_norm": 1.0,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0,
+            "edge_signal": 1.0
+          }
+        },
+        {
+          "id": "zone_07",
+          "label": "Leeward Ridge Edge",
+          "score": 61,
+          "confidence": 82,
+          "lon": -78.070607,
+          "lat": 41.891979,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 5,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_07",
+            "label": "Leeward Ridge Edge",
+            "x": 0.6193,
+            "y": 0.6649,
+            "lon": -78.070607,
+            "lat": 41.891979,
+            "elevation_norm": 0.9192,
+            "slope_norm": 0.9556,
+            "relief_norm": 0.9861,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.044,
+            "edge_signal": 0.973
+          }
+        },
+        {
+          "id": "zone_09",
+          "label": "Leeward Ridge Edge",
+          "score": 61,
+          "confidence": 82,
+          "lon": -78.066623,
+          "lat": 41.890556,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 5,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_09",
+            "label": "Leeward Ridge Edge",
+            "x": 0.7471,
+            "y": 0.7275,
+            "lon": -78.066623,
+            "lat": 41.890556,
+            "elevation_norm": 0.9299,
+            "slope_norm": 1.0,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0,
+            "edge_signal": 1.0
+          }
+        },
+        {
+          "id": "zone_10",
+          "label": "Leeward Ridge Edge",
+          "score": 61,
+          "confidence": 82,
+          "lon": -78.069103,
+          "lat": 41.895092,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 5,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_10",
+            "label": "Leeward Ridge Edge",
+            "x": 0.6675,
+            "y": 0.528,
+            "lon": -78.069103,
+            "lat": 41.895092,
+            "elevation_norm": 0.8843,
+            "slope_norm": 1.0,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0,
+            "edge_signal": 1.0
+          }
+        },
+        {
+          "id": "zone_13",
+          "label": "Leeward Ridge Edge",
+          "score": 61,
+          "confidence": 82,
+          "lon": -78.077965,
+          "lat": 41.886137,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 5,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_13",
+            "label": "Leeward Ridge Edge",
+            "x": 0.3833,
+            "y": 0.9218,
+            "lon": -78.077965,
+            "lat": 41.886137,
+            "elevation_norm": 0.8996,
+            "slope_norm": 1.0,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0,
+            "edge_signal": 1.0
+          }
+        },
+        {
+          "id": "zone_15",
+          "label": "Leeward Ridge Edge",
+          "score": 61,
+          "confidence": 82,
+          "lon": -78.082152,
+          "lat": 41.890971,
+          "best_time": "midday_scout_or_secondary_setup",
+          "setup_type": "funnel_intercept",
+          "scores": {
+            "terrain_funnel": 17,
+            "wind_advantage": 10,
+            "thermal_behavior": 9,
+            "access_safety": 8,
+            "bedding_security": 2,
+            "food_water_route": 5,
+            "pressure_avoidance": 7,
+            "cover_value": 7
+          },
+          "reasoning": [
+            "Terrain creates movement compression: edge, ridge, relief, or drainage signals stack together.",
+            "No usable wind direction supplied, so wind score stayed neutral.",
+            "Shrub or mixed cover gives useful concealment without making the area unreadable."
+          ],
+          "risks": [
+            "Access may be noisy, exposed, or physically demanding.",
+            "Thermal behavior is not a dominant advantage from the available terrain signal.",
+            "Wind direction should be verified before trusting the final setup."
+          ],
+          "zone": {
+            "id": "zone_15",
+            "label": "Leeward Ridge Edge",
+            "x": 0.249,
+            "y": 0.7093,
+            "lon": -78.082152,
+            "lat": 41.890971,
+            "elevation_norm": 0.878,
+            "slope_norm": 1.0,
+            "relief_norm": 1.0,
+            "ridge_signal": 1.0,
+            "drainage_signal": 0.0,
+            "bench_signal": 0.0,
+            "edge_signal": 1.0
+          }
+        }
+      ],
+      "curation": {
+        "enabled": true,
+        "method": "strict_top3_unique_families_plus_ui_role_labels_for_repeats",
+        "top3_role_labels": true
+      },
+      "scoring_model": {
+        "terrain_funnel": "0-20",
+        "wind_advantage": "0-20",
+        "thermal_behavior": "0-15",
+        "access_safety": "0-15",
+        "bedding_security": "0-10",
+        "food_water_route": "0-10",
+        "pressure_avoidance": "0-10",
+        "cover_value": "0-10"
+      },
+      "warnings": [
+        "This is a decision-support layer, not legal or safety authority.",
+        "Always verify land access, laws, wind, thermals, and animal sign in the field."
+      ]
+    }
+  }
+}

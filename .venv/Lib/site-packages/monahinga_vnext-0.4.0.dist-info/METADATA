@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: monahinga-vnext
+Version: 0.4.0
+Summary: Monahinga vNext operator-first terrain intelligence command surface
+Requires-Python: >=3.10
+Requires-Dist: requests>=2.31.0
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn>=0.30.0
+Requires-Dist: pydantic>=2.7.0
+Requires-Dist: numpy>=1.26.0
+Requires-Dist: Pillow>=10.0.0

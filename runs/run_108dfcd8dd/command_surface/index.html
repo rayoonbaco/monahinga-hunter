@@ -1,0 +1,1998 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Monahinga™ Command Surface</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg:#03060b; --panel:rgba(6,10,16,.90); --line:rgba(255,255,255,.08); --text:#ece3d5; --muted:#9fb0bc;
+  --green:#aef186; --gold:#f3d58a; --amber:#daab63; --shadow:0 24px 80px rgba(0,0,0,.46);
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;color:var(--text);background:linear-gradient(180deg,#0a1320 0%, #04070c 28%, #020409 100%);overflow-x:hidden;--terrain-wallpaper-image:linear-gradient(180deg,#0a1320 0%,#03060b 100%);--terrain-wallpaper-opacity:.18;--terrain-wallpaper-saturate:1.02;--terrain-wallpaper-contrast:1.00;--terrain-atmo-warm:rgba(243,213,138,.08);--terrain-atmo-cool:rgba(111,179,218,.10);--terrain-atmo-green:rgba(174,241,134,.10)}
+body::before{content:'';position:fixed;inset:-24px;z-index:0;pointer-events:none;background-image:linear-gradient(180deg,rgba(3,6,11,.42),rgba(3,6,11,.82)),radial-gradient(circle at 18% 18%,var(--terrain-atmo-warm),transparent 34%),radial-gradient(circle at 84% 18%,var(--terrain-atmo-cool),transparent 38%),radial-gradient(circle at 50% 90%,var(--terrain-atmo-green),transparent 46%),var(--terrain-wallpaper-image);background-size:cover,cover,cover,cover,cover;background-position:center;filter:blur(13px) saturate(var(--terrain-wallpaper-saturate)) contrast(var(--terrain-wallpaper-contrast));transform:scale(1.06);opacity:var(--terrain-wallpaper-opacity);transition:opacity .55s ease, filter .55s ease}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 0%,rgba(255,232,174,.09),transparent 24%),linear-gradient(90deg,rgba(3,6,11,.86) 0%,rgba(3,6,11,.28) 34%,rgba(3,6,11,.18) 66%,rgba(3,6,11,.88) 100%),linear-gradient(180deg,rgba(3,6,11,.12) 0%,rgba(3,6,11,.76) 100%)}
+body.terrain-wallpaper-ready{--terrain-wallpaper-opacity:.30}
+body.theme-appalachian{--terrain-atmo-warm:rgba(243,213,138,.07);--terrain-atmo-cool:rgba(93,138,126,.08);--terrain-atmo-green:rgba(91,174,88,.12);--terrain-wallpaper-saturate:1.08;--terrain-wallpaper-contrast:1.03}
+body.theme-mountain{--terrain-atmo-warm:rgba(231,208,168,.07);--terrain-atmo-cool:rgba(143,208,255,.14);--terrain-atmo-green:rgba(112,154,128,.07);--terrain-wallpaper-saturate:1.00;--terrain-wallpaper-contrast:1.10}
+body.theme-plains{--terrain-atmo-warm:rgba(239,199,123,.14);--terrain-atmo-cool:rgba(141,193,239,.08);--terrain-atmo-green:rgba(200,221,122,.09);--terrain-wallpaper-saturate:1.02;--terrain-wallpaper-contrast:1.02}
+body.theme-southwoods{--terrain-atmo-warm:rgba(214,178,109,.09);--terrain-atmo-cool:rgba(124,171,186,.08);--terrain-atmo-green:rgba(104,194,124,.13);--terrain-wallpaper-saturate:1.10;--terrain-wallpaper-contrast:1.03}
+button{font:inherit}
+.shell{position:relative;z-index:1;padding:10px 12px 12px; min-height:100vh}
+.chrome{position:relative;border-radius:24px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg, rgba(10,17,26,.88), rgba(3,6,11,.93));box-shadow:var(--shadow);overflow:hidden}
+.topbar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:10px 12px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.brandline{display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.18em;color:#9eb0bf;text-transform:uppercase}
+h1{margin:6px 0 3px;font-size:30px;line-height:1.02}.sub{color:var(--muted);font-size:14px;max-width:720px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;max-width:720px}.pill{padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:12px;color:#dce5ea}
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr) 320px;min-height:calc(100vh - 92px);align-items:start}
+.left{padding:10px;border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:10px}.center{padding:10px;min-width:0}.right{padding:10px 10px 10px 0;min-height:0}
+.block{padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(4,8,14,.78)}.block h3{margin:0 0 6px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#9fb1bf}
+.status-block strong{display:block;margin-bottom:4px}.tone-strong{border-color:rgba(174,241,134,.22);background:rgba(174,241,134,.08)}.tone-partial{border-color:rgba(243,213,138,.18);background:rgba(243,213,138,.06)}.tone-none{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.03)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv div{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}.kv label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#90a4b2;margin-bottom:3px}
+.note{color:#c4d0d8;line-height:1.38;font-size:13px}.layer-stack,.mode-stack{display:flex;flex-wrap:wrap;gap:8px}
+.layer-btn,.mode-btn{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);padding:8px 10px;border-radius:12px;cursor:pointer}.layer-btn.active,.mode-btn.active{background:rgba(174,241,134,.14);border-color:rgba(174,241,134,.24)}
+.slider-group{margin-top:10px}.slider-group label{display:block;font-size:11px;color:#9fb1bf;margin-bottom:5px;text-transform:uppercase;letter-spacing:.12em}.slider-group input{width:100%}
+.scene-shell{position:relative;height:min(68vh,720px);min-height:560px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg, #243b4f 0%, #132331 18%, #08131d 52%, #040a12 100%);box-shadow:var(--shadow)}
+#viewer{position:absolute;inset:0} #viewer canvas{display:block;width:100%;height:100%} #viewer .error-card{position:absolute;left:16px;right:16px;top:16px;padding:14px 16px;border-radius:16px;background:rgba(60,12,16,.92);border:1px solid rgba(255,120,120,.35);color:#ffd8d8;z-index:9;white-space:pre-wrap}
+.hud-strip{position:absolute;left:12px;right:84px;bottom:0px;display:flex;gap:8px;flex-wrap:wrap;z-index:4;opacity:0.92}
+.hud-card{padding:6px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(5,10,16,.72);backdrop-filter:blur(10px);max-width:min(30%,260px);font-size:12px}
+.side-rail{width:100%;padding:10px;border-radius:18px;border:1px solid rgba(255,255,255,.075);background:linear-gradient(180deg, rgba(4,8,14,.88), rgba(3,6,11,.94));box-shadow:0 18px 56px rgba(0,0,0,.36);height:min(68vh,720px);overflow:auto}.primary-box{padding:10px;border-radius:16px;border:1px solid rgba(173,241,129,.14);background:linear-gradient(180deg, rgba(173,241,129,.055), rgba(173,241,129,.018));margin-bottom:8px}
+.primary-title{font-size:10px;letter-spacing:.16em;color:#a4b7c4;text-transform:uppercase;margin-bottom:6px}.primary-name{font-size:20px;line-height:1.04;font-weight:700;margin-bottom:6px}.primary-reason{color:#c8d2d9;line-height:1.28;font-size:13px}.trust-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.trust-tag{padding:6px 9px;border-radius:999px;border:1px solid rgba(174,241,134,.18);background:rgba(174,241,134,.07);color:#d7ecd7;font-size:11px;letter-spacing:.04em;line-height:1;white-space:nowrap}.trust-tag-primary{border-color:rgba(174,241,134,.28);background:rgba(174,241,134,.12);color:#eef8e5;font-weight:600}.trust-tag-support{border-color:rgba(174,241,134,.14);background:rgba(174,241,134,.05);color:#cfe3cf}.trust-tag-caution{border-color:rgba(243,213,138,.24);background:rgba(243,213,138,.08);color:#f0ddad}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.chip{padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:11px;color:#dae0e5}.section-kicker{font-size:10px;letter-spacing:.16em;color:#9fb2bf;text-transform:uppercase;margin:8px 2px 6px}
+.row{display:grid;grid-template-columns:42px 1fr 52px;gap:10px;padding:10px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.02);margin-bottom:8px}.row-button{width:100%;text-align:left;color:var(--text);cursor:pointer}.row-button.active,.row-button:hover{border-color:rgba(174,241,134,.24);background:rgba(174,241,134,.08)}.row-rank{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:22px;font-weight:700;background:rgba(255,255,255,.05)}.row-tier{font-size:9px;letter-spacing:.16em;color:#9eb1be;margin-bottom:4px}.row-title{font-size:15px;font-weight:700;line-height:1.14;margin-bottom:4px}.row-reason{color:#b7c2ca;line-height:1.28;font-size:12px}.row-score{font-size:20px;font-weight:700;align-self:center;text-align:right;color:#efe6d8}
+.intel-row{padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);margin-bottom:5px}
+.intel-row.provider-ok{border-color:rgba(174,241,134,.25);background:rgba(174,241,134,.06)}
+.intel-row.provider-empty{border-color:rgba(243,213,138,.25);background:rgba(243,213,138,.06)}
+.intel-row.provider-failed{border-color:rgba(255,120,120,.35);background:rgba(120,20,20,.35)}
+.intel-row strong{display:block;font-size:12px;margin-bottom:2px}
+.intel-row span{color:#b7c2ca;font-size:11px;line-height:1.22}
+.micro-copy{display:block;color:#88a0af;font-size:11px;line-height:1.35;margin-top:5px}.hud-card .label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#93a8b6;margin-bottom:4px}.hud-card button,.copy-btn{margin-top:6px;padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:var(--text);cursor:pointer}.hud-card button:hover,.copy-btn:hover{background:rgba(174,241,134,.12)}
+ul{margin:8px 0 0 18px;padding:0;color:#c4cfd6}
+.legend{position:absolute;top:10px;left:10px;z-index:4;display:flex;gap:8px;flex-wrap:wrap;max-width:72%}.legend .chip{background:rgba(8,15,25,.78);backdrop-filter:blur(10px)}.cover-key{display:none;gap:8px;flex-wrap:wrap}.cover-key.visible{display:flex}.cover-chip{display:inline-flex;align-items:center;gap:8px}.cover-swatch{width:14px;height:14px;border-radius:999px;display:inline-block;border:1px solid rgba(255,255,255,.18)}.cover-swatch-dense{background:#0b6a2f}.cover-swatch-moderate{background:#b8e03a}.cover-swatch-open{background:#f0c36a}.cover-swatch-bowl{background:#2b8ea6}.focus-read-hint{display:none;margin-top:8px;font-size:12px;color:#a7b7c0;line-height:1.35}.focus-read-hint.visible{display:block}
+.scene-shell::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(110,156,191,.26) 0%, rgba(71,115,148,.14) 16%, rgba(18,31,44,0) 42%);pointer-events:none;z-index:1}.scene-shell::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 10%, rgba(255,233,176,.18), transparent 20%),radial-gradient(circle at 50% 14%, rgba(187,220,156,.10), transparent 34%),linear-gradient(180deg, rgba(44,68,32,.06), transparent 46%);pointer-events:none;z-index:1}
+.command-tools{margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:7px}.command-tools-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.command-tool-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(8,15,25,.82);color:var(--text);text-decoration:none;cursor:pointer;backdrop-filter:blur(10px)}.command-tool-btn:hover{background:rgba(20,30,44,.92)}.command-tool-btn.active{background:rgba(174,241,134,.16);border-color:rgba(174,241,134,.36);box-shadow:0 0 0 1px rgba(174,241,134,.10) inset}.scene-tools{position:absolute;top:10px;right:10px;z-index:5;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:34%}.scene-tool-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(8,15,25,.82);color:var(--text);text-decoration:none;cursor:pointer;backdrop-filter:blur(10px)}.scene-tool-btn:hover{background:rgba(20,30,44,.92)}.scene-tool-btn.active{background:rgba(174,241,134,.16);border-color:rgba(174,241,134,.36);box-shadow:0 0 0 1px rgba(174,241,134,.10) inset}.approach-hud{display:none;border-color:rgba(174,241,134,.20);background:rgba(5,18,12,.74)}.approach-hud.visible{display:block}.approach-risk-low{color:#bdf6a7}.approach-risk-caution{color:#f3d58a}.approach-risk-high{color:#ffb08e}.cursor-hud{position:absolute;right:10px;bottom:78px;z-index:5;min-width:260px;max-width:330px;padding:9px 11px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(8,15,25,.84);color:#eef3f7;font-size:12px;line-height:1.4;backdrop-filter:blur(10px);pointer-events:none}.cursor-hud strong{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9fd7ff;margin-bottom:4px}.cursor-hud .micro-copy{margin-top:4px}
+
+body.theme-appalachian{--region-accent:#7fd871;--region-cool:#6fb3da;--region-warm:#f0c47f}
+body.theme-mountain{--region-accent:#8fd0ff;--region-cool:#9ab4dd;--region-warm:#e7d0a8}
+body.theme-plains{--region-accent:#c8dd7a;--region-cool:#8dc1ef;--region-warm:#efc77b}
+body.theme-southwoods{--region-accent:#87d49d;--region-cool:#7cabba;--region-warm:#d6b26d}
+body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#f3d58a}
+.chrome::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(255,255,255,.03), transparent 18%),
+    radial-gradient(circle at 84% 12%, rgba(255,255,255,.02), transparent 22%);
+}
+.topbar{position:relative}
+.region-stack{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.region-chip{
+  padding:8px 11px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);
+  color:#e9efe2;font-size:12px
+}
+.region-chip strong{color:var(--region-warm)}
+.region-story{
+  margin-top:10px;max-width:760px;padding:10px 12px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);color:#d0dbe2;font-size:13px;line-height:1.45
+}
+.scene-shell.region-appalachian{
+  background:linear-gradient(180deg, #304a5c 0%, #193228 22%, #0a1c1d 58%, #060c12 100%);
+}
+.scene-shell.region-mountain{
+  background:linear-gradient(180deg, #344b66 0%, #182536 24%, #0b1420 58%, #05090f 100%);
+}
+.scene-shell.region-plains{
+  background:linear-gradient(180deg, #51728a 0%, #36473a 22%, #14211c 56%, #070b10 100%);
+}
+.scene-shell.region-southwoods{
+  background:linear-gradient(180deg, #365468 0%, #20372d 24%, #0d1816 58%, #05090d 100%);
+}
+.scene-shell::before{mix-blend-mode:screen}
+.scene-shell::after{opacity:.95}
+.atmo-note{
+  margin-top:8px;font-size:12px;line-height:1.42;color:#b9c8cf;
+}
+
+.pin-help{font-size:12px;color:#9fb0bc;margin-top:8px}
+.decision-card{padding:12px 12px 13px;border-radius:16px;border:1px solid rgba(255,209,102,.28);background:linear-gradient(180deg, rgba(255,209,102,.14), rgba(255,209,102,.05));box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.decision-label{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#ffd166;margin-bottom:6px}
+.decision-title{display:block;font-size:22px;line-height:1.05;font-weight:800;color:#fff3d6;margin-bottom:4px}
+.decision-sub{display:block;font-size:13px;line-height:1.35;color:#e4d8bd}
+.exec-decision{padding:8px 9px;border-radius:12px;border:1px solid rgba(0,217,255,.20);background:linear-gradient(180deg, rgba(0,217,255,.10), rgba(0,217,255,.03));margin-bottom:8px}
+.exec-decision strong{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8fe7f6;margin-bottom:4px}
+.exec-decision span{display:block;font-size:18px;line-height:1.1;font-weight:800;color:#effcff;margin-bottom:3px}
+.exec-decision em{display:block;font-style:normal;color:#cae6ec;font-size:12px;line-height:1.35}
+.viewer-micro-note{margin-top:6px;font-size:11px;line-height:1.35;color:#9eb0bf}
+.game-context-card{margin-top:8px;padding:9px 10px;border-radius:14px;border:1px solid rgba(127,216,113,.18);background:linear-gradient(180deg, rgba(127,216,113,.10), rgba(127,216,113,.03))}
+.game-context-card h3{margin-bottom:6px}
+.game-context-kicker{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9fe693;margin-bottom:5px}
+.game-context-primary{display:block;font-size:16px;line-height:1.15;font-weight:800;color:#eff8e5;margin-bottom:4px}
+.game-context-secondary{display:block;font-size:12px;line-height:1.4;color:#ccdbcf}
+.wildlife-atmo-layer{position:absolute;inset:0;z-index:2;pointer-events:none;display:flex;justify-content:space-between;align-items:stretch;padding:76px 16px 108px;gap:18px}
+.wildlife-atmo-panel{width:min(21%,248px);border-radius:18px;border:1px solid rgba(255,255,255,.065);background:linear-gradient(180deg, rgba(4,8,14,.44), rgba(3,6,11,.20));box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 14px 36px rgba(0,0,0,.18);backdrop-filter:blur(7px);overflow:hidden}
+.wildlife-atmo-left{align-self:flex-start;padding:12px 13px 14px;min-height:112px;background:radial-gradient(circle at 20% 20%, rgba(243,213,138,.055), transparent 30%),linear-gradient(180deg, rgba(5,10,16,.50), rgba(5,10,16,.14))}
+.wildlife-atmo-right{align-self:stretch;padding:9px;display:flex;flex-direction:column;gap:7px;background:radial-gradient(circle at 80% 10%, rgba(174,241,134,.045), transparent 26%),linear-gradient(180deg, rgba(5,10,16,.40), rgba(5,10,16,.12))}
+.wildlife-kicker{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#9fb1bd;margin-bottom:7px}.wildlife-region{font-size:17px;line-height:1.05;font-weight:800;color:#fff2d3}.wildlife-mood{margin-top:7px;color:#b5c3cb;font-size:11px;line-height:1.35}
+.wildlife-card{position:relative;min-height:78px;padding:9px 9px 8px 46px;border-radius:14px;border:1px solid rgba(255,255,255,.065);background:linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.012));overflow:hidden}
+.wildlife-card::before{content:'';position:absolute;left:-18px;bottom:-22px;width:68px;height:68px;border-radius:50%;background:radial-gradient(circle, rgba(243,213,138,.12), rgba(243,213,138,.02) 56%, transparent 70%)}
+.wildlife-rank{position:absolute;left:10px;top:10px;font-size:18px;font-weight:900;color:rgba(255,243,214,.32)}.wildlife-name{font-size:14px;font-weight:900;color:#fff1d4;line-height:1.05}.wildlife-role{margin-top:3px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9fd6a0}.wildlife-motion{margin-top:5px;color:#c1ccd3;font-size:10.5px;line-height:1.24}.wildlife-methods{margin-top:5px;color:#d2c09a;font-size:9.5px;line-height:1.22}.wildlife-legal-note{margin-top:auto;padding:7px 8px;border-radius:12px;background:rgba(255,209,102,.045);border:1px solid rgba(255,209,102,.13);color:#d2c8aa;font-size:9.5px;line-height:1.32}
+@media (max-width: 1280px){.wildlife-atmo-layer{position:relative;z-index:3;padding:8px 0 10px;display:grid;grid-template-columns:1fr}.wildlife-atmo-panel{width:100%}.wildlife-atmo-right{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.wildlife-legal-note{grid-column:1 / -1}.scene-shell{overflow:auto}}
+@media (max-width: 760px){.wildlife-atmo-layer{display:none}}
+@media (max-width: 1280px) {.layout{grid-template-columns:1fr} .left{border-right:0;border-bottom:1px solid rgba(255,255,255,.05)} .right{padding:0 10px 10px} .scene-shell{height:min(60vh,620px);min-height:500px} .side-rail{height:auto;max-height:none}}
+</style>
+</head>
+<body>
+<div class="shell"><div class="chrome"><div class="topbar"><div><div class="brandline">Monahinga™ · Terrain-First Hunter Surface</div><h1>3D Terrain Intelligence Viewer</h1><div class="sub">Real heightmap mesh, clean viewer authority, PAD-US display modes, and ranked hunting intelligence in one operator-facing surface.</div><div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.24);color:#ffd166;font-size:12px;line-height:1.4;max-width:760px">AI-optimized guidance: confirm legality, access, safety, and field conditions before acting on any recommendation.</div><div class="region-stack"><div class="region-chip"><strong id="regionIdentityLabel">Appalachian whitetail terrain</strong></div><div class="region-chip" id="regionSpeciesLabel">Whitetail · Turkey country</div><div class="region-chip" id="regionMoodLabel">Shaded timber folds</div></div><div id="regionStory" class="region-story">This box reads like Appalachian whitetail country: layered timber folds, protected side-hill movement, and setup value that rewards disciplined access.</div></div>
+
+<div class="command-tools">
+  <button id="saveViewHelpBtn" class="mode-btn" type="button">How to Save View</button>
+  <div class="command-tools-row" aria-label="Viewer utility controls">
+    <button id="resetViewBtn" class="command-tool-btn" type="button">Reset View</button>
+    <button id="downloadSummaryBtn" class="command-tool-btn" type="button">Download Summary</button>
+    <button id="invisibleApproachBtn" class="command-tool-btn" type="button">Invisible Approach</button>
+  </div>
+</div>
+
+<div class="pills"><div class="pill">Provider: usgs_3dep_cache</div><div class="pill">Legal: padus_arcgis_cache</div><div class="pill">BBox: -78.0899, 41.8844 → -78.0587, 41.9071</div><div class="pill">Mesh source: 768×768</div><div class="pill">Default layer: Terrain</div><div class="pill">Default legal view: Lines</div><div class="pill">Legal fill clipped to terrain bbox</div></div></div>
+<div class="layout">
+<aside class="left">
+  <div class="block"><h3>Operator Setup</h3><div class="kv"><div><label>Mode</label><strong>Hunter</strong></div><div><label>Wind</label><strong id="operatorWindValue">Not set</strong></div><div><label>Preferred Wind</label><strong>NE</strong></div><div><label>Readiness</label><strong>Huntable</strong></div></div></div>
+  <div class="block status-block tone-strong"><h3>Selected Box Status</h3><div class="note"><strong>Strong verified legal hunting land</strong><br>Most of the selected box is covered by verified PAD-US legal hunting land.</div></div>
+  <div class="block"><h3>Terrain Layers</h3><div class="layer-stack" id="terrainLayerStack"><button class="layer-btn active" data-layer="terrain">Terrain</button><button class="layer-btn" data-layer="hillshade">Hillshade</button><button class="layer-btn" data-layer="slope">Slope</button><button class="layer-btn" data-layer="relief">Relief</button></div><div class="note" style="margin-top:8px">Terrain stays realistic. Cover is now blended into the mountain as a soft read layer that influences movement instead of acting like a separate mode.</div><div class="slider-group"><label>Tilt</label><input id="tiltSlider" type="range" min="12" max="42" value="28"></div><div class="slider-group"><label>Depth Exaggeration</label><input id="depthSlider" type="range" min="70" max="145" value="90"></div><div class="pin-help">Click a ranked row or a 3D pin to focus the terrain.</div><div id="focusReadHint" class="focus-read-hint">Focus read: terrain stays live while the cover overlay quietly shows concealment pockets, edges, and exposed crossings.</div></div>
+  <div class="block"><h3>PAD-US Display</h3><div class="mode-stack"><button class="mode-btn" data-padus-mode="hybrid">Hybrid</button><button class="mode-btn" data-padus-mode="lines">Lines</button><button class="mode-btn" data-padus-mode="fill">Fill</button></div><div class="note" style="margin-top:10px">Legal geometry is clipped to the terrain box before it reaches the viewer, and the viewer clamps any stray points as a final guardrail.</div></div>
+  <div class="block"><h3>Operator Notes</h3><div class="note">No operator notes supplied for this run.</div></div>
+  <div class="block decision-card"><span class="decision-label">Hunt window</span><strong id="bestTimeLabel" class="decision-title">Evening destination window</strong><span id="bestTimeWindow" class="decision-sub">2.5 hours before sunset through last light</span><div class="viewer-micro-note">Use this as the fast decision read first, then verify with wind, legality, access, and field sign.</div><div class="atmo-note" id="terrainIdentityNote">Regional terrain identity helps the scene feel grounded, but your sit decision still comes from the live run data.</div></div>
+  <div class="block"><h3>Cover Intelligence</h3><div class="intel-row provider-ok"><strong>Terrain + Cover Read Active</strong><span>Movement bias: reading concealed lower-shelf routes first.</span></div><div class="intel-row"><strong>Exposure watch</strong><span>Open ridge crossings and crest-top travel stay higher risk.</span></div><div class="intel-row"><strong>How cover factors in</strong><span>Cover now supports the movement read, not a separate button mode.</span></div></div>
+</aside>
+<main class="center"><div class="scene-shell"><div class="wildlife-atmo-layer" aria-hidden="false"><div class="wildlife-atmo-panel wildlife-atmo-left"><div class="wildlife-kicker">Wildlife atmosphere</div><div class="wildlife-region">Appalachian hardwood wildlife atmosphere</div><div class="wildlife-mood">dark hardwood ridges, laurel cover, cold creek bottoms</div></div><div class="wildlife-atmo-panel wildlife-atmo-right"><div class="wildlife-card"><div class="wildlife-rank">01</div><div class="wildlife-name">White-tailed Deer</div><div class="wildlife-role">Primary terrain read</div><div class="wildlife-motion">Side-hill benches, bedding edges, and access discipline drive the setup.</div><div class="wildlife-methods">centerfire rifle / .30-06-class rifle where legal · muzzleloader season · archery / crossbow where legal</div></div><div class="wildlife-card"><div class="wildlife-rank">02</div><div class="wildlife-name">Wild Turkey</div><div class="wildlife-role">Secondary flock read</div><div class="wildlife-motion">Open timber, roost-to-feed movement, and ridge transitions matter.</div><div class="wildlife-methods">shotgun where legal · archery · state-season-specific method rules</div></div><div class="wildlife-card"><div class="wildlife-rank">03</div><div class="wildlife-name">Black Bear</div><div class="wildlife-role">Bear-country read</div><div class="wildlife-motion">Thick cover, food sources, and shaded drainages shape the read.</div><div class="wildlife-methods">centerfire rifle / .30-06-class rifle where legal · muzzleloader where legal · archery where legal</div></div><div class="wildlife-legal-note">Hunting method labels are general context only. Always verify state, season, tag, weapon, access, and safety rules before hunting.</div></div></div><div class="legend"><div class="chip">Green ring = best sit</div><div class="chip">Gold ring = backup sit</div><div class="chip">Amber ring = fringe option</div><div class="chip">PAD-US glow follows the terrain</div><div id="modeStatusChip" class="chip">Terrain + Cover Read</div><div id="coverKeyLegend" class="cover-key"><div class="chip cover-chip"><span class="cover-swatch cover-swatch-dense"></span>Dense cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-moderate"></span>Moderate cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-open"></span>Open / exposed</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-bowl"></span>Sheltered bowl</div></div></div><div class="scene-tools"><div style="margin-bottom:8px">
+
+</div><a class="scene-tool-btn" href="/">Back to Box / Launch</a></div><div id="viewer"></div><div class="cursor-hud" id="cursorHud"><strong>Cursor terrain read</strong><div id="cursorCoords">Move over the terrain to read live GPS.</div><div class="micro-copy">Reads the current terrain point under your cursor.</div></div><div class="hud-strip"><div class="hud-card"><span class="label">Primary sit</span><strong>Primary Sit — Core Converge</strong></div><div class="hud-card"><span class="label">Confidence</span><strong>High</strong> · 92</div><div class="hud-card" id="selectedSiteHud"><span class="label">Selected sit coordinates</span><strong id="selectedSiteTitle">Primary Sit — Core Converge</strong><div id="selectedSiteCoords">Loading coordinates…</div><button id="copyCoordsBtn" type="button">Copy coordinates</button></div><div class="hud-card" id="liveWindHud"><span class="label">Live wind near primary sit</span><strong id="liveWindHudSummary">Loading live wind…</strong><div id="liveWindHudMeta" class="micro-copy">Fetching current direction and speed.</div></div><div class="hud-card approach-hud" id="invisibleApproachHud"><span class="label">Invisible Approach</span><strong id="invisibleApproachSummary">Layer off</strong><div id="invisibleApproachMeta" class="micro-copy">Toggle to show approach risk from Access Entry to the selected sit.</div></div></div></div></main>
+<aside class="right"><div class="side-rail"><div class="block" id="hunterCoreSpotlight" style="margin-bottom:8px;border-color:rgba(174,241,134,.34);background:radial-gradient(circle at 85% 0%,rgba(174,241,134,.16),transparent 34%),linear-gradient(135deg,rgba(6,32,22,.92),rgba(8,16,24,.92));box-shadow:0 0 0 1px rgba(174,241,134,.08) inset;"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px"><div><h3 style="margin-bottom:2px;color:#dfffd2">HUNTER 2.0 Brain</h3><div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9eb1be">Elite field setup read</div></div><div style="text-align:right"><div style="font-size:28px;line-height:1;color:#f5d38a;font-weight:950">76</div><div style="font-size:10px;color:#9eb1be">conf 85</div></div></div><div class="note"><strong>Best Setup: Mid-Slope Bench</strong><br>Best move: enter low, stay off the flat shelf, and hunt the downwind edge of the bench.</div><div style="display:grid;grid-template-columns:28px 1fr 42px;gap:8px;align-items:center;padding:7px 0;border-top:1px solid rgba(255,255,255,.07);"><div style="width:24px;height:24px;border-radius:9px;display:grid;place-items:center;background:rgba(174,241,134,.16);color:#dfffd2;font-weight:900;">1</div><div style="min-width:0"><strong style="display:block;color:#fff4df;font-size:12px;line-height:1.15">Mid-Slope Bench</strong><span style="font-size:10px;color:#9eb1be">First 90 Minutes Or Last 90 Minutes</span></div><div style="text-align:right;color:#f5d38a;font-weight:900;font-size:15px">76</div></div><div style="display:grid;grid-template-columns:28px 1fr 42px;gap:8px;align-items:center;padding:7px 0;border-top:1px solid rgba(255,255,255,.07);"><div style="width:24px;height:24px;border-radius:9px;display:grid;place-items:center;background:rgba(174,241,134,.16);color:#dfffd2;font-weight:900;">2</div><div style="min-width:0"><strong style="display:block;color:#fff4df;font-size:12px;line-height:1.15">Leeward Ridge Edge</strong><span style="font-size:10px;color:#9eb1be">Midday Scout Or Secondary Setup</span></div><div style="text-align:right;color:#f5d38a;font-weight:900;font-size:15px">65</div></div><div style="display:grid;grid-template-columns:28px 1fr 42px;gap:8px;align-items:center;padding:7px 0;border-top:1px solid rgba(255,255,255,.07);"><div style="width:24px;height:24px;border-radius:9px;display:grid;place-items:center;background:rgba(174,241,134,.16);color:#dfffd2;font-weight:900;">3</div><div style="min-width:0"><strong style="display:block;color:#fff4df;font-size:12px;line-height:1.15">Mid-Slope Bench</strong><span style="font-size:10px;color:#9eb1be">First 90 Minutes Or Last 90 Minutes</span></div><div style="text-align:right;color:#f5d38a;font-weight:900;font-size:15px">76</div></div><div style="margin-top:6px;font-size:10px;color:#9eb1be">18 zones checked - 426 ms - field-verify wind, access, legality, and sign.</div></div><div class="block" id="fieldAnchorGuide" style="margin-bottom:8px;border-color:rgba(94,200,255,.22);background:rgba(8,18,28,.78)">
+  <h3 style="margin-bottom:6px">Field Anchors</h3>
+  <div class="note">
+    <strong style="color:#8fd0ff">Blue pin = Base Camp</strong><br>
+    <strong style="color:#ffb347">Orange pin = Access Entry</strong><br>
+    Invisible Approach routes from Access Entry to the selected sit.
+    <br><br>
+    To move one: click the pin, type <strong>MOVE</strong>, then click its new spot on the terrain.
+  </div>
+</div><div class="primary-box"><div class="primary-title">Primary Sit</div><div class="primary-name">Primary Sit — Core Converge</div><div class="primary-reason">General terrain read is active, so Monahinga™ is using the normal terrain-first scoring without species tuning. Win strength: Narrow. Breaks if: movement loads harder into the backup lane than this shelf. State Game Land 204 stays legal here; 695 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, cover; inactive=ridge, edge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Competitive read: this is a narrow win over the nearest backup because it carries slightly cleaner total terrain fit. Conditional read: this stays viable unless movement loads harder into the backup lane than this shelf.</div>
+<div class="block" id="executiveSummaryBlock" style="margin-top:8px;padding:8px 9px"><h3 style="margin-bottom:5px">Executive Summary</h3><div id="executiveSummaryContent" class="note">Select a sit, pin, Base Camp, or Access Entry to see the fast decision summary.</div></div>
+<div class="game-context-card" id="gameContextBlock"><span class="game-context-kicker">Likely game context</span><div id="gameContextContent" class="note">Select a sit to see the likely target species, movement style, and why this terrain supports that read.</div></div>
+<div class="block" style="margin-top:8px;padding:8px 9px">
+  <h3 style="margin-bottom:5px">Cover & Exposure</h3>
+  <div class="intel-row"><strong>Cover</strong><span>Moderate Concealment</span></div><div class="intel-row"><strong>Impact</strong><span>Supporting movement and partial bedding</span></div><div class="intel-row"><strong>Exposure</strong><span>Moderate</span></div>
+</div><div class="trust-tags" id="trustTags" data-title="Primary Sit — Core Converge" data-reason="General terrain read is active, so Monahinga™ is using the normal terrain-first scoring without species tuning. Win strength: Narrow. Breaks if: movement loads harder into the backup lane than this shelf. State Game Land 204 stays legal here; 695 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, cover; inactive=ridge, edge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Competitive read: this is a narrow win over the nearest backup because it carries slightly cleaner total terrain fit. Conditional read: this stays viable unless movement loads harder into the backup lane than this shelf." data-tags="[&quot;Bench Travel&quot;, &quot;Full Legal Setup&quot;, &quot;Cover Advantage&quot;]" data-wind="NE" data-legal="Legal fill clipped to terrain bbox" aria-label="Why this sit works"></div><div class="meta"><div class="chip">114 score</div><div class="chip">NE</div><div class="chip">2.5 hours before sunset through last light</div></div></div><div class="section-kicker">Hunting Read</div><div class="intel-row provider-ok"><strong>Monahinga™ — Terrain Intelligence</strong><span>This run produced a usable terrain read for field planning.</span></div><div class="intel-row provider-ok"><strong>Save this scouting run</strong><span>Use Download Summary for the written report, copy coordinates for your notes, and use How to Save View for terrain images.</span></div><div class="intel-row provider-ok"><strong>Plan more than one move</strong><span>Compare your primary sit against backup access, wind shifts, terrain funnels, and pressure changes before stepping into the field.</span></div><div class="intel-row provider-ok"><strong>Verify before acting</strong><span>Monahinga™ supports scouting decisions, but you must confirm land access, seasons, tags, weapon rules, weather, and safety conditions.</span></div><div class="intel-row provider-ok"><strong>Field-ready workflow</strong><span>Rotate the terrain, save the view you want, download the summary, and carry both into your scouting notes.</span></div><div style="margin:8px 0 12px;padding:12px;border-radius:18px;border:1px solid rgba(174,241,134,.30);background:radial-gradient(circle at 20% 0%,rgba(174,241,134,.13),transparent 30%),rgba(5,18,14,.74);"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;"><div><div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#aef186;font-weight:900;">HUNTER 2.0 Field Brain</div><div style="font-size:18px;font-weight:950;color:#fff4df;margin-top:2px;">Elite Setup Read</div></div><div style="text-align:right;font-size:10px;color:#9eb1be;line-height:1.35;">18 zones<br>426 ms</div></div><div style="margin-top:8px;font-size:12px;line-height:1.4;color:#c6d2d9;">Best Setup: Lower Bench Below Ridge. This is the lead option at 76/100 because Bench/flat security signal supports bedding or staging behavior nearby.. Best move: enter low, stay off the obvious travel edge, and hunt the downwind side. Breaks if: Wind direction should be verified before trusting the final setup..</div><div style="margin:9px 0;padding:11px;border-radius:16px;border:1px solid rgba(174,241,134,.24);background:linear-gradient(135deg,rgba(18,40,28,.82),rgba(8,16,24,.86));"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="min-width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(174,241,134,.16);font-weight:900;color:#dfffd2;">1</div><div style="min-width:0;flex:1;"><div style="font-size:15px;font-weight:950;line-height:1.15;color:#fff4df;">Mid-Slope Bench</div><div style="margin-top:3px;font-size:11px;color:#9eb1be;">Bedding Edge Observation - First 90 Minutes Or Last 90 Minutes</div></div><div style="font-size:24px;font-weight:950;color:#f5d38a;text-align:right;">76</div></div><div style="margin-top:9px;font-size:12px;line-height:1.38;color:#cad6dc;"><strong style="color:#bdf6a7;">Field read:</strong> A bench or flatter shelf can slow movement and create a natural staging lane before deer commit to open terrain.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#dfffd2;"><strong style="color:#bdf6a7;">Best move:</strong> Treat it as a flexible setup, then let wind and fresh sign decide timing. Set up just off the bench edge, enter from the low-impact side, and avoid walking across the flat shelf.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#d8c4a0;"><strong style="color:#f5d38a;">When it fails:</strong> Wind direction should be verified before trusting the final setup.</div><div style="margin-top:8px;font-size:11px;color:#9eb1be;">Lat 41.904641 - Lon -78.058778 - Confidence 85</div></div><div style="margin:9px 0;padding:11px;border-radius:16px;border:1px solid rgba(174,241,134,.24);background:linear-gradient(135deg,rgba(18,40,28,.82),rgba(8,16,24,.86));"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="min-width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(174,241,134,.16);font-weight:900;color:#dfffd2;">2</div><div style="min-width:0;flex:1;"><div style="font-size:15px;font-weight:950;line-height:1.15;color:#fff4df;">Leeward Ridge Edge</div><div style="margin-top:3px;font-size:11px;color:#9eb1be;">Funnel Intercept - Midday Scout Or Secondary Setup</div></div><div style="font-size:24px;font-weight:950;color:#f5d38a;text-align:right;">65</div></div><div style="margin-top:9px;font-size:12px;line-height:1.38;color:#cad6dc;"><strong style="color:#bdf6a7;">Field read:</strong> This reads like an edge-travel setup where animals can move with cover while still checking the slope below.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#dfffd2;"><strong style="color:#bdf6a7;">Best move:</strong> Treat it as a flexible setup, then let wind and fresh sign decide timing. Hunt the downwind edge and stay off the skyline so the ridge does not expose you.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#d8c4a0;"><strong style="color:#f5d38a;">When it fails:</strong> Thermal behavior is not a dominant advantage from the available terrain signal.</div><div style="margin-top:8px;font-size:11px;color:#9eb1be;">Lat 41.885811 - Lon -78.087558 - Confidence 82</div></div><div style="margin:9px 0;padding:11px;border-radius:16px;border:1px solid rgba(174,241,134,.24);background:linear-gradient(135deg,rgba(18,40,28,.82),rgba(8,16,24,.86));"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="min-width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(174,241,134,.16);font-weight:900;color:#dfffd2;">3</div><div style="min-width:0;flex:1;"><div style="font-size:15px;font-weight:950;line-height:1.15;color:#fff4df;">Mid-Slope Bench</div><div style="margin-top:3px;font-size:11px;color:#9eb1be;">Bedding Edge Observation - First 90 Minutes Or Last 90 Minutes</div></div><div style="font-size:24px;font-weight:950;color:#f5d38a;text-align:right;">76</div></div><div style="margin-top:9px;font-size:12px;line-height:1.38;color:#cad6dc;"><strong style="color:#bdf6a7;">Field read:</strong> A bench or flatter shelf can slow movement and create a natural staging lane before deer commit to open terrain.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#dfffd2;"><strong style="color:#bdf6a7;">Best move:</strong> Treat it as a flexible setup, then let wind and fresh sign decide timing. Set up just off the bench edge, enter from the low-impact side, and avoid walking across the flat shelf.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#d8c4a0;"><strong style="color:#f5d38a;">When it fails:</strong> Wind direction should be verified before trusting the final setup.</div><div style="margin-top:8px;font-size:11px;color:#9eb1be;">Lat 41.884388 - Lon -78.066542 - Confidence 85</div></div><div style="margin:9px 0;padding:11px;border-radius:16px;border:1px solid rgba(174,241,134,.24);background:linear-gradient(135deg,rgba(18,40,28,.82),rgba(8,16,24,.86));"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="min-width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(174,241,134,.16);font-weight:900;color:#dfffd2;">4</div><div style="min-width:0;flex:1;"><div style="font-size:15px;font-weight:950;line-height:1.15;color:#fff4df;">Mid-Slope Bench</div><div style="margin-top:3px;font-size:11px;color:#9eb1be;">Bedding Edge Observation - Evening Transition</div></div><div style="font-size:24px;font-weight:950;color:#f5d38a;text-align:right;">70</div></div><div style="margin-top:9px;font-size:12px;line-height:1.38;color:#cad6dc;"><strong style="color:#bdf6a7;">Field read:</strong> A bench or flatter shelf can slow movement and create a natural staging lane before deer commit to open terrain.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#dfffd2;"><strong style="color:#bdf6a7;">Best move:</strong> Treat it as an evening transition setup. Set up just off the bench edge, enter from the low-impact side, and avoid walking across the flat shelf.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#d8c4a0;"><strong style="color:#f5d38a;">When it fails:</strong> Thermal behavior is not a dominant advantage from the available terrain signal.</div><div style="margin-top:8px;font-size:11px;color:#9eb1be;">Lat 41.903306 - Lon -78.077111 - Confidence 78</div></div><div style="margin:9px 0;padding:11px;border-radius:16px;border:1px solid rgba(174,241,134,.24);background:linear-gradient(135deg,rgba(18,40,28,.82),rgba(8,16,24,.86));"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="min-width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(174,241,134,.16);font-weight:900;color:#dfffd2;">5</div><div style="min-width:0;flex:1;"><div style="font-size:15px;font-weight:950;line-height:1.15;color:#fff4df;">Leeward Ridge Edge</div><div style="margin-top:3px;font-size:11px;color:#9eb1be;">Funnel Intercept - Evening Transition</div></div><div style="font-size:24px;font-weight:950;color:#f5d38a;text-align:right;">64</div></div><div style="margin-top:9px;font-size:12px;line-height:1.38;color:#cad6dc;"><strong style="color:#bdf6a7;">Field read:</strong> This reads like an edge-travel setup where animals can move with cover while still checking the slope below.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#dfffd2;"><strong style="color:#bdf6a7;">Best move:</strong> Treat it as an evening transition setup. Hunt the downwind edge and stay off the skyline so the ridge does not expose you.</div><div style="margin-top:7px;font-size:12px;line-height:1.38;color:#d8c4a0;"><strong style="color:#f5d38a;">When it fails:</strong> Thermal behavior is not a dominant advantage from the available terrain signal.</div><div style="margin-top:8px;font-size:11px;color:#9eb1be;">Lat 41.898977 - Lon -78.070444 - Confidence 79</div></div><div style="margin-top:7px;font-size:10px;color:#7f939f;">Engine: hunter_core_2_0_pass10_ui_role_labels. Decision support only. Verify law, land access, sign, wind, and safety before acting.</div></div><div class="intel-row"><strong>Analysis mode</strong><span>General Terrain Read</span></div><div class="intel-row"><strong>Species read</strong><span>General terrain read is active, so Monahinga™ is using the normal terrain-first scoring without species tuning.</span></div><div class="intel-row"><strong>Cover read</strong><span>Moderate Concealment</span></div><div class="intel-row"><strong>Vegetation impact</strong><span>Supporting movement and partial bedding</span></div><div class="intel-row"><strong>Exposure risk</strong><span>Moderate</span></div><div class="intel-row"><strong>Legal coverage inside box</strong><span>46% PAD-US legal coverage in this box. Useful legal coverage is present, but edge management matters.</span></div><div class="intel-row"><strong>Legal state</strong><span>Strong verified legal hunting land. Primary and alternate pins are being drawn only from verified legal land inside your selected box.</span></div><div class="intel-row"><strong>Terrain pull</strong><span>Terrain read: Unknown. Viewer trust: Unverified.</span></div><div class="intel-row"><strong>Vegetation read</strong><span>Shrub cover · Source: Terrain-based fallback · Confidence: Medium. Vegetation cache hit: reused prior cover classification.</span></div><div class="intel-row"><strong>Cover layer</strong><span>Toggle Cover to separate dense concealment, moderate cover, and open ground in the 3D viewer. Selected sit glow marks the current read zone.</span></div><div class="intel-row provider-ok"><strong>Terrain provider</strong><span>Cache</span></div><div class="intel-row provider-ok"><strong>Legal provider</strong><span>Cache</span></div><div class="intel-row provider-empty"><strong>Vegetation provider</strong><span>Degraded</span></div><div class="intel-row provider-failed"><strong>Provider note</strong><span>Vegetation layer now uses multi-sample NLCD with terrain heuristic fallback.</span></div><div class="intel-row provider-failed"><strong>Provider note</strong><span>Fast vegetation mode: live NLCD sampling skipped for launch speed. Set MONAHINGA_USE_NLCD=1 to enable live vegetation samples.</span></div><div class="intel-row"><strong>Live wind near primary sit</strong><span id="liveWindSummary">Loading live wind…</span><small id="liveWindMeta" class="micro-copy">Manual fallback remains available if live weather does not load.</small></div><div class="intel-row"><strong>Wind read</strong><span>Current wind Not set. Preferred wind NE. Wind fit reads Unknown.</span></div><div class="intel-row"><strong>Primary sit elevation</strong><span>Primary Sit — Core Converge sits at about 695 meters and remains the lead setup.</span></div><div class="intel-row"><strong>Primary sit coordinates</strong><span>Lat 41.892683 · Lon -78.069650 · 695 m</span></div><div class="intel-row"><strong>Alternate Sit #2 — South West Spur coordinates</strong><span>Lat 41.891235 · Lon -78.081186 · 658 m</span></div><div class="intel-row"><strong>Alternate Sit #3 — South Bench coordinates</strong><span>Lat 41.889788 · Lon -78.072768 · 659 m</span></div><div class="section-kicker">Movement Pattern Snapshot</div><div class="intel-row"><strong>Primary Sit — Core Converge</strong><span>Bench Bedding Edge · Support Cover Advantage / Mixed Cover · Travel 54 · Bedding 85</span></div><div class="intel-row"><strong>Alternate Sit #2 — South West Spur</strong><span>Bench Bedding Edge · Support Cover Advantage / Mixed Cover · Travel 64 · Bedding 82 · Narrow pressure behind the next stronger sit: sits just behind the stronger lane.</span></div><div class="intel-row"><strong>Alternate Sit #3 — South Bench</strong><span>Bench Bedding Edge · Support Cover Advantage / Mixed Cover · Travel 65 · Bedding 82 · Narrow pressure behind the next stronger sit: sits just behind the stronger lane.</span></div><div class="section-kicker">Invalidators</div><div class="intel-row"><ul><li>Wind drifts into the preferred approach lane.</li><li>Access pressure rises on the legal edge.</li><li>The route forces you through the hot corridor instead of offsetting from it.</li></ul></div><div class="section-kicker">Quick Focus</div><div class="mode-stack"><button class="mode-btn focus-btn" data-focus-rank="1" type="button">Primary</button><button class="mode-btn focus-btn" data-focus-rank="2" type="button">Alt #2</button><button class="mode-btn focus-btn" data-focus-rank="3" type="button">Alt #3</button></div><div class="section-kicker">Ranked Sit Locations</div><button class="row row-button active" type="button" data-rank="1" data-tier="primary"><div class="row-rank">1</div><div class="row-main"><div class="row-tier">PRIMARY</div><div class="row-title">Primary Sit — Core Converge</div><div class="row-reason">Win strength: Narrow. Breaks if: movement loads harder into the backup lane than this shelf. State Game Land 204 stays legal here; 695 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, cover; inactive=ridge, edge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Competitive read: this is a narrow win over the nearest backup because it carries slightly cleaner total terrain fit. Conditional read: this stays viable unless movement loads harder into the backup lane than this shelf.</div></div><div class="row-score">114</div></button><button class="row row-button" type="button" data-rank="2" data-tier="alternate"><div class="row-rank">2</div><div class="row-main"><div class="row-tier">ALTERNATE</div><div class="row-title">Alternate Sit #2 — South West Spur</div><div class="row-reason">State Game Land 204 stays legal here; 658 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.</div></div><div class="row-score">111</div></button><button class="row row-button" type="button" data-rank="3" data-tier="alternate"><div class="row-rank">3</div><div class="row-main"><div class="row-tier">ALTERNATE</div><div class="row-title">Alternate Sit #3 — South Bench</div><div class="row-reason">State Game Land 204 stays legal here; 659 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.</div></div><div class="row-score">109</div></button><button class="row row-button" type="button" data-rank="4" data-tier="alternate"><div class="row-rank">4</div><div class="row-main"><div class="row-tier">ALTERNATE</div><div class="row-title">Alternate Sit #4 — Core Converge</div><div class="row-reason">State Game Land 204 stays legal here; 586 m on a mid-slope bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.</div></div><div class="row-score">108</div></button></div></aside>
+</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+(function() {
+  const payload = {"bbox": [-78.089916, 41.884358, -78.058737, 41.907102], "bbox_center": {"lon": -78.074326, "lat": 41.89573}, "layers": {"terrain": "../terrain_truth/terrain_derivatives/terrain_render.png", "hillshade": "../terrain_truth/terrain_derivatives/hillshade.png", "slope": "../terrain_truth/terrain_derivatives/slope.png", "relief": "../terrain_truth/terrain_derivatives/local_relief.png"}, "defaultLayer": "terrain", "defaultPadusMode": "lines", "wildlife_atmosphere": {"version": "wildlife_atmosphere_v2_bbox_deterministic", "region_key": "appalachian", "label": "Appalachian hardwood wildlife atmosphere", "species_label": "White-tailed Deer \u00b7 Wild Turkey \u00b7 Black Bear", "mood": "dark hardwood ridges, laurel cover, cold creek bottoms", "story": "Timber folds, side-hill cover, and disciplined access. Current cover signal suggests mixed brush, edge cover, and broken visibility.", "cover_read": "mixed brush, edge cover, and broken visibility", "species": [{"name": "White-tailed Deer", "role": "Primary terrain read", "movement_read": "Side-hill benches, bedding edges, and access discipline drive the setup.", "methods": ["centerfire rifle / .30-06-class rifle where legal", "muzzleloader season", "archery / crossbow where legal"], "visual_prompt": "realistic mature whitetail buck in Appalachian hardwood ridge, cinematic hunting scouting background"}, {"name": "Wild Turkey", "role": "Secondary flock read", "movement_read": "Open timber, roost-to-feed movement, and ridge transitions matter.", "methods": ["shotgun where legal", "archery", "state-season-specific method rules"], "visual_prompt": "realistic wild turkey in Appalachian hardwood forest, mature outdoor visual"}, {"name": "Black Bear", "role": "Bear-country read", "movement_read": "Thick cover, food sources, and shaded drainages shape the read.", "methods": ["centerfire rifle / .30-06-class rifle where legal", "muzzleloader where legal", "archery where legal"], "visual_prompt": "realistic black bear in Appalachian timber, serious hunter-focused scouting visual"}], "method_summary": ["centerfire rifle / .30-06-class rifle where legal", "muzzleloader season", "archery / crossbow where legal", "shotgun where legal", "archery"], "classification_method": "coordinate_rule_appalachian_hardwood", "classification_confidence": 0.82, "fallback_explanation": "", "centroid": {"lat": 41.89573, "lon": -78.074326}, "legal_note": "Hunting method labels are general context only. Always verify state, season, tag, weapon, access, and safety rules before hunting.", "visual_style": "mature cinematic hunter scouting atmosphere; realistic animals; no cartoon icons; dark textured background; subtle weapon-category context"}, "heightmap_url": "../terrain_truth/terrain_derivatives/heightmap.json", "sites": [{"rank": 1, "tier": "primary", "title": "Primary Sit \u2014 Core Converge", "score": 114, "lon": -78.06964965, "lat": 41.89268333050059, "nx": 0.65, "ny": 0.366045, "elevation_m": 695.4884643554688, "reasoning": "Win strength: Narrow. Breaks if: movement loads harder into the backup lane than this shelf. State Game Land 204 stays legal here; 695 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, cover; inactive=ridge, edge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull. Competitive read: this is a narrow win over the nearest backup because it carries slightly cleaner total terrain fit. Conditional read: this stays viable unless movement loads harder into the backup lane than this shelf.", "source_name": "State Game Land 204", "slope_bias": "bench", "legality_status": "legal"}, {"rank": 2, "tier": "alternate", "title": "Alternate Sit #2 \u2014 South West Spur", "score": 111, "lon": -78.08118588, "lat": 41.89123544693527, "nx": 0.28, "ny": 0.302385, "elevation_m": 658.156982421875, "reasoning": "State Game Land 204 stays legal here; 658 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.", "source_name": "State Game Land 204", "slope_bias": "bench", "legality_status": "legal"}, {"rank": 3, "tier": "alternate", "title": "Alternate Sit #3 \u2014 South Bench", "score": 109, "lon": -78.07276755, "lat": 41.88978756336995, "nx": 0.55, "ny": 0.238725, "elevation_m": 658.6067504882812, "reasoning": "State Game Land 204 stays legal here; 659 m on a upper third bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.", "source_name": "State Game Land 204", "slope_bias": "bench", "legality_status": "legal"}, {"rank": 4, "tier": "alternate", "title": "Alternate Sit #4 \u2014 Core Converge", "score": 108, "lon": -78.0743265, "lat": 41.89376924317458, "nx": 0.5, "ny": 0.41379, "elevation_m": 586.0087890625, "reasoning": "State Game Land 204 stays legal here; 586 m on a mid-slope bench. Primary read: Bench Bedding Edge. Support: terrain continuity. This sit is level with the surrounding pull with a flatter shelf on the side-hill, which creates a more believable hunting setup than a flat random point. It also holds better interior security than a boundary-hugging sit. Feature read: active=bench, edge, cover; inactive=ridge, open. General weighting keeps the base terrain read dominant. Vegetation read: shrub cover adds workable concealment and modestly strengthens travel and bedding confidence. This read came from terrain fallback rather than direct land-cover data, so confidence stays slightly tempered. Cover proxy: thicker-feeling travel structure adds security to movement here. Feeding proxy: bench-edge and lower-shelf terrain adds a mild destination pull.", "source_name": "State Game Land 204", "slope_bias": "bench", "legality_status": "legal"}], "corridors": [{"name": "Dominant Corridor", "strength": "dominant", "points": [[-78.06964965, 41.89268333050059], [-78.075417765, 41.89268333050059], [-78.08118588, 41.89123544693527]], "reasoning": "Main travel line between the strongest legal sit positions along upper structure."}, {"name": "Secondary Corridor A", "strength": "secondary", "points": [[-78.08118588, 41.89123544693527], [-78.076976715, 41.89051150515261], [-78.07276755, 41.88978756336995]], "reasoning": "Fallback connection between alternate sits when the primary lane is compromised."}], "legal_polygons": [{"class": "legal", "rings": [[[0.0, 0.777382], [0.20006, 0.776207], [0.200805, 0.79575], [0.217144, 0.791728], [0.22654, 0.441961], [0.39355, 0.444028], [0.392916, 0.506392], [0.778872, 0.510029], [0.777461, 0.315514], [0.709026, 0.314273], [0.707623, 0.24507], [0.746828, 0.146673], [0.955787, 0.216456], [0.957854, 0.203113], [0.913274, 0.188971], [0.975917, 0.100907], [0.994371, 0.127533], [0.999184, 0.11646], [1.0, 0.111663], [1.0, 0.0], [0.0, 0.0], [0.0, 0.213052], [0.06443, 0.214613], [0.061053, 0.4087], [0.0, 0.407608]]]}], "summary": {"mesh_width": 768, "mesh_height": 768, "terrain_strength": null, "surface_trust": null, "legal_coverage_ratio": 0.459, "legal_cropped_to_bbox": true, "legal_feature_count": 1}};
+  const wildlifeAtmosphere = payload.wildlife_atmosphere || null;
+  const viewer = document.getElementById('viewer');
+  const tiltSlider = document.getElementById('tiltSlider');
+  const depthSlider = document.getElementById('depthSlider');
+  const terrainLayerStack = document.getElementById('terrainLayerStack');
+  let layerButtons = Array.from(document.querySelectorAll('.layer-btn'));
+  const padusButtons = Array.from(document.querySelectorAll('.mode-btn[data-padus-mode]'));
+  const focusButtons = Array.from(document.querySelectorAll('.focus-btn'));
+  const rowButtons = Array.from(document.querySelectorAll('.row-button'));
+  const resetViewBtn = document.getElementById('resetViewBtn');
+  const invisibleApproachBtn = document.getElementById('invisibleApproachBtn');
+  const saveViewHelpBtn = document.getElementById('saveViewHelpBtn');
+  const downloadSummaryBtn = document.getElementById('downloadSummaryBtn');
+  const setBaseCampBtn = document.getElementById('setBaseCampBtn');
+  const setAccessEntryBtn = document.getElementById('setAccessEntryBtn');
+  const placeBaseCampBtn = document.getElementById('placeBaseCampBtn');
+  const placeAccessEntryBtn = document.getElementById('placeAccessEntryBtn');
+  const pinControlStatus = document.getElementById('pinControlStatus');
+  const baseCampSummary = document.getElementById('baseCampSummary');
+  const accessEntrySummary = document.getElementById('accessEntrySummary');
+  const executiveSummaryContent = document.getElementById('executiveSummaryContent');
+  const gameContextContent = document.getElementById('gameContextContent');
+  const operatorWindValue = document.getElementById('operatorWindValue');
+  const selectedSiteTitle = document.getElementById('selectedSiteTitle');
+  const selectedSiteCoords = document.getElementById('selectedSiteCoords');
+  const copyCoordsBtn = document.getElementById('copyCoordsBtn');
+  const bestTimeLabelEl = document.getElementById('bestTimeLabel');
+  const bestTimeWindowEl = document.getElementById('bestTimeWindow');
+  const liveWindSummary = document.getElementById('liveWindSummary');
+  const liveWindMeta = document.getElementById('liveWindMeta');
+  const liveWindHudSummary = document.getElementById('liveWindHudSummary');
+  const liveWindHudMeta = document.getElementById('liveWindHudMeta');
+  const invisibleApproachHud = document.getElementById('invisibleApproachHud');
+  const invisibleApproachSummary = document.getElementById('invisibleApproachSummary');
+  const invisibleApproachMeta = document.getElementById('invisibleApproachMeta');
+  const trustTags = document.getElementById('trustTags');
+  const coverKeyLegend = document.getElementById('coverKeyLegend');
+  const focusReadHint = document.getElementById('focusReadHint');
+  const modeStatusChip = document.getElementById('modeStatusChip');
+  const regionIdentityLabel = document.getElementById('regionIdentityLabel');
+  const regionSpeciesLabel = document.getElementById('regionSpeciesLabel');
+  const regionMoodLabel = document.getElementById('regionMoodLabel');
+  const regionStory = document.getElementById('regionStory');
+  const terrainIdentityNote = document.getElementById('terrainIdentityNote');
+  const cursorHud = document.getElementById('cursorHud');
+  const cursorCoords = document.getElementById('cursorCoords');
+  let updateFocusOverlay = function() {};
+  let liveWindState = null;
+
+  function deriveRegionIdentity() {
+    if (wildlifeAtmosphere && wildlifeAtmosphere.label) {
+      const rawKey = String(wildlifeAtmosphere.region_key || "default");
+      const themeKey = rawKey === "northern_rockies" ? "mountain" : rawKey;
+      return {
+        key: themeKey,
+        label: wildlifeAtmosphere.label || "Regional wildlife atmosphere",
+        species: wildlifeAtmosphere.species_label || "Regional game context",
+        mood: wildlifeAtmosphere.mood || "Region-driven wildlife atmosphere",
+        story: wildlifeAtmosphere.story || "Wildlife atmosphere is presentation only; the sit decision still comes from active terrain run data.",
+        note: wildlifeAtmosphere.legal_note || "Wildlife atmosphere is presentation only. Verify regulations before hunting.",
+      };
+    }
+    const center = payload.bbox_center || {};
+    const lon = Number(center.lon || 0);
+    const lat = Number(center.lat || 0);
+    if (lon < -108 && lat > 36) {
+      return {
+        key: 'mountain',
+        label: 'Mountain big-game terrain',
+        species: 'Elk · Mule deer country',
+        mood: 'Alpine shadow and ridge light',
+        story: 'This box reads like western mountain country: cooler light, bigger relief, and hunt setups that feel more exposed, wind-sensitive, and terrain-driven.',
+        note: 'Mountain presentation is cosmetic. The sit ranking still comes from the current run inputs, legality, cover proxy, and terrain logic.',
+      };
+    }
+    if (lon > -90 && lat < 37) {
+      return {
+        key: 'southwoods',
+        label: 'Southern timber terrain',
+        species: 'Whitetail · Turkey country',
+        mood: 'Humid timber and creek travel',
+        story: 'This box reads like southern timber country: thicker cover, warmer understory tones, and setup value shaped by quiet entry and shaded movement.',
+        note: 'Southern timber identity sets the visual mood only. Decision support still follows the live terrain and sit data.',
+      };
+    }
+    if (lon > -104 && lon < -92 && lat > 35 && lat < 47) {
+      return {
+        key: 'plains',
+        label: 'Plains edge terrain',
+        species: 'Whitetail · Mule deer country',
+        mood: 'Open edge and shelter breaks',
+        story: 'This box reads like plains-edge hunting ground: cleaner horizon lines, sharper exposure choices, and movement shaped by cover islands and sheltered breaks.',
+        note: 'Plains identity is atmosphere, not scoring. The sit stack still comes from the active hunt run.',
+      };
+    }
+    return {
+      key: 'appalachian',
+      label: 'Appalachian whitetail terrain',
+      species: 'Whitetail · Turkey country',
+      mood: 'Shaded timber folds',
+      story: 'This box reads like Appalachian whitetail country: layered timber folds, protected side-hill movement, and setup value that rewards disciplined access.',
+      note: 'Appalachian identity is presentation only. The recommendation engine still comes from the run data shown on the page.',
+    };
+  }
+  function applyTerrainWallpaper(identity) {
+    const body = document.body;
+    if (!body || !payload || !payload.layers) return;
+    const src = payload.layers.terrain || payload.layers.relief || payload.layers.hillshade || payload.layers.slope;
+    if (!src) return;
+    const safeSrc = String(src).replace(/\\/g, '/').replace(/"/g, '%22');
+    body.style.setProperty('--terrain-wallpaper-image', 'url("' + safeSrc + '")');
+    body.classList.add('terrain-wallpaper-ready');
+    if (identity && identity.key === 'mountain') {
+      body.style.setProperty('--terrain-wallpaper-opacity', '.34');
+    } else if (identity && identity.key === 'plains') {
+      body.style.setProperty('--terrain-wallpaper-opacity', '.27');
+    } else {
+      body.style.setProperty('--terrain-wallpaper-opacity', '.30');
+    }
+  }
+  function applyRegionIdentity(identity) {
+    const body = document.body;
+    if (body) {
+      body.classList.remove('theme-default','theme-appalachian','theme-mountain','theme-plains','theme-southwoods');
+      body.classList.add('theme-' + identity.key);
+      applyTerrainWallpaper(identity);
+    }
+    const sceneShell = document.querySelector('.scene-shell');
+    if (sceneShell) {
+      sceneShell.classList.remove('region-appalachian','region-mountain','region-plains','region-southwoods');
+      sceneShell.classList.add('region-' + identity.key);
+    }
+    if (regionIdentityLabel) regionIdentityLabel.textContent = identity.label;
+    if (regionSpeciesLabel) regionSpeciesLabel.textContent = identity.species;
+    if (regionMoodLabel) regionMoodLabel.textContent = identity.mood;
+    if (regionStory) regionStory.textContent = identity.story;
+    if (terrainIdentityNote) terrainIdentityNote.textContent = identity.note;
+  }
+  const state = { baseExaggeration: 1.0, currentTexture: (payload.defaultLayer === 'cover' ? 'terrain' : (payload.defaultLayer || 'terrain')), currentPadusMode: payload.defaultPadusMode || 'hybrid', widthWorld: 24, depthWorld: 24, rotationY: -0.92, tiltDeg: Number(tiltSlider.value || 30), cameraRadius: 18, pinControlMode: null, pinControlIndex: -1, pinControlLabel: '', invisibleApproachVisible: false, invisibleApproachRank: 1 };
+  const FEATURE_TYPES = Object.freeze({
+    MARKER: 'marker',
+    POLYLINE: 'polyline',
+    DECAL: 'decal',
+    ANALYTICAL: 'analytical',
+    DIRECTIONAL: 'directional',
+  });
+  const overlayRegistry = [];
+  const userPinGroups = [];
+  const anchorGroups = [];
+  let pinControlJustActivated = false;
+  const STORAGE_KEYS = Object.freeze({ userPins: "userPins", baseCamp: "baseCampGps", accessEntry: "accessEntryGps" });
+  function showError(message) { viewer.innerHTML = '<div class="error-card">Viewer failed to load.\n' + String(message) + '</div>'; }
+  if (!window.THREE) { showError('Three.js did not load in the browser.'); return; }
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function tierColorValue(tier) { if (tier === 'primary') return 0x27e8ff; if (tier === 'alternate') return 0xffc247; return 0xff4a78; }
+  function tierColor(tier) { return new THREE.Color(tierColorValue(tier)); }
+  function legalColor(cls) { if (cls === 'legal') return new THREE.Color(0x8fe58f); if (cls === 'restricted') return new THREE.Color(0xd98686); return new THREE.Color(0xe4bb74); }
+  function hexColor(colorObj) { return Number(colorObj.getHex()); }
+  function safeNorm(v) { return clamp(Number(v) || 0, 0, 1); }
+  function normToWorld(x, y, width, depth) { const nx = safeNorm(x); const ny = safeNorm(y); return new THREE.Vector3((nx - 0.5) * width, 0, (ny - 0.5) * depth); }
+  function sampleHeight(grid, rows, cols, x, y) { const fx = clamp(x,0,1)*(cols-1); const fy = clamp(y,0,1)*(rows-1); const x0=Math.floor(fx), y0=Math.floor(fy), x1=Math.min(cols-1,x0+1), y1=Math.min(rows-1,y0+1); const tx=fx-x0, ty=fy-y0; const q11=grid[y0*cols+x0]||0, q21=grid[y0*cols+x1]||0, q12=grid[y1*cols+x0]||0, q22=grid[y1*cols+x1]||0; const top=q11*(1-tx)+q21*tx; const bot=q12*(1-tx)+q22*tx; return top*(1-ty)+bot*ty; }
+  function computeReliefFocus(grid, rows, cols) { let min=Infinity,max=-Infinity,peakIndex=0,total=0,sumX=0,sumY=0; for (let i=0;i<grid.length;i++){const v=Number(grid[i]||0); if(v<min)min=v; if(v>max){max=v; peakIndex=i;}} if(!Number.isFinite(min)||!Number.isFinite(max)||max<=min){return {nx:.5,ny:.5,relief:0};} for(let row=0;row<rows;row++){for(let col=0;col<cols;col++){const idx=row*cols+col; const v=Number(grid[idx]||0); const nx=cols<=1?0.5:col/(cols-1); const ny=rows<=1?0.5:row/(rows-1); const local=Math.max(0,(v-min)/(max-min)); const biasX=1-Math.abs(nx-.5)*.55; const biasY=1-Math.abs(ny-.5)*.55; const w=Math.max(.0001, local*local*biasX*biasY); total+=w; sumX+=nx*w; sumY+=ny*w; }} const peakCol=peakIndex%cols, peakRow=Math.floor(peakIndex/cols); const peakNx=cols<=1?.5:peakCol/(cols-1), peakNy=rows<=1?.5:peakRow/(rows-1); if(total<=0){return {nx:peakNx,ny:peakNy,relief:max-min};} return {nx:clamp((sumX/total)*0.68+peakNx*0.32,0.18,0.82), ny:clamp((sumY/total)*0.68+peakNy*0.32,0.18,0.82), relief:max-min}; }
+  function setButtonActive(key) { layerButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.layer === key)); }
+  function setCoverReadUi(key) {
+    const terrainRead = key === 'terrain';
+    if (coverKeyLegend) coverKeyLegend.classList.toggle('visible', terrainRead);
+    if (focusReadHint) focusReadHint.classList.toggle('visible', terrainRead);
+    if (modeStatusChip) {
+      modeStatusChip.textContent = terrainRead ? 'Terrain + Cover Read' : ((key || 'terrain').charAt(0).toUpperCase() + (key || 'terrain').slice(1) + ' View');
+      modeStatusChip.style.borderColor = terrainRead ? 'rgba(174,241,134,.24)' : 'rgba(255,255,255,.08)';
+      modeStatusChip.style.background = terrainRead ? 'rgba(174,241,134,.10)' : 'rgba(8,15,25,.78)';
+      modeStatusChip.style.color = terrainRead ? '#eef8e5' : '#ece3d5';
+    }
+  }
+  function stripCoverLayerButton() {
+    if (!terrainLayerStack) return;
+    const coverBtn = terrainLayerStack.querySelector('[data-layer="cover"]');
+    if (coverBtn && coverBtn.parentNode) coverBtn.parentNode.removeChild(coverBtn);
+    layerButtons = Array.from(document.querySelectorAll('.layer-btn')).filter((btn) => btn.dataset.layer !== 'cover');
+  }
+  function setPadusModeActive(mode) { padusButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.padusMode === mode)); }
+  function setFocusActive(rank) { focusButtons.forEach(btn => btn.classList.toggle('active', Number(btn.dataset.focusRank) === Number(rank))); rowButtons.forEach(btn => btn.classList.toggle('active', Number(btn.dataset.rank) === Number(rank))); }
+  function sitePoint(site) { return { nx:safeNorm((site.lon-payload.bbox[0])/(payload.bbox[2]-payload.bbox[0])), ny:safeNorm((site.lat-payload.bbox[1])/(payload.bbox[3]-payload.bbox[1])) }; }
+  function corridorPoint(pt) { return { nx:safeNorm((pt[0]-payload.bbox[0])/(payload.bbox[2]-payload.bbox[0])), ny:safeNorm((pt[1]-payload.bbox[1])/(payload.bbox[3]-payload.bbox[1])) }; }
+  function siteByRank(rank) { return (payload.sites || []).find(item => Number(item.rank) === Number(rank)); }
+  function formatSiteCoords(site) { if (!site) return ''; return 'Lat ' + Number(site.lat).toFixed(6) + ' · Lon ' + Number(site.lon).toFixed(6) + ' · ' + Math.round(Number(site.elevation_m) || 0) + ' m'; }
+
+  function normalizedToLatLon(nx, ny) {
+    const minLon = Number(payload.bbox[0] || 0), minLat = Number(payload.bbox[1] || 0), maxLon = Number(payload.bbox[2] || 0), maxLat = Number(payload.bbox[3] || 0);
+    return {
+      lat: minLat + safeNorm(ny) * (maxLat - minLat),
+      lon: minLon + safeNorm(nx) * (maxLon - minLon),
+    };
+  }
+  function latLonToNormalized(lat, lon) {
+    const minLon = Number(payload.bbox[0] || 0), minLat = Number(payload.bbox[1] || 0), maxLon = Number(payload.bbox[2] || 0), maxLat = Number(payload.bbox[3] || 0);
+    return {
+      nx: safeNorm((Number(lon) - minLon) / Math.max(1e-9, (maxLon - minLon))),
+      ny: safeNorm((Number(lat) - minLat) / Math.max(1e-9, (maxLat - minLat))),
+    };
+  }
+  function haversineMiles(a, b) {
+    const toRad = (deg) => deg * Math.PI / 180;
+    const R = 3958.8;
+    const dLat = toRad(Number(b.lat) - Number(a.lat));
+    const dLon = toRad(Number(b.lon) - Number(a.lon));
+    const lat1 = toRad(Number(a.lat));
+    const lat2 = toRad(Number(b.lat));
+    const sin1 = Math.sin(dLat / 2), sin2 = Math.sin(dLon / 2);
+    const h = sin1 * sin1 + Math.cos(lat1) * Math.cos(lat2) * sin2 * sin2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  function bearingLabel(a, b) {
+    const toRad = (deg) => deg * Math.PI / 180;
+    const toDeg = (rad) => rad * 180 / Math.PI;
+    const lat1 = toRad(Number(a.lat)), lat2 = toRad(Number(b.lat));
+    const dLon = toRad(Number(b.lon) - Number(a.lon));
+    const y = Math.sin(dLon) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+    const bearing = (toDeg(Math.atan2(y, x)) + 360) % 360;
+    const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+    return dirs[Math.round(bearing / 45) % 8];
+  }
+  function inferCoverLabel(site) {
+    const corpus = ((site && (site.reason || site.title || '')) + ' ' + JSON.stringify((site && site.tags) || (site && site.primary_tags) || [])).toLowerCase();
+    if (/cover|conceal|security|shelter|bedding/.test(corpus)) return 'Strong Cover';
+    if (/edge|shoulder|bench|travel/.test(corpus)) return 'Moderate Cover';
+    return 'Open / Needs Field Check';
+  }
+  function inferAccessLabel(site) {
+    const corpus = ((site && (site.reason || site.title || '')) + ' ' + JSON.stringify((site && site.tags) || (site && site.primary_tags) || [])).toLowerCase();
+    if (/interior|legal access|easy|creek|road/.test(corpus)) return 'Reasonable Access';
+    if (/ridge|climb|bench/.test(corpus)) return 'Moderate Access';
+    return 'Field Verify Access';
+  }
+  function inferLegalLabel(site) {
+    const corpus = ((site && (site.reason || site.title || '')) + ' ' + JSON.stringify((site && site.tags) || (site && site.primary_tags) || []) + ' ' + String(payload.legal_badge || '')).toLowerCase();
+    if (/legal|verified|state game land|pad-us/.test(corpus)) return 'Likely Legal — Verify On Arrival';
+    if (/restricted|boundary|edge/.test(corpus)) return 'Boundary / Legality Check';
+    return 'Confirm Legality In Field';
+  }
+  function inferBestTimeLabel(site) {
+    return deriveDecisionProfile(site).whenLabel;
+  }
+  function siteCorpus(site) {
+    return ((site && (site.reason || site.title || '')) + ' ' + JSON.stringify((site && site.tags) || (site && site.primary_tags) || []) + ' ' + String(payload.best_time_window || '')).toLowerCase();
+  }
+  function firstMatchingLabel(corpus, rules, fallback) {
+    for (const rule of rules) {
+      if (rule.matchers.some((matcher) => corpus.includes(matcher))) return rule.label;
+    }
+    return fallback;
+  }
+  function deriveDecisionProfile(site) {
+    const corpus = siteCorpus(site);
+    const reasons = [];
+    const risks = [];
+    const priorities = [];
+    const addUnique = (arr, value) => { if (value && !arr.includes(value)) arr.push(value); };
+
+    const timingRules = [
+      { key: 'morning', matchers: ['bedding', 'security', 'conceal', 'cover', 'bench bedding edge', 'interior security', 'dawn', 'morning'], whenLabel: 'Morning Hunt', whenWindow: 'First light through mid-morning', reason: 'Security cover suggests daylight movement back toward bedding.' },
+      { key: 'evening', matchers: ['feeding', 'field edge', 'crop', 'dusk', 'evening', 'destination'], whenLabel: 'Evening Hunt', whenWindow: 'Late afternoon through last legal light', reason: 'Destination-style movement is more likely late in the day.' },
+      { key: 'both', matchers: ['funnel', 'convergence', 'travel intercept', 'travel lane', 'ridge funnel', 'shoulder travel lane', 'saddle'], whenLabel: 'Morning + Evening', whenWindow: 'First light and last light both rate well', reason: 'Terrain funneling can pull movement during both ends of the day.' },
+    ];
+
+    let chosenTiming = timingRules.find((rule) => rule.matchers.some((matcher) => corpus.includes(matcher)));
+    if (!chosenTiming) {
+      chosenTiming = site && Number(site.rank) === 1
+        ? { whenLabel: 'Morning + Evening', whenWindow: 'Start with first light, then re-check for evening travel', reason: 'Top-ranked sit gets the broadest scouting priority.' }
+        : { whenLabel: 'Morning Check', whenWindow: 'Scout first light and verify sign for evening use', reason: 'Needs field confirmation before committing to a narrow window.' };
+    }
+
+    addUnique(reasons, chosenTiming.reason);
+
+    const reasonRules = [
+      { matchers: ['core converge', 'convergence', 'ridge funnel', 'funnel', 'saddle'], label: 'Terrain funnel concentrates movement through a smaller decision point.' },
+      { matchers: ['bench', 'bedding', 'interior security', 'security', 'conceal', 'cover'], label: 'Security cover nearby supports daylight confidence and repeatability.' },
+      { matchers: ['travel intercept', 'travel lane', 'shoulder', 'edge', 'bench bedding edge'], label: 'This sit lines up with a natural travel lane or edge transition.' },
+      { matchers: ['legal interior access', 'verified legal access', 'legal access', 'state game land', 'pad-us'], label: 'Legal access appears favorable relative to the current box.' },
+      { matchers: ['creek', 'water', 'drainage'], label: 'Terrain and drainage features may help hide movement and entry.' },
+    ];
+    reasonRules.forEach((rule) => {
+      if (rule.matchers.some((matcher) => corpus.includes(matcher))) addUnique(reasons, rule.label);
+    });
+
+    const riskRules = [
+      { matchers: ['boundary', 'restricted', 'edge management', 'coverage edge'], label: 'Boundary or legality edge needs an on-site confirmation before committing.' },
+      { matchers: ['open', 'exposure', 'ridge', 'crest'], label: 'Exposure risk rises if wind or visibility shifts the wrong way.' },
+      { matchers: ['climb', 'steep', 'ridge'], label: 'Access effort could slow entry and exit timing.' },
+    ];
+    riskRules.forEach((rule) => {
+      if (rule.matchers.some((matcher) => corpus.includes(matcher))) addUnique(risks, rule.label);
+    });
+    if (!liveWindState || !liveWindState.summary) addUnique(risks, 'Live wind is unavailable, so field confirmation matters more.');
+    if (!risks.length) addUnique(risks, 'Main risk is a wind shift or unexpected human pressure on the approach.');
+
+    const priorityRules = [
+      { matchers: ['legal interior access', 'verified legal access', 'state game land', 'pad-us'], label: 'Legality / access confidence' },
+      { matchers: ['bedding', 'security', 'cover', 'conceal'], label: 'Security cover alignment' },
+      { matchers: ['funnel', 'convergence', 'travel intercept', 'travel lane', 'shoulder', 'edge'], label: 'Terrain-driven movement funnel' },
+      { matchers: ['creek', 'drainage', 'bench'], label: 'Low-visibility terrain approach' },
+    ];
+    priorityRules.forEach((rule) => {
+      if (rule.matchers.some((matcher) => corpus.includes(matcher))) addUnique(priorities, rule.label);
+    });
+    if (!priorities.length) {
+      addUnique(priorities, 'Terrain shape and current sit rank');
+      addUnique(priorities, 'Cover and access read');
+    }
+
+    return {
+      whenLabel: chosenTiming.whenLabel,
+      whenWindow: chosenTiming.whenWindow,
+      why: reasons.slice(0, 4),
+      risks: risks.slice(0, 3),
+      priorities: priorities.slice(0, 4),
+    };
+  }
+  function deriveGameContext(site) {
+const speciesControl = document.getElementById('viewer_species') || { value: 'default' };
+const selected = speciesControl ? speciesControl.value : 'default';
+
+    if (selected && selected !== 'default') {
+      const speciesLabels = {
+        whitetail: 'Whitetail Deer',
+        mule_deer: 'Mule Deer',
+        elk: 'Elk',
+        moose: 'Moose',
+        bighorn: 'Bighorn Sheep',
+        pronghorn: 'Pronghorn',
+        black_bear: 'Black Bear',
+        turkey: 'Wild Turkey',
+        hog: 'Feral Hog',
+        coyote: 'Coyote',
+        javelina: 'Javelina'
+      };
+
+      return {
+        primary: speciesLabels[selected] || selected,
+        secondary: [],
+        movement: 'User-selected species logic is active for this terrain read.',
+        confidence: 'Selected',
+        why: 'The 3D species selector is driving the live wildlife read and Invisible Approach bias.',
+        cover: inferCoverLabel(site)
+      };
+    }
+
+    const identity = deriveRegionIdentity();
+    const corpus = siteCorpus(site);
+    const coverLabel = inferCoverLabel(site);
+    const wildlifeSpecies = wildlifeAtmosphere && Array.isArray(wildlifeAtmosphere.species) ? wildlifeAtmosphere.species : [];
+
+    const primaryMap = {
+      appalachian: 'Whitetail',
+      mountain: 'Elk',
+      plains: 'Whitetail',
+      southwoods: 'Whitetail',
+    };
+
+    const secondaryMap = {
+      appalachian: ['Turkey', 'Black Bear'],
+      mountain: ['Mule Deer', 'Turkey'],
+      plains: ['Turkey', 'Mule Deer'],
+      southwoods: ['Turkey', 'Feral Hog'],
+    };    let movement = 'Edge travel and terrain-led movement are the main read here.';
+    if (/bedding|security|conceal|bench/.test(corpus)) movement = 'Security-cover movement near bedding looks most relevant here.';
+    else if (/funnel|convergence|travel lane|intercept|saddle|shoulder/.test(corpus)) movement = 'Terrain funnel travel is the strongest movement pattern here.';
+    else if (/feeding|destination|field/.test(corpus)) movement = 'Feed-bound evening movement is the strongest pattern here.';
+
+    let confidence = 'Moderate';
+    if (site && Number(site.rank) === 1) confidence = 'High';
+    else if (/funnel|convergence|bedding|security/.test(corpus)) confidence = 'High';
+    else if (/open|exposure/.test(corpus)) confidence = 'Low-Moderate';
+
+    let why = 'This game context comes from region identity, terrain shape, cover proxy, and the current sit explanation.';
+    if (/ridge|bench|side-hill|shoulder/.test(corpus)) why = 'Benches, side-hills, and shoulder terrain usually support disciplined deer movement and setup repeatability.';
+    else if (/creek|drainage/.test(corpus)) why = 'Drainage and low-visibility terrain often support quieter animal movement and cleaner entry.';
+    else if (/funnel|convergence|saddle/.test(corpus)) why = 'Funnels and convergence points increase the odds of movement compressing into a smaller window.';
+    else if (/feeding|field/.test(corpus)) why = 'Open-to-cover transitions make this read more relevant for late travel and cautious approach decisions.';
+
+    return {
+      primary: (wildlifeSpecies[0] && wildlifeSpecies[0].name) || primaryMap[identity.key] || 'Whitetail',
+      secondary: (wildlifeSpecies.length ? wildlifeSpecies.slice(1, 3).map((item) => item.name) : (secondaryMap[identity.key] || ['Turkey'])).slice(0, 2),
+      movement,
+      confidence,
+      why,
+      cover: coverLabel,
+    };
+  }
+  function updateGameContextForSite(site) {
+    if (!gameContextContent || !site) return;
+    const gc = deriveGameContext(site);
+    gameContextContent.innerHTML =
+      '<span class="game-context-primary">Primary target: ' + gc.primary + '</span>' +
+      '<span class="game-context-secondary">Secondary: ' + gc.secondary.join(' · ') + '</span>' +
+      '<div class="micro-copy" style="margin-top:6px">Movement: ' + gc.movement + '</div>' +
+      '<div class="micro-copy">Confidence: ' + gc.confidence + ' · Cover read: ' + gc.cover + '</div>' +
+      '<div class="micro-copy">Why it matters: ' + gc.why + '</div>';
+  }
+  function updateGameContextForAnchor(label) {
+    if (!gameContextContent) return;
+    gameContextContent.innerHTML =
+      '<span class="game-context-primary">' + label + ' reference</span>' +
+      '<span class="game-context-secondary">Use this anchor to judge entry, exit, and distance—not game behavior by itself.</span>';
+  }
+  function buildExecutiveSummaryHtml(title, rows) {
+    return '<div class="intel-row provider-ok"><strong>' + title + '</strong><span>' + rows.join('<br>') + '</span></div>';
+  }
+  function buildDecisionLeadHtml(label, windowText, whyText) {
+    return '<div class="exec-decision"><strong>Best move</strong><span>' + label + '</span><em>' + windowText + (whyText ? '<br>' + whyText : '') + '</em></div>';
+  }
+  function updateExecutiveSummaryForSite(site) {
+    if (!site || !executiveSummaryContent) return;
+    const baseCamp = getAnchorPoint('baseCamp');
+    const siteCoords = { lat: Number(site.lat), lon: Number(site.lon) };
+    const distance = baseCamp ? haversineMiles(baseCamp, siteCoords).toFixed(1) + ' mi ' + bearingLabel(baseCamp, siteCoords) + ' of Base Camp' : 'Base Camp not set';
+    const windLine = liveWindState && liveWindState.summary ? liveWindState.summary : 'Live wind loading or unavailable';
+    const decision = deriveDecisionProfile(site);
+    if (bestTimeLabelEl) bestTimeLabelEl.textContent = decision.whenLabel;
+    if (bestTimeWindowEl) bestTimeWindowEl.textContent = decision.whenWindow;
+    updateGameContextForSite(site);
+    executiveSummaryContent.innerHTML =
+      buildDecisionLeadHtml(decision.whenLabel, decision.whenWindow, decision.why[0] || '') +
+      buildExecutiveSummaryHtml(
+        site.title || 'Selected Sit',
+        [
+          'Priority Stack: ' + decision.priorities.join(' | '),
+          'Why: ' + decision.why.join(' | '),
+          'Risk: ' + decision.risks.join(' | '),
+          'Legal: ' + inferLegalLabel(site),
+          'Access: ' + inferAccessLabel(site),
+          'Cover: ' + inferCoverLabel(site),
+          'Wind: ' + windLine,
+          'GPS: ' + Number(site.lat).toFixed(5) + ', ' + Number(site.lon).toFixed(5),
+          'Base Camp Relation: ' + distance,
+        ]
+      );
+  }
+  function updateExecutiveSummaryForAnchor(label, point, note) {
+    if (!executiveSummaryContent || !point) return;
+    updateGameContextForAnchor(label);
+    executiveSummaryContent.innerHTML = buildExecutiveSummaryHtml(
+      label,
+      [
+        note || label + ' anchor',
+        'GPS: ' + Number(point.lat).toFixed(5) + ', ' + Number(point.lon).toFixed(5),
+      ]
+    );
+    if (bestTimeLabelEl) bestTimeLabelEl.textContent = 'Field Reference';
+    if (bestTimeWindowEl) bestTimeWindowEl.textContent = 'Use this anchor to plan access, timing, and exit routes.';
+  }
+function pointInsideCurrentBbox(point) {
+  if (!point || !payload || !payload.bbox) return false;
+  const minLon = Number(payload.bbox[0]);
+  const minLat = Number(payload.bbox[1]);
+  const maxLon = Number(payload.bbox[2]);
+  const maxLat = Number(payload.bbox[3]);
+  const lat = Number(point.lat);
+  const lon = Number(point.lon);
+  return Number.isFinite(lat) && Number.isFinite(lon) && lat >= minLat && lat <= maxLat && lon >= minLon && lon <= maxLon;
+}
+
+function defaultAnchorPoint(kind) {
+  if (kind === 'baseCamp') {
+    const center = payload.bbox_center || normalizedToLatLon(0.5, 0.5);
+    return { lat: Number(center.lat || normalizedToLatLon(0.5, 0.5).lat), lon: Number(center.lon || normalizedToLatLon(0.5, 0.5).lon), label: 'Base Camp' };
+  }
+
+  const primary = siteByRank(1);
+  if (primary) {
+    const fallback = normalizedToLatLon(sitePoint(primary).nx, 0.92);
+    return { lat: fallback.lat, lon: fallback.lon, label: 'Access Entry' };
+  }
+
+  const south = normalizedToLatLon(0.5, 0.92);
+  return { lat: south.lat, lon: south.lon, label: 'Access Entry' };
+}
+
+function getAnchorPoint(kind) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS[kind]);
+    if (raw) {
+      const stored = JSON.parse(raw);
+      if (pointInsideCurrentBbox(stored)) return stored;
+      localStorage.removeItem(STORAGE_KEYS[kind]);
+    }
+  } catch (err) {
+    localStorage.removeItem(STORAGE_KEYS[kind]);
+  }
+
+  const fallback = defaultAnchorPoint(kind);
+  saveAnchorPoint(kind, fallback);
+  return fallback;
+}
+  function saveAnchorPoint(kind, point) {
+    localStorage.setItem(STORAGE_KEYS[kind], JSON.stringify(point));
+  }
+  function getStoredUserPins() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.userPins) || '[]'); } catch (err) { return []; }
+  }
+  function saveStoredUserPins(pins) {
+    localStorage.setItem(STORAGE_KEYS.userPins, JSON.stringify(pins));
+  }
+  function updatePinControlStatus() {
+    if (!pinControlStatus) return;
+    if (!state.pinControlMode) {
+      pinControlStatus.textContent = 'Shift + click adds a named field pin. Click any field pin to rename, move, or delete it. Click Base Camp or Access Entry for coordinates and edit options.';
+      return;
+    }
+    if (state.pinControlMode === 'placeBaseCamp') {
+      pinControlStatus.textContent = 'Placement mode active: click the terrain to set Base Camp.';
+      return;
+    }
+    if (state.pinControlMode === 'placeAccessEntry') {
+      pinControlStatus.textContent = 'Placement mode active: click the terrain to set Access Entry.';
+      return;
+    }
+    if (state.pinControlMode === 'moveUserPin') {
+      pinControlStatus.textContent = 'Placement mode active: click the terrain to move ' + (state.pinControlLabel || 'the selected field pin') + '.';
+      return;
+    }
+  }
+  function clearPinControlMode() {
+    state.pinControlMode = null;
+    state.pinControlIndex = -1;
+    state.pinControlLabel = '';
+    pinControlJustActivated = false;
+    updatePinControlStatus();
+    [placeBaseCampBtn, placeAccessEntryBtn].forEach((btn) => { if (btn) btn.classList.remove('active'); });
+  }
+  function beginPinControlMode(mode, index, label) {
+    state.pinControlMode = mode;
+    state.pinControlIndex = Number.isFinite(Number(index)) ? Number(index) : -1;
+    state.pinControlLabel = label || '';
+    pinControlJustActivated = true;
+    [placeBaseCampBtn, placeAccessEntryBtn].forEach((btn) => { if (btn) btn.classList.remove('active'); });
+    if (mode === 'placeBaseCamp' && placeBaseCampBtn) placeBaseCampBtn.classList.add('active');
+    if (mode === 'placeAccessEntry' && placeAccessEntryBtn) placeAccessEntryBtn.classList.add('active');
+    updatePinControlStatus();
+  }
+  function promptForAnchor(kind, label) {
+    const current = getAnchorPoint(kind);
+    const latInput = window.prompt(label + ' latitude', current ? Number(current.lat).toFixed(6) : '');
+    if (latInput === null) return;
+    const lonInput = window.prompt(label + ' longitude', current ? Number(current.lon).toFixed(6) : '');
+    if (lonInput === null) return;
+    const lat = Number(latInput), lon = Number(lonInput);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) { window.alert('Enter valid GPS coordinates.'); return; }
+    saveAnchorPoint(kind, { lat, lon, label });
+    updateAnchorSummaries();
+    rebuildOverlays();
+  }
+  function updateAnchorSummaries() {
+    const baseCamp = getAnchorPoint('baseCamp');
+    const accessEntry = getAnchorPoint('accessEntry');
+    if (baseCampSummary && baseCamp) baseCampSummary.textContent = Number(baseCamp.lat).toFixed(5) + ', ' + Number(baseCamp.lon).toFixed(5);
+    if (accessEntrySummary && accessEntry) accessEntrySummary.textContent = Number(accessEntry.lat).toFixed(5) + ', ' + Number(accessEntry.lon).toFixed(5);
+  }
+  function escapeSummaryText(value) {
+    return String(value == null ? '' : value).replace(/\r?\n/g, ' ').trim();
+  }
+  function getSelectedSiteForExport() {
+    if (selectedSiteTitle && selectedSiteTitle.textContent) {
+      const byTitle = (payload.sites || []).find((item) => String(item.title || '') === String(selectedSiteTitle.textContent || ''));
+      if (byTitle) return byTitle;
+    }
+    return siteByRank(1) || (payload.sites || [])[0] || null;
+  }
+  function currentExecutiveSummaryText() {
+    if (!executiveSummaryContent) return '';
+    return escapeSummaryText(executiveSummaryContent.innerText || executiveSummaryContent.textContent || '');
+  }
+  function buildSummaryText() {
+    const site = getSelectedSiteForExport();
+    const baseCamp = getAnchorPoint('baseCamp');
+    const accessEntry = getAnchorPoint('accessEntry');
+    const pins = JSON.parse(localStorage.getItem(STORAGE_KEYS.userPins) || '[]');
+    const lines = [];
+    lines.push('MONAHINGA™ HUNT SUMMARY');
+    lines.push('');
+    if (site) {
+      const decision = deriveDecisionProfile(site);
+      lines.push('Selected Sit: ' + escapeSummaryText(site.title || 'Selected Sit'));
+      lines.push('Sit GPS: ' + Number(site.lat).toFixed(6) + ', ' + Number(site.lon).toFixed(6));
+      lines.push('Elevation: ' + Math.round(Number(site.elevation_m) || 0) + ' m');
+      lines.push('Confidence: ' + escapeSummaryText(site.score || 'N/A'));
+      lines.push('When: ' + decision.whenLabel + ' — ' + decision.whenWindow);
+      lines.push('Why: ' + decision.why.join(' | '));
+      lines.push('Priority Stack: ' + decision.priorities.join(' | '));
+      lines.push('Risk: ' + decision.risks.join(' | '));
+      lines.push('Legal: ' + inferLegalLabel(site));
+      lines.push('Access: ' + inferAccessLabel(site));
+      lines.push('Cover: ' + inferCoverLabel(site));
+      const gameContext = deriveGameContext(site);
+      lines.push('Wind: ' + escapeSummaryText(liveWindState && liveWindState.summary ? liveWindState.summary : 'Unavailable'));
+      lines.push('Likely Game Context: ' + gameContext.primary + ' primary | ' + gameContext.secondary.join(' / ') + ' secondary');
+      lines.push('Movement Read: ' + gameContext.movement);
+      if (baseCamp) {
+        const siteCoords = { lat: Number(site.lat), lon: Number(site.lon) };
+        lines.push('Base Camp Relation: ' + haversineMiles(baseCamp, siteCoords).toFixed(1) + ' mi ' + bearingLabel(baseCamp, siteCoords) + ' of Base Camp');
+      }
+      lines.push('');
+    }
+    lines.push('Executive Summary:');
+    lines.push(currentExecutiveSummaryText() || 'No executive summary available.');
+    lines.push('');
+    if (baseCamp) lines.push('Base Camp: ' + Number(baseCamp.lat).toFixed(6) + ', ' + Number(baseCamp.lon).toFixed(6));
+    if (accessEntry) lines.push('Access Entry: ' + Number(accessEntry.lat).toFixed(6) + ', ' + Number(accessEntry.lon).toFixed(6));
+    lines.push('');
+    lines.push('Field Pins:');
+    if (pins.length) {
+      pins.forEach((pin, idx) => {
+        const coords = (Number.isFinite(Number(pin.lat)) && Number.isFinite(Number(pin.lon)))
+          ? { lat: Number(pin.lat), lon: Number(pin.lon) }
+          : normalizedToLatLon(pin.nx, pin.ny);
+        lines.push('- ' + (idx + 1) + '. ' + escapeSummaryText(pin.note || ('Field Pin ' + (idx + 1))) + ' — ' + Number(coords.lat).toFixed(6) + ', ' + Number(coords.lon).toFixed(6));
+      });
+    } else {
+      lines.push('- None saved');
+    }
+    lines.push('');
+    lines.push('AI-optimized guidance: verify legality, safety, access, and field conditions before acting on any recommendation.');
+    return lines.join('\n');
+  }
+  function collectSnapshotPins() {
+    const pins = JSON.parse(localStorage.getItem(STORAGE_KEYS.userPins) || '[]');
+    return pins.map((pin, idx) => {
+      const coords = (Number.isFinite(Number(pin.lat)) && Number.isFinite(Number(pin.lon)))
+        ? { lat: Number(pin.lat), lon: Number(pin.lon) }
+        : normalizedToLatLon(pin.nx, pin.ny);
+      const norm = (Number.isFinite(Number(pin.nx)) && Number.isFinite(Number(pin.ny)))
+        ? { nx: Number(pin.nx), ny: Number(pin.ny) }
+        : latLonToNormalized(coords.lat, coords.lon);
+      return { label: pin.note || ('Field Pin ' + (idx + 1)), lat: coords.lat, lon: coords.lon, nx: norm.nx, ny: norm.ny };
+    });
+  }
+  function loadImageForReport(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src + (src.indexOf('?') >= 0 ? '&' : '?') + 'reportTs=' + Date.now();
+    });
+  }
+  function safeRoundRect(ctx, x, y, w, h, r) {
+    const radius = Math.max(0, Math.min(Number(r) || 0, Math.abs(w) / 2, Math.abs(h) / 2));
+    if (ctx && typeof ctx.roundRect === 'function') {
+      ctx.roundRect(x, y, w, h, radius);
+      return;
+    }
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+  }
+  function drawReportMarker(ctx, x, y, color, label, style) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 2;
+    ctx.fillStyle = color;
+    if (style === 'anchor') {
+      ctx.beginPath();
+      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, 12);
+      ctx.lineTo(0, 28);
+      ctx.stroke();
+    } else if (style === 'pin') {
+      ctx.beginPath();
+      ctx.arc(0, 0, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, 10);
+      ctx.lineTo(0, 24);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, 18, 0, Math.PI * 2);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+    if (label) {
+      ctx.font = '600 16px Segoe UI, Arial, sans-serif';
+      ctx.textBaseline = 'middle';
+      const text = String(label);
+      const tw = ctx.measureText(text).width;
+      const boxW = tw + 18;
+      const boxH = 26;
+      const bx = 16;
+      const by = -13;
+      ctx.fillStyle = 'rgba(6,10,16,0.86)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      safeRoundRect(ctx, bx, by, boxW, boxH, 10);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f4ead9';
+      ctx.fillText(text, bx + 9, 0);
+    }
+    ctx.restore();
+  }
+  function showSaveViewHelp() {
+    window.alert(
+      'Save your terrain view:\n\n' +
+      '1. Rotate and zoom the 3D terrain to the angle you want.\n' +
+      '2. Press Windows + Shift + S to snip the screen, or press PrtScn.\n' +
+      '3. Paste the image into Word, Google Docs, Paint, or your scouting notes.\n' +
+      '4. Use Download Summary for the written Monahinga™ report.\n\n' +
+      'Tip: You can save as many terrain angles as you want this way.'
+    );
+  }
+
+  function downloadSummary() {
+    try {
+      const blob = new Blob([buildSummaryText()], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = 'monahinga_summary.txt';
+      link.href = url;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      window.alert('Summary download failed.');
+    }
+  }
+  function updateSelectedSiteCard(site) { if (!site) return; state.invisibleApproachRank = Number(site.rank || state.invisibleApproachRank || 1); if (selectedSiteTitle) selectedSiteTitle.textContent = site.title || 'Selected sit'; if (selectedSiteCoords) selectedSiteCoords.textContent = formatSiteCoords(site); if (copyCoordsBtn) copyCoordsBtn.dataset.copyText = site.lat.toFixed(6) + ', ' + site.lon.toFixed(6); updateExecutiveSummaryForSite(site); updateFocusOverlay(site); if (typeof rebuildInvisibleApproachOverlay === 'function') rebuildInvisibleApproachOverlay(site); }
+  async function copySelectedCoords() { const text = (copyCoordsBtn && copyCoordsBtn.dataset.copyText) || ''; if (!text) return; try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); copyCoordsBtn.textContent = 'Copied'; setTimeout(() => { copyCoordsBtn.textContent = 'Copy coordinates'; }, 1200); } } catch (err) {} }
+  function addTrustTag(tags, seen, source, matchers, label) { if (!source) return; for (const matcher of matchers) { if (source.includes(matcher)) { const key = label.toLowerCase(); if (!seen.has(key)) { seen.add(key); tags.push(label); } return; } } }
+  function buildTrustTags() {
+    if (!trustTags) return;
+    const title = String(trustTags.dataset.title || '').toLowerCase();
+    const reason = String(trustTags.dataset.reason || '').toLowerCase();
+    const wind = String(trustTags.dataset.wind || '').toLowerCase();
+    const legal = String(trustTags.dataset.legal || '').toLowerCase();
+    const corpus = title + ' ' + reason + ' ' + legal;
+    let explicitTags = [];
+    try {
+      const parsed = JSON.parse(trustTags.dataset.tags || '[]');
+      if (Array.isArray(parsed)) explicitTags = parsed.map((item) => String(item || '').trim()).filter(Boolean);
+    } catch (err) {}
+    const tagRename = {
+      'Bench Terrain': 'Bench Bedding Edge',
+      'Bedding Overlap': 'Bedding Zone Hold',
+      'Verified Legal Access': 'Legal Interior Access',
+    };
+    explicitTags = explicitTags.map((tag) => tagRename[tag] || tag);
+
+    const ordered = [];
+    const seen = new Set();
+    const pushTag = (tag) => {
+      const clean = String(tag || '').trim();
+      const key = clean.toLowerCase();
+      if (!clean || seen.has(key)) return;
+      seen.add(key);
+      ordered.push(clean);
+    };
+
+    explicitTags.forEach(pushTag);
+
+    if (!ordered.length) {
+      addTrustTag(ordered, seen, corpus, ['core converge', 'convergence'], 'Core Convergence');
+      addTrustTag(ordered, seen, corpus, ['ridge funnel', 'funnel'], 'Ridge Funnel');
+      addTrustTag(ordered, seen, corpus, ['shoulder travel lane', 'shoulder'], 'Shoulder Travel Lane');
+      addTrustTag(ordered, seen, corpus, ['bench bedding edge', 'bench'], 'Bench Bedding Edge');
+      addTrustTag(ordered, seen, corpus, ['travel intercept', 'travel'], 'Travel Intercept');
+      addTrustTag(ordered, seen, corpus, ['interior security'], 'Interior Security');
+      addTrustTag(ordered, seen, corpus, ['legal interior access', 'verified legal access', 'legal', 'state game land', 'pad-us'], 'Legal Interior Access');
+      addTrustTag(ordered, seen, corpus, ['slope shelter', 'cover'], 'Slope Shelter');
+    }
+
+    const dominance = {
+      'core convergence': ['travel intercept', 'interior security', 'legal interior access'],
+      'ridge funnel': ['travel intercept', 'interior security', 'legal interior access'],
+      'shoulder travel lane': ['travel intercept', 'interior security', 'legal interior access'],
+      'bench bedding edge': ['interior security', 'legal interior access'],
+    };
+    const filtered = [];
+    for (const tag of ordered) {
+      const lower = tag.toLowerCase();
+      let hidden = false;
+      for (const chosen of filtered) {
+        const covered = dominance[String(chosen).toLowerCase()] || [];
+        if (covered.includes(lower)) { hidden = true; break; }
+      }
+      if (!hidden) filtered.push(tag);
+    }
+
+    const cautionTags = [];
+    if (/edge exposure|boundary|border/.test(corpus)) cautionTags.push('Edge Management');
+    if (/partial|clipped|fringe/.test(corpus)) cautionTags.push('Coverage Edge');
+    if (/unknown|unverified/.test(corpus)) cautionTags.push('Viewer Trust Check');
+    const visible = filtered.slice(0, 3);
+    if (!visible.length) visible.push('Terrain Read');
+    const primary = visible[0];
+    const supports = visible.slice(1, 3);
+    const caution = cautionTags.find((tag) => !visible.includes(tag));
+    const chips = [];
+    if (primary) chips.push('<span class="trust-tag trust-tag-primary">' + primary + '</span>');
+    supports.forEach((tag) => chips.push('<span class="trust-tag trust-tag-support">' + tag + '</span>'));
+    if (caution && chips.length < 3) chips.push('<span class="trust-tag trust-tag-caution">' + caution + '</span>');
+    trustTags.innerHTML = chips.join('');
+  }
+  buildTrustTags();
+  fetch(payload.heightmap_url + '?ts=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error('Could not load heightmap.json'))).then((heightmap) => {
+    try {
+      const rows = Number(heightmap.rows || 0), cols = Number(heightmap.cols || 0);
+      const raw = Array.isArray(heightmap.geometry_values) ? heightmap.geometry_values : (Array.isArray(heightmap.values) ? heightmap.values : []);
+      const grid = Array.isArray(raw.flat) ? raw.flat() : ([]).concat(...raw);
+      if (!rows || !cols || !grid.length) throw new Error('heightmap.json is incomplete.');
+      state.baseExaggeration = Number(heightmap.viewer_default_exaggeration || 1.0);
+      const baseVerticalScale = Number(heightmap.viewer_vertical_scale || 1.0);
+      state.depthWorld = Math.max(10, state.widthWorld * (rows / Math.max(cols, 1)));
+      const regionIdentity = deriveRegionIdentity();
+      applyRegionIdentity(regionIdentity);
+      function getVisualProfile() {
+        const hour = new Date().getHours();
+        const regionKey = regionIdentity.key;
+        const base = (() => {
+          if (hour < 6) return { skyTop:'#07111c', skyMid:'#10263b', skyBottom:'#1b3040', fog:0x142130, fogDensity:0.0088, sun:0xe7c08c, hemiSky:0x8aa1b7, hemiGround:0x263223, dir:1.18, hemi:0.72, fill:0.26, rim:0.18 };
+          if (hour < 11) return { skyTop:'#88b8de', skyMid:'#6e9abd', skyBottom:'#d9d5c2', fog:0x8da4b8, fogDensity:0.0068, sun:0xffdfb1, hemiSky:0xe7f1fb, hemiGround:0x445736, dir:1.72, hemi:0.96, fill:0.42, rim:0.22 };
+          if (hour < 17) return { skyTop:'#79acd7', skyMid:'#8fb3cd', skyBottom:'#d7d9ce', fog:0x95aabd, fogDensity:0.0062, sun:0xfff0cf, hemiSky:0xeaf3fb, hemiGround:0x4d603d, dir:1.86, hemi:1.00, fill:0.40, rim:0.24 };
+          if (hour < 20) return { skyTop:'#436d94', skyMid:'#a77f6e', skyBottom:'#e2c7a1', fog:0x6f7e8e, fogDensity:0.0078, sun:0xffc891, hemiSky:0xc9d8e8, hemiGround:0x473b2f, dir:1.52, hemi:0.84, fill:0.30, rim:0.20 };
+          return { skyTop:'#08111b', skyMid:'#12253b', skyBottom:'#223041', fog:0x121c28, fogDensity:0.0094, sun:0x9bb0c8, hemiSky:0x7088a2, hemiGround:0x1f2a22, dir:0.96, hemi:0.54, fill:0.18, rim:0.14 };
+        })();
+        if (regionKey === 'mountain') {
+          return Object.assign({}, base, { skyMid: hour < 17 ? '#7e97bb' : '#5a7695', skyBottom: hour < 17 ? '#cdd4d8' : '#9eaab7', fog:0x7f90a4, hemiGround:0x364049 });
+        }
+        if (regionKey === 'plains') {
+          return Object.assign({}, base, { skyMid: hour < 17 ? '#9cc3d9' : '#9a8a68', skyBottom: hour < 17 ? '#e4dcb8' : '#d7b57e', fog:0x97a789, hemiGround:0x5b5a39 });
+        }
+        if (regionKey === 'southwoods') {
+          return Object.assign({}, base, { skyMid: hour < 17 ? '#7ba2b5' : '#6d836c', skyBottom: hour < 17 ? '#cfd2be' : '#ac996d', fog:0x748778, hemiGround:0x31412f });
+        }
+        return base;
+      }
+      function createSkyTexture(profile) { const skyCanvas = document.createElement('canvas'); skyCanvas.width = 24; skyCanvas.height = 320; const skyCtx = skyCanvas.getContext('2d'); const grad = skyCtx.createLinearGradient(0, 0, 0, skyCanvas.height); grad.addColorStop(0.0, profile.skyTop); grad.addColorStop(0.44, profile.skyMid); grad.addColorStop(1.0, profile.skyBottom); skyCtx.fillStyle = grad; skyCtx.fillRect(0, 0, skyCanvas.width, skyCanvas.height); const horizonGlow = skyCtx.createRadialGradient(skyCanvas.width * 0.5, skyCanvas.height * 0.26, 8, skyCanvas.width * 0.5, skyCanvas.height * 0.26, skyCanvas.height * 0.45); horizonGlow.addColorStop(0.0, 'rgba(255,232,174,0.26)'); horizonGlow.addColorStop(0.38, 'rgba(251,215,154,0.10)'); horizonGlow.addColorStop(1.0, 'rgba(255,255,255,0)'); skyCtx.fillStyle = horizonGlow; skyCtx.fillRect(0, 0, skyCanvas.width, skyCanvas.height); const tex = new THREE.CanvasTexture(skyCanvas); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true; return tex; }
+      const visualProfile = getVisualProfile(); const scene = new THREE.Scene(); scene.background = createSkyTexture(visualProfile); scene.fog = new THREE.FogExp2(visualProfile.fog, visualProfile.fogDensity);
+      const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false, powerPreference:'high-performance' });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      const initialWidth = viewer.clientWidth || 1200, initialHeight = viewer.clientHeight || 720;
+      renderer.setSize(initialWidth, initialHeight); if (renderer.outputColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace; viewer.innerHTML=''; viewer.appendChild(renderer.domElement);
+      const camera = new THREE.PerspectiveCamera(42, initialWidth / initialHeight, 0.1, 1000);
+      const firstSite = (payload.sites || [])[0];
+      const reliefFocus = computeReliefFocus(grid, rows, cols);
+      const chosenFocus = firstSite ? sitePoint(firstSite) : reliefFocus;
+      const target = normToWorld(chosenFocus.nx, chosenFocus.ny, state.widthWorld, state.depthWorld); target.y = 0;
+      const sceneSpan = Math.max(state.widthWorld, state.depthWorld);
+      // --- smarter terrain-aware camera distance ---
+      const reliefNormalized = clamp(reliefFocus.relief * 2.2, 0, 1);
+      const baseRadius = sceneSpan * (0.75 + reliefNormalized * 0.65);
+      state.cameraRadius = clamp(baseRadius, 14, 42);
+
+      // --- lift camera target slightly (prevents clipping) ---
+      target.y = target.y + (1.2 + reliefNormalized * 2.0);
+
+      // --- slightly steeper angle for big terrain ---
+      state.tiltDeg = 26 + (reliefNormalized * 6);
+      tiltSlider.value = String(Math.round(state.tiltDeg));
+      scene.add(new THREE.AmbientLight(0xd8e3eb, 0.92));
+      const hemi = new THREE.HemisphereLight(visualProfile.hemiSky, visualProfile.hemiGround, visualProfile.hemi); scene.add(hemi);
+      const dir = new THREE.DirectionalLight(visualProfile.sun, visualProfile.dir); dir.position.set(16, 24, 9); scene.add(dir);
+      const fill = new THREE.DirectionalLight(0x90aec7, visualProfile.fill); fill.position.set(-12, 10, -14); scene.add(fill);
+      const rim = new THREE.DirectionalLight(0xb9d1db, visualProfile.rim); rim.position.set(10, 7, -18); scene.add(rim);
+      const geom = new THREE.PlaneGeometry(state.widthWorld, state.depthWorld, cols - 1, rows - 1); geom.rotateX(-Math.PI / 2); const pos = geom.attributes.position;
+      function currentHeight(nx, ny) { return sampleHeight(grid, rows, cols, nx, ny) * baseVerticalScale * state.baseExaggeration * (Number(depthSlider.value || 100) / 100) * 6.0; }
+      function applyHeights() { const depthScale = Number(depthSlider.value || 100) / 100; for (let row=0; row<rows; row++){ for (let col=0; col<cols; col++){ const idx=row*cols+col; pos.setY(idx, grid[idx] * baseVerticalScale * state.baseExaggeration * depthScale * 6.0); } } pos.needsUpdate = true; geom.computeVertexNormals(); }
+      function updateTargetHeight(nx, ny) { target.y = currentHeight(nx, ny) * 0.40 + 0.35; }
+      applyHeights(); updateTargetHeight(chosenFocus.nx, chosenFocus.ny);
+      const textureLoader = new THREE.TextureLoader();
+      const material = new THREE.MeshStandardMaterial({ color:0xffffff, roughness:0.96, metalness:0.01 });
+      const layerTextureCache = new Map();
+      const terrainMesh = new THREE.Mesh(geom, material); scene.add(terrainMesh);
+      const fillGroup = new THREE.Group(), boundaryGroup = new THREE.Group(), corridorGroup = new THREE.Group(), markerGroup = new THREE.Group(), windGroup = new THREE.Group(), focusGroup = new THREE.Group(), coverOverlayGroup = new THREE.Group(), invisibleApproachGroup = new THREE.Group();
+      scene.add(fillGroup); scene.add(boundaryGroup); scene.add(corridorGroup); scene.add(markerGroup); scene.add(windGroup); scene.add(focusGroup); scene.add(coverOverlayGroup); scene.add(invisibleApproachGroup);
+      invisibleApproachGroup.visible = false;
+      const siteGroups = new Map();
+      function worldPoint(nx, ny, lift) { const sx = safeNorm(nx); const sy = safeNorm(ny); const p = normToWorld(sx, sy, state.widthWorld, state.depthWorld); p.y = currentHeight(sx, sy) + (lift || 0); return p; }
+      function buildNamedFieldMarker(pinData, accentColor) {
+        const base = worldPoint(pinData.nx, pinData.ny, 0.28);
+        const group = new THREE.Group();
+        const color = accentColor;
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.32, 8), new THREE.MeshStandardMaterial({ color: 0xf7f7f7, transparent:true, opacity:0.72 }));
+        stem.position.y = -0.14;
+        const core = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 14), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.35, roughness:0.42, metalness:0.04 }));
+        const ring = new THREE.Mesh(new THREE.RingGeometry(0.22, 0.30, 32), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.9 }));
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = -0.10;
+        group.add(stem); group.add(core); group.add(ring);
+        group.position.copy(base);
+        group.userData = Object.assign({}, pinData);
+        return group;
+      }
+      function buildUserPinMarker(pinData) {
+        const group = buildNamedFieldMarker(pinData, 0xff4d4d);
+        userPinGroups.push(group);
+        return group;
+      }
+function buildAnchorMarker(pinData) {
+  const accent = pinData.kind === 'baseCamp' ? 0x5ec8ff : 0xffb347;
+  const group = buildNamedFieldMarker(pinData, accent);
+
+  group.scale.set(1.55, 1.55, 1.55);
+
+  anchorGroups.push(group);
+  return group;
+}
+      function buildCoverOverlay() {
+        while (coverOverlayGroup.children.length) coverOverlayGroup.remove(coverOverlayGroup.children[0]);
+        const colorBuffer = [];
+        for (let row = 0; row < rows; row += 1) {
+          for (let col = 0; col < cols; col += 1) {
+            const idx = row * cols + col;
+            const nx = cols <= 1 ? 0.5 : col / (cols - 1);
+            const ny = rows <= 1 ? 0.5 : row / (rows - 1);
+            const here = Number(grid[idx] || 0);
+            const left = Number(grid[row * cols + Math.max(0, col - 1)] || here);
+            const right = Number(grid[row * cols + Math.min(cols - 1, col + 1)] || here);
+            const up = Number(grid[Math.max(0, row - 1) * cols + col] || here);
+            const down = Number(grid[Math.min(rows - 1, row + 1) * cols + col] || here);
+            const slopeSignal = Math.min(1, Math.sqrt(((right - left) * (right - left)) + ((down - up) * (down - up))) * 3.4);
+            const reliefLocal = here - ((left + right + up + down) * 0.25);
+            const sheltered = Math.max(0, -reliefLocal * 3.2);
+            const vegetation = Math.max(0, Math.min(1, 1 - slopeSignal * 0.92 + sheltered * 0.34));
+            let c;
+            if (vegetation >= 0.72) c = new THREE.Color(0x06702f);
+            else if (vegetation >= 0.46) c = new THREE.Color(0xb9e63a);
+            else c = new THREE.Color(0xf0c067);
+            if (sheltered > 0.05) c.lerp(new THREE.Color(0x1d8ea7), Math.min(0.72, sheltered * 1.24));
+            if (slopeSignal > 0.34) c.offsetHSL(0, -0.02, -0.06);
+            colorBuffer.push(c.r, c.g, c.b);
+          }
+        }
+        geom.setAttribute('color', new THREE.Float32BufferAttribute(colorBuffer, 3));
+        const coverMaterial = new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide });
+        const coverMesh = new THREE.Mesh(geom, coverMaterial);
+        coverMesh.position.y = 0.06;
+        coverMesh.renderOrder = 2;
+        coverOverlayGroup.add(coverMesh);
+      }
+      function updateCoverOverlayVisibility(activeTexture) {
+        if (!coverOverlayGroup.children.length) return;
+        const show = activeTexture === 'terrain';
+        const overlay = coverOverlayGroup.children[0];
+        overlay.visible = show;
+        overlay.material.opacity = show ? 0.30 : 0.0;
+      }
+      function registerOverlay(entry) {
+        if (!entry || typeof entry.build !== 'function') return null;
+        const overlayEntry = {
+          id: entry.id || ('overlay-' + overlayRegistry.length),
+          type: entry.type || FEATURE_TYPES.MARKER,
+          group: entry.group || markerGroup,
+          data: entry.data || null,
+          build: entry.build,
+          instance: null,
+        };
+        overlayRegistry.push(overlayEntry);
+        return overlayEntry;
+      }
+      function removeOverlayEntries(predicate) {
+        for (let i = overlayRegistry.length - 1; i >= 0; i -= 1) {
+          const entry = overlayRegistry[i];
+          if (!predicate(entry)) continue;
+          if (entry.instance && entry.group) entry.group.remove(entry.instance);
+          overlayRegistry.splice(i, 1);
+        }
+      }
+      function renderOverlays() {
+        overlayRegistry.forEach((entry) => {
+          if (entry.instance) return;
+          const instance = entry.build(entry.data);
+          if (!instance) return;
+          entry.instance = instance;
+          if (entry.group) entry.group.add(instance);
+        });
+      }
+      function buildSiteMarker(site) {
+        const p = sitePoint(site);
+        const base = worldPoint(p.nx, p.ny, 0.34);
+        const group = new THREE.Group();
+        const colorObj = tierColor(site.tier);
+        const color = hexColor(colorObj);
+        const siteScale = site.rank === 1 ? 1.0 : site.rank === 2 ? 0.88 : 0.78;
+        const core = new THREE.Mesh(new THREE.SphereGeometry(0.20 * siteScale, 16, 16), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: site.rank === 1 ? 0.30 : 0.22, roughness:0.44, metalness:0.03 }));
+        const halo = new THREE.Mesh(new THREE.SphereGeometry(0.52 * siteScale, 16, 16), new THREE.MeshBasicMaterial({ color, transparent:true, opacity: site.rank === 1 ? 0.24 : 0.15 }));
+        const ring = new THREE.Mesh(new THREE.RingGeometry(0.30 * siteScale, 0.48 * siteScale, 42), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: site.rank === 1 ? 1.0 : 0.98 })); ring.rotation.x = -Math.PI / 2; ring.position.y = -0.10;
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.34 + (site.rank === 1 ? 0.12 : 0.0), 8), new THREE.MeshStandardMaterial({ color: 0xf0f5f8, emissive: 0x6e8f5e, emissiveIntensity: 0.10, transparent:true, opacity:0.68 })); stem.position.y = -0.18;
+        const groundDisc = new THREE.Mesh(new THREE.CircleGeometry(site.rank === 1 ? 0.44 : 0.31, 28), new THREE.MeshBasicMaterial({ color, transparent:true, opacity: site.rank === 1 ? 0.22 : 0.12 })); groundDisc.rotation.x = -Math.PI / 2; groundDisc.position.y = -0.12;
+        group.add(groundDisc); group.add(stem); group.add(ring); group.add(halo); group.add(core); group.position.copy(base); group.userData.rank = site.rank; group.userData.site = site; group.userData.kind = 'sit';
+        siteGroups.set(Number(site.rank), group);
+        return group;
+      }
+      updateFocusOverlay = function(site) {
+        while (focusGroup.children.length) focusGroup.remove(focusGroup.children[0]);
+        if (!site) return;
+        const p = sitePoint(site);
+        const base = worldPoint(p.nx, p.ny, 0.16);
+        const outer = new THREE.Mesh(
+          new THREE.CircleGeometry(2.25, 48),
+          new THREE.MeshBasicMaterial({ color: 0xaef186, transparent: true, opacity: 0.030, side: THREE.DoubleSide })
+        );
+        outer.rotation.x = -Math.PI / 2;
+        outer.position.copy(base);
+        const middle = new THREE.Mesh(
+          new THREE.CircleGeometry(1.35, 42),
+          new THREE.MeshBasicMaterial({ color: 0x7fcb59, transparent: true, opacity: 0.040, side: THREE.DoubleSide })
+        );
+        middle.rotation.x = -Math.PI / 2;
+        middle.position.copy(base.clone().add(new THREE.Vector3(0, 0.01, 0)));
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(1.0, 1.12, 48),
+          new THREE.MeshBasicMaterial({ color: 0xe8f6c6, transparent: true, opacity: 0.68, side: THREE.DoubleSide })
+        );
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.copy(base.clone().add(new THREE.Vector3(0, 0.02, 0)));
+        focusGroup.add(outer); focusGroup.add(middle); focusGroup.add(ring);
+      }
+      function makeTerrainLine(points, colorObj, opacity) { const geom = new THREE.BufferGeometry().setFromPoints(points); return new THREE.Line(geom, new THREE.LineBasicMaterial({ color: hexColor(colorObj), transparent:true, opacity, linewidth:1.15 })); }
+      function polygonCentroid(rings) { const ring = (rings && rings[0]) || []; if (!ring.length) return { nx:0.5, ny:0.5 }; let sx = 0, sy = 0; ring.forEach((pt) => { sx += safeNorm(pt[0]); sy += safeNorm(pt[1]); }); return { nx: sx / ring.length, ny: sy / ring.length }; }
+      function makeTube(points, radius, color, opacity) { const curve = new THREE.CatmullRomCurve3(points); const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(16, points.length*10), radius, 10, false), new THREE.MeshStandardMaterial({ color, transparent:true, opacity, emissive: color, emissiveIntensity: 0.07, roughness:0.60, metalness:0.04 })); return tube; }
+      function drawWindOverlay(read) { while (windGroup.children.length) windGroup.remove(windGroup.children[0]); const primarySite = siteByRank(1) || (payload.sites || [])[0]; if (!primarySite || !read || !read.ok || typeof read.arrow_heading_deg !== 'number') return; const p = sitePoint(primarySite); const origin = worldPoint(p.nx, p.ny, 0.9); const heading = THREE.MathUtils.degToRad(Number(read.arrow_heading_deg)); const dirVec = new THREE.Vector3(Math.sin(heading), 0, Math.cos(heading)).normalize(); const speed = Math.max(4, Number(read.speed_mph || 0)); const len = clamp(1.8 + speed * 0.08, 1.8, 4.2); const arrow = new THREE.ArrowHelper(dirVec, origin, len, 0xbde79b, 0.48, 0.24); windGroup.add(arrow); }
+      function windLabelToHeading(label) {
+        const value = String(label || '').toUpperCase();
+        const dirs = { N:180, NE:225, E:270, SE:315, S:0, SW:45, W:90, NW:135 };
+        const match = value.match(/\b(NW|NE|SW|SE|N|E|S|W)\b/);
+        return match ? dirs[match[1]] : 135;
+      }
+      function currentScentHeadingDeg() {
+        if (liveWindState && typeof liveWindState.arrow_heading_deg === 'number') return Number(liveWindState.arrow_heading_deg);
+        const label = (operatorWindValue && operatorWindValue.textContent) || '';
+        return windLabelToHeading(label);
+      }
+      function currentApproachSite() {
+        return siteByRank(state.invisibleApproachRank || 1) || siteByRank(1) || (payload.sites || [])[0] || null;
+      }
+
+      function getSelectedSpecies() {
+        const el = document.getElementById('viewer_species');
+        if (!el) return null;
+        return el.value;
+      }
+
+      function approachRiskClass(score) {
+        if (score >= 68) return { label: 'High', css: 'approach-risk-high', color: 0xff5f45 };
+        if (score >= 38) return { label: 'Caution', css: 'approach-risk-caution', color: 0xffd166 };
+        return { label: 'Low', css: 'approach-risk-low', color: 0xaef186 };
+      }
+
+      function angleDeltaDeg(a, b) {
+        return Math.abs((((Number(a || 0) - Number(b || 0)) + 540) % 360) - 180);
+      }
+
+      function localSlopeSignal(nx, ny) {
+        const step = 0.026;
+        const h = currentHeight(nx, ny);
+        const hx = currentHeight(clamp(nx + step, 0, 1), ny);
+        const hy = currentHeight(nx, clamp(ny + step, 0, 1));
+        return Math.sqrt((h - hx) * (h - hx) + (h - hy) * (h - hy));
+      }
+      function routeDotRisk(t, nx, ny, site, scentHeadingDeg) {
+        const centerPull = 1 - Math.min(1, Math.hypot(nx - 0.5, ny - 0.5) * 1.6);
+        const slopeSignal = localSlopeSignal(nx, ny);
+        const exposure = clamp(slopeSignal * 2.35, 0, 22);
+        const p = sitePoint(site);
+        const dx = nx - p.nx;
+        const dy = ny - p.ny;
+        const angleToDot = (THREE.MathUtils.radToDeg(Math.atan2(dx, dy)) + 360) % 360;
+        const delta = angleDeltaDeg(angleToDot, scentHeadingDeg);
+        const downwindRisk = delta < 42 ? 36 * (1 - delta / 42) : 0;
+        const sitPressure = t > 0.70 ? 22 * ((t - 0.70) / 0.30) : 0;
+        const corridorPressure = (payload.corridors || []).length ? 8 * centerPull : 3 * centerPull;
+        return clamp(16 + exposure + downwindRisk + sitPressure + corridorPressure, 6, 94);
+      }
+function speciesApproachBias(site) {
+  const context = deriveGameContext(site);
+  const primary = String((context && context.primary) || '').toLowerCase();
+
+  if (primary.includes('elk')) {
+    return {
+      label: 'Elk mountain approach',
+      slopeWeight: 1.15,
+      scentPenalty: 22,
+      edgePenalty: 5,
+      latePressure: 9,
+      contourBonus: 5,
+      coverBonus: 1,
+    };
+  }
+
+  if (primary.includes('turkey')) {
+    return {
+      label: 'Turkey visibility approach',
+      slopeWeight: 1.25,
+      scentPenalty: 10,
+      edgePenalty: 6,
+      latePressure: 5,
+      contourBonus: 2,
+      coverBonus: 3,
+    };
+  }
+
+  if (primary.includes('bear')) {
+    return {
+      label: 'Bear cover approach',
+      slopeWeight: 1.05,
+      scentPenalty: 16,
+      edgePenalty: 7,
+      latePressure: 6,
+      contourBonus: 3,
+      coverBonus: 6,
+    };
+  }
+
+  return {
+    label: 'Whitetail cover approach',
+    slopeWeight: 1.55,
+    scentPenalty: 18,
+    edgePenalty: 8,
+    latePressure: 7,
+    contourBonus: 4,
+    coverBonus: 7,
+  };
+}
+
+function scoreApproachCandidate(nx, ny, t, site, scentHeadingDeg) {
+  const bias = speciesApproachBias(site);
+  const slope = localSlopeSignal(nx, ny);
+  const p = sitePoint(site);
+  const dx = nx - p.nx;
+  const dy = ny - p.ny;
+  const angleToPoint = (THREE.MathUtils.radToDeg(Math.atan2(dx, dy)) + 360) % 360;
+  const scentPenalty = angleDeltaDeg(angleToPoint, scentHeadingDeg) < 48 ? bias.scentPenalty : 0;
+  const edgePenalty = (nx < 0.035 || nx > 0.965 || ny < 0.035 || ny > 0.965) ? bias.edgePenalty : 0;
+  const finalApproachPenalty = t > 0.76 ? bias.latePressure : 0;
+
+  const centerPull = 1 - Math.min(1, Math.hypot(nx - 0.5, ny - 0.5) * 1.6);
+  const contourReward = centerPull * bias.contourBonus;
+  const coverReward = /cover|conceal|security|bedding|bench/.test(siteCorpus(site)) ? bias.coverBonus : 0;
+
+  return slope * bias.slopeWeight + scentPenalty + edgePenalty + finalApproachPenalty - contourReward - coverReward;
+}
+      function buildApproachRoute(site) {
+        const access = getAnchorPoint('accessEntry') || getAnchorPoint('baseCamp');
+        if (!site || !access) return null;
+        const start = latLonToNormalized(access.lat, access.lon);
+        const end = sitePoint(site);
+        const dx = end.nx - start.nx;
+        const dy = end.ny - start.ny;
+        const len = Math.max(0.001, Math.hypot(dx, dy));
+        const px = -dy / len;
+        const py = dx / len;
+        const points = [];
+        const count = 22;
+        const scentHeading = currentScentHeadingDeg();
+        let sideMemory = 0;
+        for (let i = 0; i <= count; i += 1) {
+          const t = i / count;
+          const baseX = start.nx + dx * t;
+          const baseY = start.ny + dy * t;
+          const width = Math.sin(t * Math.PI) * 0.085;
+          const softWander = Math.sin(t * Math.PI * 2.0) * 0.018;
+          const candidates = [-1, -0.55, 0, 0.55, 1].map((side) => {
+            const continuityPenalty = sideMemory ? Math.abs(side - sideMemory) * 1.7 : 0;
+            const nx = clamp(baseX + px * (side * width + softWander), 0.02, 0.98);
+            const ny = clamp(baseY + py * (side * width + softWander), 0.02, 0.98);
+            return {
+              nx,
+              ny,
+              side,
+              score: scoreApproachCandidate(nx, ny, t, site, scentHeading) + continuityPenalty,
+            };
+          });
+          candidates.sort((a, b) => a.score - b.score);
+          const chosen = candidates[0];
+          sideMemory = chosen.side;
+          points.push({ nx: chosen.nx, ny: chosen.ny, t, candidateScore: chosen.score });
+        }
+        return { start, end, points };
+      }
+      function addScentCone(site, headingDeg, riskScore) {
+        const p = sitePoint(site);
+        const origin = worldPoint(p.nx, p.ny, 0.22);
+        const heading = THREE.MathUtils.degToRad(headingDeg);
+        const dirVec = new THREE.Vector3(Math.sin(heading), 0, Math.cos(heading)).normalize();
+        const sideVec = new THREE.Vector3(dirVec.z, 0, -dirVec.x).normalize();
+        const length = clamp(2.8 + Number((liveWindState && liveWindState.speed_mph) || 7) * 0.12, 3.0, 5.8);
+        const width = length * 0.44;
+        const a = origin.clone().add(dirVec.clone().multiplyScalar(0.35));
+        const b = origin.clone().add(dirVec.clone().multiplyScalar(length)).add(sideVec.clone().multiplyScalar(width));
+        const c = origin.clone().add(dirVec.clone().multiplyScalar(length)).add(sideVec.clone().multiplyScalar(-width));
+        const geomCone = new THREE.BufferGeometry().setFromPoints([a, b, c]);
+        geomCone.setIndex([0, 1, 2]);
+        geomCone.computeVertexNormals();
+        const opacity = riskScore >= 68 ? 0.24 : riskScore >= 38 ? 0.16 : 0.10;
+        const cone = new THREE.Mesh(geomCone, new THREE.MeshBasicMaterial({ color: riskScore >= 68 ? 0xff5f45 : 0xffd166, transparent:true, opacity, side:THREE.DoubleSide, depthWrite:false }));
+        cone.renderOrder = 4;
+        invisibleApproachGroup.add(cone);
+      }
+function approachRiskExplanation(avgRisk, risks) {
+  const activeSite = currentApproachSite();
+  const bias = speciesApproachBias(activeSite);
+  const highCount = risks.filter((item) => item >= 68).length;
+  const cautionCount = risks.filter((item) => item >= 38 && item < 68).length;
+  const windText = liveWindState && liveWindState.summary ? liveWindState.summary : ((operatorWindValue && operatorWindValue.textContent) || 'wind unavailable');
+
+  if (highCount >= 4 || avgRisk >= 68) {
+    return bias.label + ': high blowout risk. Route or scent path likely crosses too much danger ground. Wind: ' + windText + '.';
+  }
+
+  if (cautionCount >= 5 || avgRisk >= 38) {
+    return bias.label + ': caution. Dotted path is species-aware, but verify wind, exposure, and final approach before committing. Wind: ' + windText + '.';
+  }
+
+  return bias.label + ': low-risk read. Route favors species-specific terrain tendencies while limiting scent pressure. Wind: ' + windText + '.';
+}
+      function rebuildInvisibleApproachOverlay(site) {
+        while (invisibleApproachGroup.children.length) invisibleApproachGroup.remove(invisibleApproachGroup.children[0]);
+        const activeSite = site || currentApproachSite();
+        if (!activeSite) return;
+        const route = buildApproachRoute(activeSite);
+        if (!route) return;
+        const scentHeading = currentScentHeadingDeg();
+        const risks = route.points.map((pt) => routeDotRisk(pt.t, pt.nx, pt.ny, activeSite, scentHeading));
+        const avgRisk = risks.reduce((a, b) => a + b, 0) / Math.max(1, risks.length);
+        const risk = approachRiskClass(avgRisk);
+        route.points.forEach((pt, idx) => {
+          const dotRisk = approachRiskClass(risks[idx]);
+          const radius = idx === route.points.length - 1 ? 0.14 : 0.095;
+          const dot = new THREE.Mesh(
+            new THREE.SphereGeometry(radius, 12, 12),
+            new THREE.MeshStandardMaterial({ color: dotRisk.color, emissive: dotRisk.color, emissiveIntensity: 0.22, roughness:0.48, metalness:0.02, transparent:true, opacity:0.94 })
+          );
+          dot.position.copy(worldPoint(pt.nx, pt.ny, 0.34));
+          invisibleApproachGroup.add(dot);
+        });
+        const linePoints = route.points.map((pt) => worldPoint(pt.nx, pt.ny, 0.23));
+        if (linePoints.length > 1) invisibleApproachGroup.add(makeTerrainLine(linePoints, new THREE.Color(0xaef186), 0.32));
+        addScentCone(activeSite, scentHeading, avgRisk);
+        invisibleApproachGroup.visible = !!state.invisibleApproachVisible;
+        if (invisibleApproachSummary) {
+          invisibleApproachSummary.className = risk.css;
+          invisibleApproachSummary.textContent = Math.round(avgRisk) + ' / 100 — ' + risk.label;
+        }
+        if (invisibleApproachMeta) {
+          invisibleApproachMeta.textContent = approachRiskExplanation(avgRisk, risks);
+        }
+      }
+      function setInvisibleApproachVisible(visible) {
+        state.invisibleApproachVisible = !!visible;
+        invisibleApproachGroup.visible = state.invisibleApproachVisible;
+        if (invisibleApproachBtn) invisibleApproachBtn.classList.toggle('active', state.invisibleApproachVisible);
+        if (invisibleApproachHud) invisibleApproachHud.classList.toggle('visible', state.invisibleApproachVisible);
+        if (state.invisibleApproachVisible) rebuildInvisibleApproachOverlay(currentApproachSite());
+      }
+
+      function polygonShape(rings) { if (!rings || !rings.length) return null; const outer = (rings[0] || []).map(pt => [safeNorm(pt[0]), safeNorm(pt[1])]); if (!outer || outer.length < 3) return null; const shape = new THREE.Shape(); outer.forEach((pt, idx) => { const x=(pt[0]-0.5)*state.widthWorld, y=(pt[1]-0.5)*state.depthWorld; if (idx===0) shape.moveTo(x,y); else shape.lineTo(x,y); }); shape.lineTo((outer[0][0]-0.5)*state.widthWorld, (outer[0][1]-0.5)*state.depthWorld); for (let i=1; i<rings.length; i++) { const ring = (rings[i] || []).map(pt => [safeNorm(pt[0]), safeNorm(pt[1])]); if (!ring || ring.length < 3) continue; const hole = new THREE.Path(); ring.forEach((pt, idx) => { const x=(pt[0]-0.5)*state.widthWorld, y=(pt[1]-0.5)*state.depthWorld; if (idx===0) hole.moveTo(x,y); else hole.lineTo(x,y); }); hole.lineTo((ring[0][0]-0.5)*state.widthWorld, (ring[0][1]-0.5)*state.depthWorld); shape.holes.push(hole); } return shape; }
+      function rebuildOverlays() {
+        [fillGroup, boundaryGroup, corridorGroup, markerGroup].forEach(group => { while (group.children.length) group.remove(group.children[0]); });
+        siteGroups.clear(); userPinGroups.length = 0; anchorGroups.length = 0;
+        removeOverlayEntries((entry) => entry.type === FEATURE_TYPES.MARKER);
+        (payload.legal_polygons || []).forEach((poly) => {
+          const colorObj = legalColor(poly.class); const color = hexColor(colorObj); const shape = polygonShape(poly.rings || []);
+          if (shape) {
+            const fillGeom = new THREE.ShapeGeometry(shape); fillGeom.rotateX(-Math.PI / 2);
+            const position = fillGeom.attributes.position;
+            for (let i = 0; i < position.count; i++) { const x = position.getX(i), z = position.getZ(i); const nx = clamp(x / state.widthWorld + 0.5, 0, 1); const ny = clamp(z / state.depthWorld + 0.5, 0, 1); position.setY(i, currentHeight(nx, ny) + 0.05); }
+            fillGeom.computeVertexNormals();
+            const fillOpacity = poly.class === 'legal' ? 0.11 : 0.04;
+            fillGroup.add(new THREE.Mesh(fillGeom, new THREE.MeshStandardMaterial({ color, transparent:true, opacity: fillOpacity, depthWrite:false, side: THREE.DoubleSide, emissive: color, emissiveIntensity: poly.class === 'legal' ? 0.04 : 0.01, roughness:0.95, metalness:0.0 })));
+            if (poly.class === 'legal') { const centroid = polygonCentroid(poly.rings || []); const glow = new THREE.Mesh(new THREE.SphereGeometry(0.46, 14, 14), new THREE.MeshBasicMaterial({ color, transparent:true, opacity:0.018 })); glow.position.copy(worldPoint(centroid.nx, centroid.ny, 0.35)); fillGroup.add(glow); }
+          }
+          (poly.rings || []).forEach((ring) => { const pts = (ring || []).map(pt => worldPoint(pt[0], pt[1], 0.11)); if (pts.length < 2) return; boundaryGroup.add(makeTerrainLine(pts.concat([pts[0]]), colorObj, poly.class === 'legal' ? 0.50 : 0.26)); });
+        });
+        (payload.corridors || []).forEach((corridor) => { const pts=(corridor.points || []).map(pt => { const p=corridorPoint(pt); return worldPoint(p.nx,p.ny,0.16);}); if (pts.length < 2) return; corridorGroup.add(makeTube(pts, corridor.strength === 'dominant' ? 0.038 : 0.026, corridor.strength === 'dominant' ? 0xd6ff80 : 0xffd275, corridor.strength === 'dominant' ? 0.34 : 0.24)); });
+        (payload.sites || []).forEach((site) => {
+          registerOverlay({
+            id: 'site-' + Number(site.rank || 0),
+            type: FEATURE_TYPES.MARKER,
+            group: markerGroup,
+            data: site,
+            build: buildSiteMarker,
+          });
+        });
+// BASE CAMP + ACCESS ENTRY (SAFE OVERLAY SYSTEM)
+const baseCamp = getAnchorPoint('baseCamp');
+const accessEntry = getAnchorPoint('accessEntry');
+
+if (baseCamp) {
+  const norm = latLonToNormalized(baseCamp.lat, baseCamp.lon);
+  registerOverlay({
+    id: 'anchor-base-camp',
+    type: FEATURE_TYPES.MARKER,
+    group: markerGroup,
+    data: { kind: 'baseCamp', label: 'Base Camp', note: 'Base Camp', lat: baseCamp.lat, lon: baseCamp.lon, nx: norm.nx, ny: norm.ny },
+    build: buildAnchorMarker,
+  });
+}
+
+if (accessEntry) {
+  const norm = latLonToNormalized(accessEntry.lat, accessEntry.lon);
+  registerOverlay({
+    id: 'anchor-access-entry',
+    type: FEATURE_TYPES.MARKER,
+    group: markerGroup,
+    data: { kind: 'accessEntry', label: 'Access Entry', note: 'Access Entry', lat: accessEntry.lat, lon: accessEntry.lon, nx: norm.nx, ny: norm.ny },
+    build: buildAnchorMarker,
+  });
+}
+
+// USER PINS (SAFE OVERLAY SYSTEM)
+const savedPins = JSON.parse(localStorage.getItem(STORAGE_KEYS.userPins) || '[]');
+
+savedPins.forEach((pin, i) => {
+  registerOverlay({
+    id: 'user-pin-' + i,
+    type: FEATURE_TYPES.MARKER,
+    group: markerGroup,
+    data: Object.assign({ label: pin.note || ('Field Pin ' + (i + 1)), pinIndex: i }, pin),
+    build: buildUserPinMarker
+  });
+});
+        renderOverlays();
+        applyPadusMode(state.currentPadusMode);
+      }
+      function applyPadusMode(mode) { state.currentPadusMode = mode; fillGroup.visible = (mode === 'hybrid' || mode === 'fill'); boundaryGroup.visible = (mode === 'hybrid' || mode === 'lines'); setPadusModeActive(mode); }
+      function loadTexture(src) {
+        const cacheKey = src || '';
+        if (layerTextureCache.has(cacheKey)) return Promise.resolve(layerTextureCache.get(cacheKey));
+        return new Promise((resolve, reject) => {
+          textureLoader.load(src + '?ts=' + Date.now(), (tex) => {
+            if (tex.colorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+            tex.wrapS = THREE.ClampToEdgeWrapping; tex.wrapT = THREE.ClampToEdgeWrapping;
+            tex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+            tex.needsUpdate = true;
+            layerTextureCache.set(cacheKey, tex);
+            resolve(tex);
+          }, undefined, reject);
+        });
+      }
+      function textureToImage(tex) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+              img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = tex.image && tex.image.currentSrc ? tex.image.currentSrc : (tex.image && tex.image.src ? tex.image.src : tex.source && tex.source.data && tex.source.data.src ? tex.source.data.src : '');
+        });
+      }
+      async function buildTerrainFirstTexture() {
+        const terrainSrc = payload.layers.terrain || payload.layers[payload.defaultLayer] || payload.layers.hillshade;
+        if (!terrainSrc) throw new Error('No terrain texture available');
+        const [terrainTex, hillTex, reliefTex, slopeTex] = await Promise.all([
+          loadTexture(terrainSrc),
+          payload.layers.hillshade ? loadTexture(payload.layers.hillshade) : Promise.resolve(null),
+          payload.layers.relief ? loadTexture(payload.layers.relief) : Promise.resolve(null),
+          payload.layers.slope ? loadTexture(payload.layers.slope) : Promise.resolve(null),
+        ]);
+        const [terrainImg, hillImg, reliefImg, slopeImg] = await Promise.all([
+          textureToImage(terrainTex),
+          hillTex ? textureToImage(hillTex) : Promise.resolve(null),
+          reliefTex ? textureToImage(reliefTex) : Promise.resolve(null),
+          slopeTex ? textureToImage(slopeTex) : Promise.resolve(null),
+        ]);
+        const width = terrainImg.naturalWidth || terrainImg.width; const height = terrainImg.naturalHeight || terrainImg.height;
+        const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d', { willReadFrequently:true });
+        const sampleCanvas = document.createElement('canvas'); sampleCanvas.width = width; sampleCanvas.height = height; const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently:true });
+        function readPixels(img) {
+          if (!img) return null; sampleCtx.clearRect(0, 0, width, height); sampleCtx.drawImage(img, 0, 0, width, height); return sampleCtx.getImageData(0, 0, width, height).data;
+        }
+        sampleCtx.drawImage(terrainImg, 0, 0, width, height);
+        const imageData = sampleCtx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const hill = readPixels(hillImg); const relief = readPixels(reliefImg); const slope = readPixels(slopeImg);
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i + 1], b = data[i + 2];
+          const lum = (r + g + b) / 3;
+          const hillShade = hill ? (hill[i] + hill[i + 1] + hill[i + 2]) / 765 : lum / 255;
+          const reliefBias = relief ? (((relief[i] + relief[i + 1] + relief[i + 2]) / 3) - 128) / 128 : 0;
+          const slopeNorm = slope ? ((slope[i] + slope[i + 1] + slope[i + 2]) / 765) : 0.35;
+          const vegetation = Math.max(0, Math.min(1, 1 - slopeNorm * 0.78));
+          const hazeLift = 4 + vegetation * 3;
+          const ridgeSignal = Math.max(0, reliefBias);
+          const bowlSignal = Math.max(0, -reliefBias);
+          const coverVariation = Math.sin((i / 4 % width) * 0.065) * 0.5 + Math.cos(Math.floor(i / 4 / width) * 0.082) * 0.5;
+
+          let nr = r, ng = g, nb = b;
+          let coverClass;
+          if (vegetation > 0.69) coverClass = "dense";
+          else if (vegetation > 0.43) coverClass = "moderate";
+          else coverClass = "open";
+
+          if (coverClass === "dense") {
+            nr *= 0.46;
+            ng = ng * 0.92 + 62;
+            nb *= 0.42;
+          } else if (coverClass === "moderate") {
+            nr *= 0.74;
+            ng = ng * 1.10 + 28;
+            nb *= 0.70;
+          } else {
+            const gray = (r + g + b) / 3;
+            nr = gray * 1.16 + 40;
+            ng = gray * 1.00 + 18;
+            nb = gray * 0.80 + 2;
+          }
+
+          const slopeExposure = Math.max(0, slopeNorm - 0.44);
+          nr -= slopeExposure * 24;
+          ng -= slopeExposure * 18;
+          nb -= slopeExposure * 10;
+
+          if (ridgeSignal > 0.10) {
+            nr += 26;
+            ng += 16;
+            nb -= 6;
+          }
+
+          if (bowlSignal > 0.08) {
+            nr -= 18;
+            ng -= 6;
+            nb += 28;
+          }
+
+          const benchGlow = Math.max(0, reliefBias - 0.02) * 28;
+          nr += benchGlow * 0.48;
+          ng += benchGlow * 0.62;
+          nb += benchGlow * 0.18;
+
+          nr += coverVariation * 6;
+          ng += coverVariation * 9;
+          nb += coverVariation * 4;
+
+          const shadeFactor = 0.78 + hillShade * 0.64;
+          nr *= shadeFactor;
+          ng *= shadeFactor;
+          nb *= shadeFactor;
+
+          nr += hazeLift * 0.95;
+          ng += hazeLift;
+          nb += hazeLift * 0.70;
+
+          const localContrast = (hillShade - 0.5) * 38;
+          nr += localContrast * 0.84;
+          ng += localContrast * 0.96;
+          nb += localContrast * 0.44;
+
+          data[i] = clamp(Math.round(nr), 0, 255);
+          data[i + 1] = clamp(Math.round(ng), 0, 255);
+          data[i + 2] = clamp(Math.round(nb), 0, 255);
+        }
+        ctx.putImageData(imageData, 0, 0);
+        const outTex = new THREE.CanvasTexture(canvas);
+        outTex.colorSpace = THREE.SRGBColorSpace;
+        outTex.wrapS = THREE.ClampToEdgeWrapping; outTex.wrapT = THREE.ClampToEdgeWrapping;
+        outTex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+        outTex.needsUpdate = true;
+        layerTextureCache.set('terrain:first', outTex);
+        return outTex;
+      }
+      async function buildCoverTexture() {
+        const cacheKey = 'cover:high-contrast';
+        if (layerTextureCache.has(cacheKey)) return layerTextureCache.get(cacheKey);
+        const terrainSrc = payload.layers.terrain || payload.layers[payload.defaultLayer] || payload.layers.hillshade;
+        if (!terrainSrc) throw new Error('No terrain texture available');
+        const [terrainTex, hillTex, reliefTex, slopeTex] = await Promise.all([
+          loadTexture(terrainSrc),
+          payload.layers.hillshade ? loadTexture(payload.layers.hillshade) : Promise.resolve(null),
+          payload.layers.relief ? loadTexture(payload.layers.relief) : Promise.resolve(null),
+          payload.layers.slope ? loadTexture(payload.layers.slope) : Promise.resolve(null),
+        ]);
+        const [terrainImg, hillImg, reliefImg, slopeImg] = await Promise.all([
+          textureToImage(terrainTex),
+          hillTex ? textureToImage(hillTex) : Promise.resolve(null),
+          reliefTex ? textureToImage(reliefTex) : Promise.resolve(null),
+          slopeTex ? textureToImage(slopeTex) : Promise.resolve(null),
+        ]);
+
+        const width = terrainImg.naturalWidth || terrainImg.width;
+        const height = terrainImg.naturalHeight || terrainImg.height;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d', { willReadFrequently:true });
+        const sampleCanvas = document.createElement('canvas');
+        sampleCanvas.width = width;
+        sampleCanvas.height = height;
+        const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently:true });
+
+        function readPixels(img) {
+          if (!img) return null;
+          sampleCtx.clearRect(0, 0, width, height);
+          sampleCtx.drawImage(img, 0, 0, width, height);
+          return sampleCtx.getImageData(0, 0, width, height).data;
+        }
+
+        sampleCtx.drawImage(terrainImg, 0, 0, width, height);
+        const imageData = sampleCtx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const hill = readPixels(hillImg);
+        const relief = readPixels(reliefImg);
+        const slope = readPixels(slopeImg);
+
+        for (let i = 0; i < data.length; i += 4) {
+          const lum = (data[i] + data[i + 1] + data[i + 2]) / 3;
+          const hillShade = hill ? (hill[i] + hill[i + 1] + hill[i + 2]) / 765 : lum / 255;
+          const reliefBias = relief ? (((relief[i] + relief[i + 1] + relief[i + 2]) / 3) - 128) / 128 : 0;
+          const slopeNorm = slope ? ((slope[i] + slope[i + 1] + slope[i + 2]) / 765) : 0.35;
+          const vegetation = Math.max(0, Math.min(1, 1 - slopeNorm * 0.78));
+          const sheltered = Math.max(0, -reliefBias) * 0.85 + Math.max(0, 0.54 - hillShade) * 0.44;
+          const ridgeSignal = Math.max(0, reliefBias);
+          const bowlSignal = Math.max(0, -reliefBias);
+          const openSignal = Math.max(0, slopeNorm - 0.46) * 0.95 + ridgeSignal * 0.25;
+          const coverStrength = clamp(vegetation * 0.58 + sheltered * 0.82 - openSignal * 0.40, 0, 1);
+          const micro = Math.sin((i / 4 % width) * 0.09) * 0.5 + Math.cos(Math.floor(i / 4 / width) * 0.11) * 0.5;
+
+          let nr, ng, nb;
+          if (coverStrength >= 0.72) {
+            nr = 8;
+            ng = 132 + coverStrength * 98;
+            nb = 18;
+          } else if (coverStrength >= 0.44) {
+            nr = 148;
+            ng = 222 + coverStrength * 14;
+            nb = 32;
+          } else {
+            nr = 232 + openSignal * 18;
+            ng = 184 - openSignal * 6;
+            nb = 74 - openSignal * 14;
+          }
+
+          if (bowlSignal > 0.10) {
+            nr -= 28;
+            ng -= 18;
+            nb += 48;
+          }
+
+          if (ridgeSignal > 0.10) {
+            nr += 34;
+            ng += 18;
+            nb -= 10;
+          }
+
+          nr += micro * 6;
+          ng += micro * 7;
+          nb += micro * 4;
+
+          const shadeFactor = 0.70 + hillShade * 0.72;
+          nr *= shadeFactor;
+          ng *= shadeFactor;
+          nb *= shadeFactor;
+
+          const poster = coverStrength >= 0.72 ? 10 : (coverStrength >= 0.44 ? 8 : 12);
+          nr = Math.round(nr / poster) * poster;
+          ng = Math.round(ng / poster) * poster;
+          nb = Math.round(nb / poster) * poster;
+
+          data[i] = clamp(Math.round(nr), 0, 255);
+          data[i + 1] = clamp(Math.round(ng), 0, 255);
+          data[i + 2] = clamp(Math.round(nb), 0, 255);
+          data[i + 3] = 255;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        const outTex = new THREE.CanvasTexture(canvas);
+        outTex.colorSpace = THREE.SRGBColorSpace;
+        outTex.wrapS = THREE.ClampToEdgeWrapping;
+        outTex.wrapT = THREE.ClampToEdgeWrapping;
+        outTex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+        outTex.needsUpdate = true;
+        layerTextureCache.set(cacheKey, outTex);
+        return outTex;
+      }
+
+      async function applyTexture(key) {
+        const safeKey = key === 'cover' ? 'terrain' : key;
+        const isAnalytical = ['hillshade','relief','slope'].includes(safeKey);
+        try {
+          let tex;
+          if (safeKey === 'terrain') {
+            tex = layerTextureCache.get('terrain:first') || await buildTerrainFirstTexture();
+          } else {
+            const src = payload.layers[safeKey] || payload.layers[payload.defaultLayer] || payload.layers.terrain || payload.layers.hillshade;
+            if (!src) return;
+            tex = await loadTexture(src);
+          }
+
+          material.map = tex;
+          material.map.needsUpdate = true;
+          material.color = new THREE.Color(0xffffff);
+          material.emissive = new THREE.Color(0x000000);
+          material.emissiveIntensity = 0.0;
+          material.roughness = isAnalytical ? 1.0 : 0.98;
+          material.metalness = 0.01;
+          material.normalScale = new THREE.Vector2(1, 1);
+          scene.fog.density = safeKey === 'terrain' ? visualProfile.fogDensity : Math.max(visualProfile.fogDensity, 0.0088);
+          fill.intensity = safeKey === 'terrain' ? visualProfile.fill : 0.26;
+          hemi.intensity = safeKey === 'terrain' ? visualProfile.hemi : 0.66;
+          dir.intensity = safeKey === 'terrain' ? visualProfile.dir : 1.42;
+          rim.intensity = safeKey === 'terrain' ? visualProfile.rim : 0.12;
+          state.currentTexture = safeKey;
+          material.needsUpdate = true;
+          setButtonActive(safeKey);
+          setCoverReadUi(safeKey);
+          updateCoverOverlayVisibility(safeKey);
+        } catch (err) {
+          material.map = null;
+          material.color = new THREE.Color(isAnalytical ? 0x8f9599 : 0x788462);
+          material.needsUpdate = true;
+          state.currentTexture = safeKey;
+          setButtonActive(safeKey);
+          setCoverReadUi(safeKey);
+          updateCoverOverlayVisibility(safeKey);
+        }
+      }
+      function updateCamera() { const phi = THREE.MathUtils.degToRad(clamp(state.tiltDeg,12,42)); const flat = Math.cos(phi)*state.cameraRadius; const y = Math.sin(phi)*state.cameraRadius + Math.max(3.0, target.y+2.8); camera.position.set(target.x + Math.cos(state.rotationY)*flat, y, target.z + Math.sin(state.rotationY)*flat); camera.lookAt(target); }
+      function moveTarget(nx, ny) { target.x = normToWorld(nx, ny, state.widthWorld, state.depthWorld).x; target.z = normToWorld(nx, ny, state.widthWorld, state.depthWorld).z; updateTargetHeight(nx, ny); }
+      let dragging=false,lastX=0,lastY=0; renderer.domElement.addEventListener('pointerdown', (event) => { dragging=true; lastX=event.clientX; lastY=event.clientY; renderer.domElement.setPointerCapture(event.pointerId); }); renderer.domElement.addEventListener('pointermove', (event) => { if(!dragging)return; const dx=event.clientX-lastX, dy=event.clientY-lastY; lastX=event.clientX; lastY=event.clientY; state.rotationY -= dx*0.008; state.tiltDeg = clamp(state.tiltDeg + dy*0.08, 12, 42); tiltSlider.value = String(Math.round(state.tiltDeg)); updateCamera(); }); const endDrag=()=>{dragging=false;}; renderer.domElement.addEventListener('pointerup', endDrag); renderer.domElement.addEventListener('pointercancel', endDrag); renderer.domElement.addEventListener('wheel', (event) => { event.preventDefault(); state.cameraRadius = clamp(state.cameraRadius + event.deltaY*0.01, 10, 58); updateCamera(); }, { passive:false });
+      const initialView = { rotationY: state.rotationY, tiltDeg: state.tiltDeg, cameraRadius: state.cameraRadius, depthValue: Number(depthSlider.value || 100), currentTexture: state.currentTexture, currentPadusMode: state.currentPadusMode, target: target.clone() };
+      function resetView() { clearPinControlMode(); setInvisibleApproachVisible(false); state.rotationY = initialView.rotationY; state.tiltDeg = initialView.tiltDeg; state.cameraRadius = initialView.cameraRadius; tiltSlider.value = String(Math.round(initialView.tiltDeg)); depthSlider.value = String(Math.round(initialView.depthValue)); target.copy(initialView.target.clone()); applyHeights(); rebuildOverlays(); applyTexture(initialView.currentTexture); applyPadusMode(initialView.currentPadusMode); setFocusActive(1); updateSelectedSiteCard(siteByRank(1)); updateCamera(); }
+      function focusSiteByRank(rank) { const site = siteByRank(rank); if (!site) return; const p = sitePoint(site); moveTarget(p.nx, p.ny); state.cameraRadius = Number(site.rank) === 1 ? 16.5 : 18.5; state.tiltDeg = Number(site.rank) === 1 ? 24 : 27; tiltSlider.value = String(Math.round(state.tiltDeg)); setFocusActive(rank); updateSelectedSiteCard(site); updateCamera(); }
+      const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
+
+      function updateCursorTerrainRead(event) {
+        if (!cursorCoords || dragging) return;
+        const rect = renderer.domElement.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const terrainHit = raycaster.intersectObject(terrainMesh, true);
+        if (!terrainHit.length) {
+          cursorCoords.textContent = 'Move over the terrain to read live GPS.';
+          return;
+        }
+        const point = terrainHit[0].point;
+        const nx = clamp((point.x / state.widthWorld) + 0.5, 0, 1);
+        const ny = clamp((point.z / state.depthWorld) + 0.5, 0, 1);
+        const coords = normalizedToLatLon(nx, ny);
+        cursorCoords.innerHTML = 'Lat ' + Number(coords.lat).toFixed(6) + ' · Lon ' + Number(coords.lon).toFixed(6) + ' · Elev ' + Math.round(Number(point.y || 0)) + '<br><span class="micro-copy">nx ' + nx.toFixed(3) + ' · ny ' + ny.toFixed(3) + '</span>';
+      }
+      renderer.domElement.addEventListener('pointermove', updateCursorTerrainRead);
+      renderer.domElement.addEventListener('click', (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const clickTargets = Array.from(siteGroups.values()).concat(userPinGroups).concat(anchorGroups);
+        const intersects = raycaster.intersectObjects(clickTargets, true);
+        if (!intersects.length) return;
+        const owner = intersects[0].object.parent && intersects[0].object.parent.userData ? intersects[0].object.parent : intersects[0].object;
+        if (!owner || !owner.userData) return;
+        if (owner.userData.rank) {
+          updateSelectedSiteCard(owner.userData.site || siteByRank(owner.userData.rank));
+          focusSiteByRank(owner.userData.rank);
+          return;
+        }
+        if (owner.userData.kind === 'baseCamp' || owner.userData.kind === 'accessEntry') {
+          const label = owner.userData.label || owner.userData.kind;
+          updateExecutiveSummaryForAnchor(label, owner.userData, (owner.userData.kind === 'baseCamp' ? 'Reference point for distance and direction.' : 'Preferred start or parking approach.'));
+          const action = window.prompt(label + ' options: type VIEW, MOVE, or GPS', 'VIEW');
+          if (action === null) return;
+          const choice = String(action || '').trim().toUpperCase();
+          if (choice === 'MOVE') {
+            beginPinControlMode(owner.userData.kind === 'baseCamp' ? 'placeBaseCamp' : 'placeAccessEntry', -1, label);
+            return;
+          }
+          if (choice === 'GPS') {
+            promptForAnchor(owner.userData.kind, label);
+            return;
+          }
+          window.alert(label + '\nLat: ' + Number(owner.userData.lat).toFixed(5) + '\nLon: ' + Number(owner.userData.lon).toFixed(5));
+          return;
+        }
+        if (owner.userData.note) {
+          const pins = getStoredUserPins();
+          const pinIndex = Number.isFinite(Number(owner.userData.pinIndex)) ? Number(owner.userData.pinIndex) : pins.findIndex((pin) => {
+            const lat = Number.isFinite(Number(pin.lat)) ? Number(pin.lat) : normalizedToLatLon(pin.nx, pin.ny).lat;
+            const lon = Number.isFinite(Number(pin.lon)) ? Number(pin.lon) : normalizedToLatLon(pin.nx, pin.ny).lon;
+            return Math.abs(lat - Number(owner.userData.lat || 0)) < 0.000001 && Math.abs(lon - Number(owner.userData.lon || 0)) < 0.000001;
+          });
+          const coords = (Number.isFinite(Number(owner.userData.lat)) && Number.isFinite(Number(owner.userData.lon)))
+            ? { lat: Number(owner.userData.lat), lon: Number(owner.userData.lon) }
+            : normalizedToLatLon(owner.userData.nx, owner.userData.ny);
+          updateExecutiveSummaryForAnchor(owner.userData.label || 'Field Pin', coords, owner.userData.note);
+          const action = window.prompt((owner.userData.note || 'Field Pin') + ' options: type VIEW, RENAME, MOVE, or DELETE', 'VIEW');
+          if (action === null) return;
+          const choice = String(action || '').trim().toUpperCase();
+          if (choice === 'RENAME' && pinIndex >= 0) {
+            const nextNote = window.prompt('Rename this field pin', owner.userData.note || 'Field Pin');
+            if (nextNote) {
+              pins[pinIndex] = Object.assign({}, pins[pinIndex], { note: nextNote });
+              saveStoredUserPins(pins);
+              rebuildOverlays();
+            }
+            return;
+          }
+          if (choice === 'MOVE' && pinIndex >= 0) {
+            beginPinControlMode('moveUserPin', pinIndex, owner.userData.note || 'Field Pin');
+            return;
+          }
+          if (choice === 'DELETE' && pinIndex >= 0) {
+            if (window.confirm('Delete ' + (owner.userData.note || 'this field pin') + '?')) {
+              pins.splice(pinIndex, 1);
+              saveStoredUserPins(pins);
+              rebuildOverlays();
+              updateExecutiveSummaryForSite(getSelectedSiteForExport() || siteByRank(1));
+            }
+            return;
+          }
+          window.alert((owner.userData.note || 'Field Pin') + '\nLat: ' + Number(coords.lat).toFixed(5) + '\nLon: ' + Number(coords.lon).toFixed(5));
+        }
+      });
+
+      // CLICK TERRAIN TO PLACE OR MOVE ANCHORS / PINS
+      renderer.domElement.addEventListener('click', (event) => {
+        const awaitingPlacement = !!state.pinControlMode;
+        if (awaitingPlacement && pinControlJustActivated) {
+          pinControlJustActivated = false;
+          return;
+        }
+        if (!awaitingPlacement && !event.shiftKey) return;
+        event.preventDefault();
+
+        const rect = renderer.domElement.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(pointer, camera);
+
+        const terrainHit = raycaster.intersectObject(terrainMesh, true);
+        if (!terrainHit.length) return;
+
+        const point = terrainHit[0].point;
+        const nx = clamp((point.x / state.widthWorld) + 0.5, 0, 1);
+        const ny = clamp((point.z / state.depthWorld) + 0.5, 0, 1);
+        const coords = normalizedToLatLon(nx, ny);
+
+        if (state.pinControlMode === 'placeBaseCamp') {
+          saveAnchorPoint('baseCamp', { lat: coords.lat, lon: coords.lon, label: 'Base Camp' });
+          updateAnchorSummaries();
+          rebuildOverlays();
+          if (state.invisibleApproachVisible) rebuildInvisibleApproachOverlay(currentApproachSite());
+          updateExecutiveSummaryForAnchor('Base Camp', { lat: coords.lat, lon: coords.lon }, 'Reference point for distance and direction.');
+          clearPinControlMode();
+          return;
+        }
+
+        if (state.pinControlMode === 'placeAccessEntry') {
+          saveAnchorPoint('accessEntry', { lat: coords.lat, lon: coords.lon, label: 'Access Entry' });
+          updateAnchorSummaries();
+          rebuildOverlays();
+          if (state.invisibleApproachVisible) rebuildInvisibleApproachOverlay(currentApproachSite());
+          updateExecutiveSummaryForAnchor('Access Entry', { lat: coords.lat, lon: coords.lon }, 'Preferred start or parking approach.');
+          clearPinControlMode();
+          return;
+        }
+
+        if (state.pinControlMode === 'moveUserPin') {
+          const pins = getStoredUserPins();
+          if (state.pinControlIndex >= 0 && state.pinControlIndex < pins.length) {
+            pins[state.pinControlIndex] = Object.assign({}, pins[state.pinControlIndex], { nx, ny, lat: coords.lat, lon: coords.lon });
+            saveStoredUserPins(pins);
+            rebuildOverlays();
+          }
+          clearPinControlMode();
+          return;
+        }
+
+        const note = window.prompt('Name this field pin', 'Trail Cam / Scrape / Rub Line');
+        if (!note) return;
+
+        const pins = getStoredUserPins();
+        pins.push({ nx, ny, note, lat: coords.lat, lon: coords.lon });
+        saveStoredUserPins(pins);
+        rebuildOverlays();
+      });
+      if (resetViewBtn) resetViewBtn.addEventListener('click', resetView);
+      if (invisibleApproachBtn) invisibleApproachBtn.addEventListener('click', () => setInvisibleApproachVisible(!state.invisibleApproachVisible));
+      if (saveViewHelpBtn) saveViewHelpBtn.addEventListener('click', showSaveViewHelp);
+if (downloadSummaryBtn) downloadSummaryBtn.addEventListener('click', downloadSummary);
+
+const viewerSpecies = document.getElementById('viewer_species');
+if (viewerSpecies) {
+  viewerSpecies.addEventListener('change', () => {
+    const current = getSelectedSiteForExport() || siteByRank(1);
+    if (current) updateExecutiveSummaryForSite(current);
+    if (state.invisibleApproachVisible) rebuildInvisibleApproachOverlay(currentApproachSite());
+  });
+}
+      if (setBaseCampBtn) setBaseCampBtn.addEventListener('click', () => { clearPinControlMode(); promptForAnchor('baseCamp', 'Base Camp'); });
+      if (setAccessEntryBtn) setAccessEntryBtn.addEventListener('click', () => { clearPinControlMode(); promptForAnchor('accessEntry', 'Access Entry'); });
+      if (placeBaseCampBtn) placeBaseCampBtn.addEventListener('click', () => beginPinControlMode('placeBaseCamp', -1, 'Base Camp'));
+      if (placeAccessEntryBtn) placeAccessEntryBtn.addEventListener('click', () => beginPinControlMode('placeAccessEntry', -1, 'Access Entry'));
+      if (copyCoordsBtn) copyCoordsBtn.addEventListener('click', copySelectedCoords);
+      focusButtons.forEach(btn => btn.addEventListener('click', () => focusSiteByRank(btn.dataset.focusRank)));
+      rowButtons.forEach(btn => btn.addEventListener('click', () => focusSiteByRank(btn.dataset.rank)));
+      layerButtons.forEach(btn => btn.addEventListener('click', () => applyTexture(btn.dataset.layer)));
+      padusButtons.forEach(btn => btn.addEventListener('click', () => applyPadusMode(btn.dataset.padusMode)));
+      tiltSlider.addEventListener('input', () => { state.tiltDeg = Number(tiltSlider.value || 28); updateCamera(); });
+      depthSlider.addEventListener('input', () => { applyHeights(); rebuildOverlays(); if (state.invisibleApproachVisible) rebuildInvisibleApproachOverlay(currentApproachSite()); updateCamera(); });
+      window.addEventListener('resize', () => { const w=viewer.clientWidth||1200, h=viewer.clientHeight||720; camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h); });
+      async function loadLiveWind() { const primarySite = siteByRank(1) || (payload.sites || [])[0]; const center = payload.bbox_center || {}; const lat = primarySite ? Number(primarySite.lat) : Number(center.lat || 0); const lon = primarySite ? Number(primarySite.lon) : Number(center.lon || 0); if (!lat && !lon) return; try { const resp = await fetch(window.location.origin + '/live-wind?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon), { cache: 'no-store' }); const read = await resp.json(); if (read && read.ok) { liveWindState = read; const summary = read.summary || 'Live wind loaded.'; const meta = (read.observed_at_label ? 'Updated ' + read.observed_at_label + '. ' : '') + (read.note || ''); if (liveWindSummary) liveWindSummary.textContent = summary; if (liveWindMeta) liveWindMeta.textContent = meta; if (liveWindHudSummary) liveWindHudSummary.textContent = summary; if (liveWindHudMeta) liveWindHudMeta.textContent = meta; if (operatorWindValue) operatorWindValue.textContent = (read.direction_label || 'Wind') + (read.speed_mph ? ' · ' + Math.round(Number(read.speed_mph)) + ' mph' : ''); drawWindOverlay(read); if (state.invisibleApproachVisible) rebuildInvisibleApproachOverlay(currentApproachSite()); const current = siteByRank(1); if (current) updateExecutiveSummaryForSite(current); } else { throw new Error((read && read.note) || 'Live wind unavailable'); } } catch (err) { const fallback = 'Live wind unavailable. Manual wind stays active.'; if (liveWindSummary) liveWindSummary.textContent = fallback; if (liveWindMeta) liveWindMeta.textContent = String(err && err.message ? err.message : err); if (liveWindHudSummary) liveWindHudSummary.textContent = fallback; if (liveWindHudMeta) liveWindHudMeta.textContent = 'Using manual or preferred wind guidance only for this run.'; } }
+      stripCoverLayerButton(); buildCoverOverlay(); updateAnchorSummaries(); updatePinControlStatus(); applyTexture(state.currentTexture); rebuildOverlays(); applyPadusMode(payload.defaultPadusMode || state.currentPadusMode); setFocusActive(1); updateSelectedSiteCard(siteByRank(1)); updateCamera(); loadLiveWind();
+      function animate() { renderer.render(scene, camera); requestAnimationFrame(animate); }
+      animate();
+    } catch (err) { showError(err && err.message ? err.message : err); }
+  }).catch(err => showError(err && err.message ? err.message : err));
+})();
+</script>
+</body>
+</html>
