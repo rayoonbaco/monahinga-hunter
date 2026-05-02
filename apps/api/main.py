@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 import json
 import math
 import os
 import shutil
 import tempfile
+import threading
+import time
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
@@ -33,6 +36,64 @@ DEFAULT_BBOX = BBox(
     max_lon=-104.357929,
     max_lat=44.510845,
 )
+
+
+def _bbox_cache_key(bbox: BBox) -> str:
+    payload = [round(float(v), 6) for v in bbox.as_list()]
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()[:24]
+    return f"bbox_{digest}"
+
+
+def _preflight_cache_paths(bbox: BBox) -> tuple[Path, Path]:
+    cache_dir = RUNS_DIR / "_padus_preflight_cache" / _bbox_cache_key(bbox)
+    return cache_dir / "legal_surface.geojson", cache_dir / "legal_surface_summary.json"
+
+
+def _prewarm_default_bbox() -> None:
+    """Build default terrain and PAD-US cache in the background after startup.
+
+    This makes the default BBox much faster after Render boots. It does not
+    increment RUN_COUNT, does not touch payment limits, and does not change the
+    public launch flow. If prewarm fails, the app still starts normally.
+    """
+    try:
+        if os.getenv("MONAHINGA_DISABLE_PREWARM", "0").strip().lower() in {"1", "true", "yes", "on"}:
+            print("[prewarm] skipped because MONAHINGA_DISABLE_PREWARM is enabled")
+            return
+
+        time.sleep(2.0)
+        prewarm_root = RUNS_DIR / "_prewarm" / "default_bbox"
+
+        if prewarm_root.exists():
+            shutil.rmtree(prewarm_root, ignore_errors=True)
+
+        print("[prewarm] starting default BBox PAD-US + terrain cache build")
+
+        # Fill the PAD-US preflight cache first. The visible run still enforces
+        # the same huntability rule, but it can reuse this result instead of
+        # making the user wait for the first PAD-US lookup.
+        _enforce_padus_huntability_preflight(DEFAULT_BBOX)
+
+        # Fill DEM, legal surface, derivative, vegetation, decision, and command
+        # surface caches through the existing orchestrator path.
+        build_terrain_truth_run(
+            DEFAULT_BBOX,
+            prewarm_root,
+            width=512,
+            height=512,
+            operator_context={
+                "wind_direction": "",
+                "notes": "Startup prewarm cache build.",
+                "mode": "hunter",
+                "selected_species": "default",
+                "target_species": "default",
+            },
+        )
+
+        print("[prewarm] default BBox cache build complete")
+
+    except Exception as exc:
+        print(f"[prewarm] default BBox cache build failed: {type(exc).__name__}: {exc}")
 
 
 def load_env_file() -> None:
@@ -187,58 +248,83 @@ def _enforce_padus_huntability_preflight(bbox: BBox) -> None:
 
     This prevents city/non-huntable boxes from producing a polished but misleading
     3D hunting scene. Frontend catches this 400 and shows the NOT HUNTABLE LAND modal.
+
+    Speed note:
+    - Results are cached by exact BBox.
+    - Startup prewarm fills the default BBox cache.
+    - The same huntability test still runs on cached features.
     """
-    preflight_root = RUNS_DIR / "_padus_preflight"
-    preflight_root.mkdir(parents=True, exist_ok=True)
+    cached_geojson_path, cached_summary_path = _preflight_cache_paths(bbox)
 
-    with tempfile.TemporaryDirectory(prefix="padus_", dir=str(preflight_root)) as tmp:
-        tmp_root = Path(tmp)
-        geojson_path = tmp_root / "legal_surface.geojson"
-        summary_path = tmp_root / "legal_surface_summary.json"
-        legal = PADUSLegalSurfaceClient().fetch_legal_surface(bbox, geojson_path, summary_path)
+    if cached_geojson_path.exists() and cached_summary_path.exists():
+        geojson_path = cached_geojson_path
+        summary_path = cached_summary_path
+        legal_feature_count = None
+    else:
+        preflight_root = RUNS_DIR / "_padus_preflight"
+        preflight_root.mkdir(parents=True, exist_ok=True)
 
-        try:
-            summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
-        except Exception:
-            summary = {}
+        with tempfile.TemporaryDirectory(prefix="padus_", dir=str(preflight_root)) as tmp:
+            tmp_root = Path(tmp)
+            geojson_path = tmp_root / "legal_surface.geojson"
+            summary_path = tmp_root / "legal_surface_summary.json"
+            legal = PADUSLegalSurfaceClient().fetch_legal_surface(bbox, geojson_path, summary_path)
+            legal_feature_count = int(getattr(legal, "legal_feature_count", 0) or 0)
 
-        if summary.get("configured") is False:
-            raise HuntabilityGuardrailError(
-                "PAD-US huntability check is not configured, so Monahinga cannot safely verify this BBox as huntable land. "
-                "Please select another BBox over real natural/legal hunting ground after PAD-US is configured."
-            )
+            cached_geojson_path.parent.mkdir(parents=True, exist_ok=True)
+            if geojson_path.exists():
+                shutil.copy2(geojson_path, cached_geojson_path)
+            if summary_path.exists():
+                shutil.copy2(summary_path, cached_summary_path)
 
-        if summary.get("skipped"):
-            raise HuntabilityGuardrailError(
-                "PAD-US huntability check does not cover this BBox. Please select another BBox over real natural/legal hunting ground."
-            )
+            geojson_path = cached_geojson_path
+            summary_path = cached_summary_path
 
-        if int(getattr(legal, "legal_feature_count", 0) or 0) <= 0:
-            raise HuntabilityGuardrailError(
-                "PAD-US found no verified hunting-eligible legal land inside this BBox. "
-                "Please select another BBox over real natural/legal hunting ground."
-            )
+    try:
+        summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
+    except Exception:
+        summary = {}
 
-        try:
-            feature_collection = json.loads(geojson_path.read_text(encoding="utf-8"))
-        except Exception as exc:
-            raise HuntabilityGuardrailError(
-                "PAD-US huntability check could not read the legal surface safely. "
-                "Please select another BBox over real natural/legal hunting ground."
-            ) from exc
+    if summary.get("configured") is False:
+        raise HuntabilityGuardrailError(
+            "PAD-US huntability check is not configured, so Monahinga cannot safely verify this BBox as huntable land. "
+            "Please select another BBox over real natural/legal hunting ground after PAD-US is configured."
+        )
 
-        eligible = 0
-        for feat in feature_collection.get("features", []):
-            props = feat.get("properties") or {}
-            if _padus_feature_is_hunting_eligible(props):
-                eligible += 1
+    if summary.get("skipped"):
+        raise HuntabilityGuardrailError(
+            "PAD-US huntability check does not cover this BBox. Please select another BBox over real natural/legal hunting ground."
+        )
 
-        if eligible <= 0:
-            raise HuntabilityGuardrailError(
-                "PAD-US did not identify hunting-eligible public land inside this BBox. "
-                "City parks, suburbs, parking lots, and general public/open land are not enough for a Monahinga hunting run. "
-                "Please select another BBox over real natural/legal hunting ground."
-            )
+    if legal_feature_count is None:
+        legal_feature_count = int(summary.get("legal_feature_count") or 0)
+
+    if int(legal_feature_count or 0) <= 0:
+        raise HuntabilityGuardrailError(
+            "PAD-US found no verified hunting-eligible legal land inside this BBox. "
+            "Please select another BBox over real natural/legal hunting ground."
+        )
+
+    try:
+        feature_collection = json.loads(geojson_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HuntabilityGuardrailError(
+            "PAD-US huntability check could not read the legal surface safely. "
+            "Please select another BBox over real natural/legal hunting ground."
+        ) from exc
+
+    eligible = 0
+    for feat in feature_collection.get("features", []):
+        props = feat.get("properties") or {}
+        if _padus_feature_is_hunting_eligible(props):
+            eligible += 1
+
+    if eligible <= 0:
+        raise HuntabilityGuardrailError(
+            "PAD-US did not identify hunting-eligible public land inside this BBox. "
+            "City parks, suburbs, parking lots, and general public/open land are not enough for a Monahinga hunting run. "
+            "Please select another BBox over real natural/legal hunting ground."
+        )
 
 
 def _read_json(path: Path) -> dict:
@@ -523,6 +609,12 @@ def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = No
         "runs_remaining": MAX_RUNS - RUN_COUNT,
         "terrain_validation": terrain_validation,
     }
+
+
+@app.on_event("startup")
+def startup_event() -> None:
+    thread = threading.Thread(target=_prewarm_default_bbox, daemon=True)
+    thread.start()
 
 
 @app.get("/", response_class=HTMLResponse)
