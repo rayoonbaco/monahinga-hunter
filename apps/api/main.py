@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-import hashlib
 import json
 import math
 import os
 import shutil
-import threading
-import time
+import tempfile
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
@@ -19,6 +17,7 @@ from engine.launch_surface import render_home_page
 from engine.launch_surface.instructions_page import render_instructions_page
 from engine.terrain_truth.bbox import BBox
 from engine.terrain_truth.orchestrator import build_terrain_truth_run
+from engine.terrain_truth.legal.padus_fetch import PADUSLegalSurfaceClient
 from engine.wildlife_atmosphere import build_wildlife_atmosphere
 from engine.live.wind import OpenMeteoWindClient, format_observed_at, wind_arrow_heading_deg
 
@@ -29,10 +28,10 @@ MAX_RUNS = 6  # 1 free + 5 paid
 
 
 DEFAULT_BBOX = BBox(
-    min_lon=-78.089916,
-    min_lat=41.884358,
-    max_lon=-78.058737,
-    max_lat=41.907102,
+    min_lon=-104.40645,
+    min_lat=44.495664,
+    max_lon=-104.357929,
+    max_lat=44.510845,
 )
 
 
@@ -74,6 +73,172 @@ class RunRequest(BaseModel):
 
 class TerrainValidationError(RuntimeError):
     """Raised when generated terrain files exist but are not physically usable."""
+
+
+class HuntabilityGuardrailError(ValueError):
+    """Raised when the selected box is obviously urban or not suitable for hunting review."""
+
+
+MAJOR_URBAN_GUARDRAILS = [
+    ("Cleveland, OH", 41.4993, -81.6944, 14.0),
+    ("Pittsburgh, PA", 40.4406, -79.9959, 14.0),
+    ("Philadelphia, PA", 39.9526, -75.1652, 18.0),
+    ("Erie, PA", 42.1292, -80.0851, 10.0),
+    ("Harrisburg, PA", 40.2732, -76.8867, 9.0),
+    ("Buffalo, NY", 42.8864, -78.8784, 14.0),
+    ("Columbus, OH", 39.9612, -82.9988, 16.0),
+    ("Cincinnati, OH", 39.1031, -84.5120, 14.0),
+    ("Detroit, MI", 42.3314, -83.0458, 18.0),
+    ("New York City, NY", 40.7128, -74.0060, 25.0),
+]
+
+
+def _distance_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    radius = 3958.8
+    p1 = math.radians(lat1)
+    p2 = math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lon2 - lon1)
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * radius * math.asin(min(1, math.sqrt(a)))
+
+
+def _enforce_huntability_guardrail(bbox: BBox) -> None:
+    """Block obvious city/urban boxes before the app creates a fake hunting read.
+
+    This is a conservative emergency trust guardrail. It catches major-city boxes
+    that should never be labeled huntable. Natural/legal hunting land still runs.
+    """
+    center_lat = (float(bbox.min_lat) + float(bbox.max_lat)) / 2
+    center_lon = (float(bbox.min_lon) + float(bbox.max_lon)) / 2
+
+    for city, city_lat, city_lon, radius_miles in MAJOR_URBAN_GUARDRAILS:
+        if _distance_miles(center_lat, center_lon, city_lat, city_lon) <= radius_miles:
+            raise HuntabilityGuardrailError(
+                f"Selected box appears to be inside or too close to the {city} urban area. "
+                "Monahinga is for natural/legal hunting terrain, not downtown, suburbs, parking lots, or city blocks. "
+                "Move the box onto actual public/legal hunting ground and verify access before using any recommendation."
+            )
+
+
+
+HUNTING_ELIGIBLE_PADUS_TOKENS = [
+    "state game land",
+    "game land",
+    "wildlife management",
+    "wildlife area",
+    "wildlife refuge",
+    "fish and wildlife",
+    "national forest",
+    "forest service",
+    "blm",
+    "bureau of land management",
+    "state forest",
+    "hunt",
+    "hunting",
+]
+
+NON_HUNTABLE_PADUS_TOKENS = [
+    "city park",
+    "county park",
+    "municipal park",
+    "urban park",
+    "neighborhood park",
+    "school",
+    "cemetery",
+    "parking",
+    "golf",
+    "zoo",
+    "museum",
+    "downtown",
+    "recreation center",
+    "playground",
+]
+
+
+def _padus_props_text(props: dict) -> str:
+    values = []
+    for key, value in props.items():
+        if isinstance(value, (str, int, float)) and value is not None:
+            values.append(str(value))
+    return " ".join(values).lower()
+
+
+def _padus_feature_is_hunting_eligible(props: dict) -> bool:
+    """Emergency trust rule: public/open is not enough for a huntable 3D run.
+
+    PAD-US can include city parks and other public protected lands. For Monahinga,
+    the run should continue only when the PAD-US feature looks like hunting-eligible
+    public land, such as BLM, National Forest, State Forest, State Game Land, or
+    wildlife-management land. Anything merely public/park-like stays blocked.
+    """
+    cls = str(props.get("monahinga_legal_class") or "").strip().lower()
+    if cls != "legal":
+        return False
+
+    text = _padus_props_text(props)
+    if any(token in text for token in NON_HUNTABLE_PADUS_TOKENS):
+        return False
+    return any(token in text for token in HUNTING_ELIGIBLE_PADUS_TOKENS)
+
+
+def _enforce_padus_huntability_preflight(bbox: BBox) -> None:
+    """Run PAD-US before expensive terrain generation and fail closed.
+
+    This prevents city/non-huntable boxes from producing a polished but misleading
+    3D hunting scene. Frontend catches this 400 and shows the NOT HUNTABLE LAND modal.
+    """
+    preflight_root = RUNS_DIR / "_padus_preflight"
+    preflight_root.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.TemporaryDirectory(prefix="padus_", dir=str(preflight_root)) as tmp:
+        tmp_root = Path(tmp)
+        geojson_path = tmp_root / "legal_surface.geojson"
+        summary_path = tmp_root / "legal_surface_summary.json"
+        legal = PADUSLegalSurfaceClient().fetch_legal_surface(bbox, geojson_path, summary_path)
+
+        try:
+            summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
+        except Exception:
+            summary = {}
+
+        if summary.get("configured") is False:
+            raise HuntabilityGuardrailError(
+                "PAD-US huntability check is not configured, so Monahinga cannot safely verify this BBox as huntable land. "
+                "Please select another BBox over real natural/legal hunting ground after PAD-US is configured."
+            )
+
+        if summary.get("skipped"):
+            raise HuntabilityGuardrailError(
+                "PAD-US huntability check does not cover this BBox. Please select another BBox over real natural/legal hunting ground."
+            )
+
+        if int(getattr(legal, "legal_feature_count", 0) or 0) <= 0:
+            raise HuntabilityGuardrailError(
+                "PAD-US found no verified hunting-eligible legal land inside this BBox. "
+                "Please select another BBox over real natural/legal hunting ground."
+            )
+
+        try:
+            feature_collection = json.loads(geojson_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            raise HuntabilityGuardrailError(
+                "PAD-US huntability check could not read the legal surface safely. "
+                "Please select another BBox over real natural/legal hunting ground."
+            ) from exc
+
+        eligible = 0
+        for feat in feature_collection.get("features", []):
+            props = feat.get("properties") or {}
+            if _padus_feature_is_hunting_eligible(props):
+                eligible += 1
+
+        if eligible <= 0:
+            raise HuntabilityGuardrailError(
+                "PAD-US did not identify hunting-eligible public land inside this BBox. "
+                "City parks, suburbs, parking lots, and general public/open land are not enough for a Monahinga hunting run. "
+                "Please select another BBox over real natural/legal hunting ground."
+            )
 
 
 def _read_json(path: Path) -> dict:
@@ -254,85 +419,6 @@ def _quarantine_bad_run(run_root: Path, reason: str) -> None:
         pass
 
 
-def _cache_key_for_run(
-    *,
-    bbox: BBox,
-    width: int,
-    height: int,
-    operator_context: dict,
-) -> str:
-    """Create a stable cache key for repeat public runs.
-
-    Same box + same species + same wind + same grid can reuse a previously
-    validated command surface instead of rebuilding terrain from scratch.
-    """
-    species = str(
-        operator_context.get("selected_species")
-        or operator_context.get("target_species")
-        or "default"
-    ).strip().lower()
-    wind = str(operator_context.get("wind_direction") or "").strip().upper()
-
-    raw = "|".join([
-        f"{float(bbox.min_lon):.5f}",
-        f"{float(bbox.min_lat):.5f}",
-        f"{float(bbox.max_lon):.5f}",
-        f"{float(bbox.max_lat):.5f}",
-        str(int(width)),
-        str(int(height)),
-        species,
-        wind,
-    ])
-    digest = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:16]
-    return f"cache_{digest}"
-
-
-def _cache_root_for_key(cache_key: str) -> Path:
-    return RUNS_DIR / "_smart_cache" / cache_key
-
-
-def _try_cached_run(
-    *,
-    cache_key: str,
-    bbox: BBox,
-) -> dict | None:
-    """Return a cached successful run if it still validates.
-
-    Cache is intentionally conservative: if anything smells wrong, we ignore it
-    and rebuild normally. Fake terrain success is still not allowed.
-    """
-    cache_root = _cache_root_for_key(cache_key)
-    command_surface = cache_root / "command_surface" / "index.html"
-    if not cache_root.exists() or not command_surface.exists():
-        return None
-
-    try:
-        validation = _validate_terrain_run(cache_root, bbox)
-    except Exception:
-        return None
-
-    validation["cache_hit"] = True
-    return {
-        "run_id": cache_key,
-        "run_root": cache_root,
-        "terrain_validation": validation,
-        "command_surface_path": "command_surface/index.html",
-    }
-
-
-def _save_successful_run_to_cache(*, run_root: Path, cache_key: str) -> Path | None:
-    """Copy a successful validated run into smart cache for instant reuse."""
-    cache_root = _cache_root_for_key(cache_key)
-    try:
-        cache_root.parent.mkdir(parents=True, exist_ok=True)
-        if cache_root.exists():
-            shutil.rmtree(cache_root, ignore_errors=True)
-        shutil.copytree(run_root, cache_root)
-        return cache_root
-    except Exception:
-        return None
-
-
 def _build_and_validate_once(
     *,
     bbox: BBox,
@@ -352,19 +438,6 @@ def _build_and_validate_once(
     return contract, terrain_validation
 
 
-def _safe_run_dimensions(width: int, height: int) -> tuple[int, int]:
-    """Keep public web runs responsive while preserving terrain truth.
-
-    Local testing can still request larger values, but public launch flow should
-    not punish users with slow first impressions. Override with
-    MONAHINGA_MAX_RENDER_GRID if needed.
-    """
-    max_grid = int(os.getenv("MONAHINGA_MAX_RENDER_GRID", "384"))
-    safe_width = max(256, min(int(width or 512), max_grid))
-    safe_height = max(256, min(int(height or 512), max_grid))
-    return safe_width, safe_height
-
-
 def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = None) -> dict:
     global RUN_COUNT
 
@@ -372,28 +445,9 @@ def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = No
         return {"redirect": "/checkout"}
 
     bbox.validate_us_hunting_box()
-    width, height = _safe_run_dimensions(width, height)
+    _enforce_huntability_guardrail(bbox)
+    _enforce_padus_huntability_preflight(bbox)
     operator_context = dict(operator_context or {})
-
-    cache_key = _cache_key_for_run(
-        bbox=bbox,
-        width=width,
-        height=height,
-        operator_context=operator_context,
-    )
-    cached = _try_cached_run(cache_key=cache_key, bbox=bbox)
-    if cached:
-        RUN_COUNT += 1
-        return {
-            "ok": True,
-            "run_id": cached["run_id"],
-            "run_folder": str(cached["run_root"]),
-            "decision_contract": f"/runs/_smart_cache/{cache_key}/terrain_truth/decision/decision_contract.json",
-            "command_surface_url": f"/runs/_smart_cache/{cache_key}/{cached['command_surface_path']}",
-            "runs_remaining": MAX_RUNS - RUN_COUNT,
-            "terrain_validation": cached["terrain_validation"],
-            "cache_hit": True,
-        }
 
     first_run_id = f"run_{uuid4().hex[:10]}"
     first_run_root = RUNS_DIR / first_run_id
@@ -460,11 +514,6 @@ def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = No
     if retry_notes:
         terrain_validation["retry_notes"] = retry_notes
 
-    cached_copy = _save_successful_run_to_cache(run_root=run_root, cache_key=cache_key)
-    if cached_copy is not None:
-        terrain_validation["cache_saved"] = True
-        terrain_validation["cache_key"] = cache_key
-
     return {
         "ok": True,
         "run_id": run_id,
@@ -473,62 +522,7 @@ def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = No
         "command_surface_url": f"/runs/{run_id}/{contract.command_surface.path}",
         "runs_remaining": MAX_RUNS - RUN_COUNT,
         "terrain_validation": terrain_validation,
-        "cache_hit": False,
     }
-
-
-def _prewarm_default_cache() -> None:
-    """Warm the terrain stack once after server startup.
-
-    This is intentionally best-effort. If it fails, users can still run normally.
-    It does not count against the user run limit.
-    """
-    try:
-        if str(os.getenv("MONAHINGA_PREWARM_CACHE", "1")).strip().lower() in {"0", "false", "no", "off"}:
-            return
-
-        # Let the server finish binding before we start heavy work.
-        time.sleep(float(os.getenv("MONAHINGA_PREWARM_DELAY_SECONDS", "2.0")))
-
-        width, height = _safe_run_dimensions(384, 384)
-        operator_context = {
-            "wind_direction": "",
-            "notes": "startup prewarm cache",
-            "mode": "hunter",
-            "selected_species": "whitetail",
-            "target_species": "whitetail",
-        }
-        cache_key = _cache_key_for_run(
-            bbox=DEFAULT_BBOX,
-            width=width,
-            height=height,
-            operator_context=operator_context,
-        )
-        if _try_cached_run(cache_key=cache_key, bbox=DEFAULT_BBOX):
-            return
-
-        prewarm_root = RUNS_DIR / "_prewarm" / f"prewarm_{uuid4().hex[:8]}"
-        contract, terrain_validation = _build_and_validate_once(
-            bbox=DEFAULT_BBOX,
-            run_root=prewarm_root,
-            width=width,
-            height=height,
-            operator_context=operator_context,
-        )
-        cached_copy = _save_successful_run_to_cache(run_root=prewarm_root, cache_key=cache_key)
-        if cached_copy is not None:
-            terrain_validation["prewarm_cache_saved"] = True
-
-    except Exception:
-        # Never let prewarm kill production startup.
-        return
-
-
-@app.on_event("startup")
-def startup_prewarm_cache() -> None:
-    """Start cache prewarm in a background thread so Render becomes responsive first."""
-    thread = threading.Thread(target=_prewarm_default_cache, daemon=True)
-    thread.start()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -626,6 +620,8 @@ def run_terrain_truth(req: RunRequest):
 
     except HTTPException:
         raise
+    except HuntabilityGuardrailError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:

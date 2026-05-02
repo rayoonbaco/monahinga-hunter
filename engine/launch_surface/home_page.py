@@ -243,6 +243,58 @@ pre {
   background:rgba(131,201,255,.08);
   color:#d5efff;
 }
+/* Pass 24B: safe not-huntable overlay */
+.not-huntable-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0,0,0,.72);
+}
+.not-huntable-overlay.visible {
+  display: flex;
+}
+.not-huntable-box {
+  width: min(640px, 94vw);
+  border-radius: 24px;
+  border: 3px solid rgba(255,70,70,.95);
+  background: linear-gradient(180deg, rgba(45,5,8,.98), rgba(8,10,14,.98));
+  box-shadow: 0 30px 120px rgba(0,0,0,.8);
+  padding: 30px 28px 26px;
+  text-align: center;
+}
+.not-huntable-box h2 {
+  margin: 0 0 14px;
+  color: #ff4b4b;
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.not-huntable-box p {
+  margin: 0 auto 14px;
+  max-width: 540px;
+  color: #ffe0e0;
+  font-size: 19px;
+  line-height: 1.38;
+}
+.not-huntable-box .small-copy {
+  color: #d0aaaa;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.not-huntable-box button {
+  margin-top: 20px;
+  background: #ff4b4b;
+  color: white;
+  font-size: 17px;
+  padding: 14px 22px;
+  border-radius: 16px;
+}
+
 small { color:#8ea0ac; }
 
 .hero-band{
@@ -402,6 +454,14 @@ small { color:#8ea0ac; }
 </style>
 </head>
 <body>
+<div id="not_huntable_overlay" class="not-huntable-overlay" role="alertdialog" aria-modal="true" aria-labelledby="not_huntable_title">
+  <div class="not-huntable-box">
+    <h2 id="not_huntable_title">NOT HUNTABLE LAND</h2>
+    <p>Please select another BBox over real natural/legal hunting ground.</p>
+    <div class="small-copy">Monahinga blocks city blocks, suburbs, parking lots, roads, and non-hunting land so it does not generate a fake terrain read.</div>
+    <button type="button" onclick="hideNotHuntableOverlay()">Return to BBox</button>
+  </div>
+</div>
 <div class="shell theme-default" id="launch_shell">
   <div class="header-row">
     <div class="kicker">Monahinga™ · AI-powered terrain intelligence</div>
@@ -639,6 +699,20 @@ function setStatus(message) {
   document.getElementById('status').textContent = message;
 }
 
+function showNotHuntableOverlay() {
+  const overlay = document.getElementById('not_huntable_overlay');
+  if (overlay) overlay.classList.add('visible');
+}
+
+function hideNotHuntableOverlay() {
+  const overlay = document.getElementById('not_huntable_overlay');
+  if (overlay) overlay.classList.remove('visible');
+  const mapBox = document.getElementById('bbox-map');
+  if (mapBox && mapBox.scrollIntoView) {
+    mapBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
 function hasUsedFreeTerrainView() {
   return window.localStorage && localStorage.getItem('monahinga_free_view_used') === 'yes';
 }
@@ -811,7 +885,28 @@ function applyPastedBBox() {
     applyRegionIdentityFromCurrent();
     setStatus('Pasted bbox applied. The map rectangle and run fields now match those exact coordinates.');
   } catch (err) {
-    setStatus('FAILED\n\n' + String(err));
+    const message = String(err && err.message ? err.message : err);
+    const lower = message.toLowerCase();
+    const blockedLand =
+      lower.includes('urban') ||
+      lower.includes('huntable') ||
+      lower.includes('natural/legal') ||
+      lower.includes('city') ||
+      lower.includes('suburb') ||
+      lower.includes('parking') ||
+      lower.includes('400') ||
+      lower.includes('bad request');
+
+    if (blockedLand) {
+      showNotHuntableOverlay();
+      setStatus(
+        'NOT HUNTABLE LAND\n\n' +
+        'Please select another BBox over real natural/legal hunting ground.\n\n' +
+        message
+      );
+    } else {
+      setStatus('FAILED\n\n' + message);
+    }
   }
 }
 
@@ -927,7 +1022,7 @@ function syncRectangleFromInputs(fit=false) {
 
 function goDefaultView() {
   map.fitBounds(defaultBounds, { padding:[20,20] });
-  setStatus('Returned to the Monahinga™ reference area inside the lower 48.');
+  setStatus('Returned to the public Monahinga™ demo box inside the lower 48.');
 }
 
 function applyDefault() {
@@ -938,7 +1033,7 @@ function applyDefault() {
   drawRectangleFromBounds(defaultBounds, true);
   updateBBoxTextFromCurrent();
   applyRegionIdentityFromCurrent();
-  setStatus('Reset to the default lower-48 box and run settings.');
+  setStatus('Reset to the public default lower-48 demo box and run settings.');
 }
 
 
@@ -988,29 +1083,69 @@ function payloadFromForm() {
   };
 }
 
+function isNotHuntableRunError(message, statusCode) {
+  const lower = String(message || '').toLowerCase();
+  return (
+    Number(statusCode) === 400 && (
+      lower.includes('urban') ||
+      lower.includes('natural/legal') ||
+      lower.includes('downtown') ||
+      lower.includes('suburb') ||
+      lower.includes('parking') ||
+      lower.includes('city block') ||
+      lower.includes('non-hunting') ||
+      lower.includes('not huntable') ||
+      lower.includes('huntable')
+    )
+  );
+}
+
+async function readRunResponse(res) {
+  try {
+    return await res.json();
+  } catch (err) {
+    return { detail: 'Server returned an unreadable response.' };
+  }
+}
+
 async function runCustom() {
 // Server-side gate now controls access
 // Frontend gate disabled intentionally
-  const payload = payloadFromForm();
-  const bbox = currentBBox();
-  if (!bboxLooksUsa(bbox)) {
-    setStatus('FAILED\n\nMove the hunt box back inside the lower-48 hunting footprint before running.');
-    return;
-  }
-  setStatus('Reading terrain, elevation, wind, and cover...\nBuilding your 3D hunting intelligence (5–10 seconds)');
-
-  setTimeout(() => {
-  setStatus('Analyzing terrain structure and movement patterns...\nSelecting optimal stand locations...');
-}, 1800);
+  let progressTimer = null;
   try {
+    const payload = payloadFromForm();
+    const bbox = currentBBox();
+    if (!bboxLooksUsa(bbox)) {
+      setStatus('FAILED\n\nMove the hunt box back inside the lower-48 hunting footprint before running.');
+      return;
+    }
+    setStatus('Reading terrain, elevation, wind, and cover...\nBuilding your 3D hunting intelligence (5–10 seconds)');
+
+    progressTimer = window.setTimeout(() => {
+      setStatus('Analyzing terrain structure and movement patterns...\nSelecting optimal stand locations...');
+    }, 1800);
+
     const res = await fetch('/run-terrain-truth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || JSON.stringify(data));
-// handled by server now
+    const data = await readRunResponse(res);
+
+    if (!res.ok) {
+      const detail = data && data.detail ? String(data.detail) : JSON.stringify(data);
+      if (isNotHuntableRunError(detail, res.status)) {
+        showNotHuntableOverlay();
+        setStatus(
+          'NOT HUNTABLE LAND\n\n' +
+          'Please select another BBox over real natural/legal hunting ground.\n\n' +
+          detail
+        );
+        return;
+      }
+      throw new Error(detail);
+    }
+
     setStatus(
       'PASS - first free terrain view used.\n\n' +
       'Run folder: ' + data.run_folder + '\n' +
@@ -1019,7 +1154,21 @@ async function runCustom() {
     );
     window.location = data.command_surface_url;
   } catch (err) {
-    setStatus('FAILED\n\n' + String(err));
+    const message = String(err && err.message ? err.message : err);
+    if (isNotHuntableRunError(message, 400)) {
+      showNotHuntableOverlay();
+      setStatus(
+        'NOT HUNTABLE LAND\n\n' +
+        'Please select another BBox over real natural/legal hunting ground.\n\n' +
+        message
+      );
+      return;
+    }
+    setStatus('FAILED\n\n' + message);
+  } finally {
+    if (progressTimer !== null) {
+      window.clearTimeout(progressTimer);
+    }
   }
 }
 
