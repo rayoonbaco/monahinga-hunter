@@ -114,6 +114,23 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
 .game-context-kicker{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9fe693;margin-bottom:5px}
 .game-context-primary{display:block;font-size:16px;line-height:1.15;font-weight:800;color:#eff8e5;margin-bottom:4px}
 .game-context-secondary{display:block;font-size:12px;line-height:1.4;color:#ccdbcf}
+.field-map-card{margin-bottom:8px;border-color:rgba(143,208,255,.26);background:linear-gradient(180deg,rgba(8,18,28,.88),rgba(4,8,14,.88))}
+.field-map-wrap{position:relative;width:100%;aspect-ratio:1/1;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.10);background:radial-gradient(circle at 50% 45%,rgba(174,241,134,.10),transparent 34%),linear-gradient(180deg,rgba(16,34,46,.95),rgba(5,14,20,.96))}
+.field-map-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.field-map-grid{stroke:rgba(255,255,255,.08);stroke-width:.35}
+.field-map-path{fill:none;stroke:#aef186;stroke-width:1.15;stroke-dasharray:2 1.5;opacity:.92}
+.field-map-path-secondary{fill:none;stroke:rgba(255,255,255,.18);stroke-width:.7;stroke-dasharray:1.5 2}
+.field-map-ring-primary{fill:rgba(245,211,138,.16);stroke:#f5d38a;stroke-width:1.4}
+.field-map-ring-alt{fill:rgba(111,179,218,.14);stroke:#6fb3da;stroke-width:1.1}
+.field-map-ring-third{fill:rgba(218,171,99,.13);stroke:#daab63;stroke-width:1.0}
+.field-map-base{fill:#5ec8ff;stroke:#eef9ff;stroke-width:.9}
+.field-map-entry{fill:#ffb347;stroke:#fff0d2;stroke-width:.9}
+.field-map-label{fill:#f7ead8;font-size:4px;font-weight:800;font-family:Segoe UI,Arial,sans-serif;text-shadow:0 1px 2px rgba(0,0,0,.75)}
+.field-map-small{fill:#b9c8cf;font-size:3px;font-weight:700;font-family:Segoe UI,Arial,sans-serif}
+.field-map-compass{position:absolute;right:8px;top:8px;display:grid;place-items:center;width:42px;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(3,8,13,.68);font-weight:900;color:#eef8ff;font-size:12px}
+.field-map-legend{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px;font-size:10px;color:#c4d0d8}
+.field-map-legend span{display:flex;align-items:center;gap:5px}
+.field-map-dot{width:9px;height:9px;border-radius:999px;display:inline-block}
 .wildlife-atmo-layer{position:absolute;inset:0;z-index:2;pointer-events:none;display:flex;justify-content:space-between;align-items:stretch;padding:76px 16px 108px;gap:18px}
 .wildlife-atmo-panel{width:min(21%,248px);border-radius:18px;border:1px solid rgba(255,255,255,.065);background:linear-gradient(180deg, rgba(4,8,14,.44), rgba(3,6,11,.20));box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 14px 36px rgba(0,0,0,.18);backdrop-filter:blur(7px);overflow:hidden}
 .wildlife-atmo-left{align-self:flex-start;padding:12px 13px 14px;min-height:112px;background:radial-gradient(circle at 20% 20%, rgba(243,213,138,.055), transparent 30%),linear-gradient(180deg, rgba(5,10,16,.50), rgba(5,10,16,.14))}
@@ -128,7 +145,7 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
 </style>
 </head>
 <body>
-<div class="shell"><div class="chrome"><div class="topbar"><div><div class="brandline">Monahinga™ · Terrain-First Hunter Surface</div><h1>3D Terrain Intelligence Viewer</h1><div class="sub">Real heightmap mesh, clean viewer authority, PAD-US display modes, and ranked hunting intelligence in one operator-facing surface.</div><div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.24);color:#ffd166;font-size:12px;line-height:1.4;max-width:760px">AI-optimized guidance: confirm legality, access, safety, and field conditions before acting on any recommendation.</div><div class="region-stack"><div class="region-chip"><strong id="regionIdentityLabel">Appalachian whitetail terrain</strong></div><div class="region-chip" id="regionSpeciesLabel">Whitetail · Turkey country</div><div class="region-chip" id="regionMoodLabel">Shaded timber folds</div></div><div id="regionStory" class="region-story">This box reads like Appalachian whitetail country: layered timber folds, protected side-hill movement, and setup value that rewards disciplined access.</div></div>
+<div class="shell"><div class="chrome"><div class="topbar"><div><div class="brandline">Monahinga™ · Terrain-First Hunter Surface</div><h1>3D Terrain Intelligence Viewer</h1><div class="sub">Real heightmap mesh, clean viewer authority, PAD-US display modes, and ranked hunting intelligence in one operator-facing surface.</div><div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.24);color:#ffd166;font-size:12px;line-height:1.4;max-width:760px">AI-optimized guidance: confirm legality, access, safety, and field conditions before acting on any recommendation.</div><div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(255,120,120,.08);border:1px solid rgba(255,120,120,.28);color:#ffd1d1;font-size:12px;line-height:1.4;max-width:760px"><strong>Huntability warning:</strong> Do not use city blocks, suburbs, parking lots, houses, roads, or non-hunting land. Draw boxes only over real natural/legal hunting ground and verify permission before entering.</div><div class="region-stack"><div class="region-chip"><strong id="regionIdentityLabel">Appalachian whitetail terrain</strong></div><div class="region-chip" id="regionSpeciesLabel">Whitetail · Turkey country</div><div class="region-chip" id="regionMoodLabel">Shaded timber folds</div></div><div id="regionStory" class="region-story">This box reads like Appalachian whitetail country: layered timber folds, protected side-hill movement, and setup value that rewards disciplined access.</div></div>
 
 <div class="command-tools">
   <button id="saveViewHelpBtn" class="mode-btn" type="button">How to Save View</button>
@@ -183,6 +200,20 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
     <br><br>
     To move one: click the pin, type <strong>MOVE</strong>, then click its new spot on the terrain.
   </div>
+</div><div class="block field-map-card" id="fieldOrientationMap">
+  <h3 style="margin-bottom:6px">2D Field Orientation Map</h3>
+  <div class="note" style="margin-bottom:7px">Top-down read for field use. North is up. Use this with the 3D view so the sit stack is not confusing.</div>
+  <div class="field-map-wrap">
+    <svg id="fieldMapSvg" class="field-map-svg" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="2D field orientation map"></svg>
+    <div class="field-map-compass">N ↑</div>
+  </div>
+  <div class="field-map-legend">
+    <span><i class="field-map-dot" style="background:#5ec8ff"></i>Base Camp</span>
+    <span><i class="field-map-dot" style="background:#ffb347"></i>Access Entry</span>
+    <span><i class="field-map-dot" style="background:#f5d38a"></i>Primary</span>
+    <span><i class="field-map-dot" style="background:#6fb3da"></i>Alt sits</span>
+  </div>
+  <div class="micro-copy">Dotted green line = invisible approach from Access Entry to the selected sit. Click ranked sits to update this map.</div>
 </div><div class="primary-box"><div class="primary-title">Primary Sit</div><div class="primary-name">$primary_title</div><div class="primary-reason">$primary_reason</div>
 <div class="block" id="executiveSummaryBlock" style="margin-top:8px;padding:8px 9px"><h3 style="margin-bottom:5px">Executive Summary</h3><div id="executiveSummaryContent" class="note">Select a sit, pin, Base Camp, or Access Entry to see the fast decision summary.</div></div>
 <div class="game-context-card" id="gameContextBlock"><span class="game-context-kicker">Likely game context</span><div id="gameContextContent" class="note">Select a sit to see the likely target species, movement style, and why this terrain supports that read.</div></div>
@@ -241,6 +272,7 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
   const terrainIdentityNote = document.getElementById('terrainIdentityNote');
   const cursorHud = document.getElementById('cursorHud');
   const cursorCoords = document.getElementById('cursorCoords');
+  const fieldMapSvg = document.getElementById('fieldMapSvg');
   let updateFocusOverlay = function() {};
   let liveWindState = null;
 
@@ -381,6 +413,64 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
   function corridorPoint(pt) { return { nx:safeNorm((pt[0]-payload.bbox[0])/(payload.bbox[2]-payload.bbox[0])), ny:safeNorm((pt[1]-payload.bbox[1])/(payload.bbox[3]-payload.bbox[1])) }; }
   function siteByRank(rank) { return (payload.sites || []).find(item => Number(item.rank) === Number(rank)); }
   function formatSiteCoords(site) { if (!site) return ''; return 'Lat ' + Number(site.lat).toFixed(6) + ' · Lon ' + Number(site.lon).toFixed(6) + ' · ' + Math.round(Number(site.elevation_m) || 0) + ' m'; }
+
+  function fieldMapPointFromNorm(nx, ny) {
+    return { x: clamp(safeNorm(nx) * 100, 5, 95), y: clamp((1 - safeNorm(ny)) * 100, 5, 95) };
+  }
+  function fieldMapPointFromGps(point) {
+    const norm = latLonToNormalized(point.lat, point.lon);
+    return fieldMapPointFromNorm(norm.nx, norm.ny);
+  }
+  function escapeSvgText(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+  function update2DFieldMap(selectedSite) {
+    if (!fieldMapSvg || !payload || !payload.bbox) return;
+    const sites = (payload.sites || []).slice(0, 3);
+    const active = selectedSite || siteByRank(state.invisibleApproachRank || 1) || siteByRank(1) || sites[0] || null;
+    const baseCamp = getAnchorPoint('baseCamp');
+    const accessEntry = getAnchorPoint('accessEntry') || baseCamp;
+    const basePt = baseCamp ? fieldMapPointFromGps(baseCamp) : fieldMapPointFromNorm(0.5, 0.5);
+    const entryPt = accessEntry ? fieldMapPointFromGps(accessEntry) : fieldMapPointFromNorm(0.5, 0.92);
+    const activePt = active ? fieldMapPointFromNorm(sitePoint(active).nx, sitePoint(active).ny) : null;
+
+    let html = '';
+    [25, 50, 75].forEach(function(v) {
+      html += '<line class="field-map-grid" x1="' + v + '" y1="0" x2="' + v + '" y2="100"></line>';
+      html += '<line class="field-map-grid" x1="0" y1="' + v + '" x2="100" y2="' + v + '"></line>';
+    });
+    html += '<rect x="1.2" y="1.2" width="97.6" height="97.6" rx="3" fill="none" stroke="rgba(255,255,255,.18)" stroke-width=".7"></rect>';
+
+    if (activePt) {
+      html += '<path class="field-map-path" d="M ' + entryPt.x.toFixed(1) + ' ' + entryPt.y.toFixed(1) + ' Q ' + ((entryPt.x + activePt.x) / 2).toFixed(1) + ' ' + Math.max(8, ((entryPt.y + activePt.y) / 2) - 8).toFixed(1) + ' ' + activePt.x.toFixed(1) + ' ' + activePt.y.toFixed(1) + '"></path>';
+    }
+
+    sites.forEach(function(site, idx) {
+      const p = fieldMapPointFromNorm(sitePoint(site).nx, sitePoint(site).ny);
+      const cls = idx === 0 ? 'field-map-ring-primary' : (idx === 1 ? 'field-map-ring-alt' : 'field-map-ring-third');
+      const label = idx === 0 ? 'P1' : (idx === 1 ? 'S2' : 'T3');
+      html += '<circle class="' + cls + '" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + (idx === 0 ? 4.8 : 4.0) + '"></circle>';
+      html += '<text class="field-map-label" x="' + Math.min(90, p.x + 3).toFixed(1) + '" y="' + Math.max(7, p.y - 3).toFixed(1) + '">' + label + '</text>';
+      html += '<text class="field-map-small" x="' + Math.min(84, p.x + 3).toFixed(1) + '" y="' + Math.min(96, p.y + 5).toFixed(1) + '">' + escapeSvgText(String(site.title || '').slice(0, 18)) + '</text>';
+    });
+
+    html += '<circle class="field-map-base" cx="' + basePt.x.toFixed(1) + '" cy="' + basePt.y.toFixed(1) + '" r="3.4"></circle>';
+    html += '<text class="field-map-label" x="' + Math.min(82, basePt.x + 3).toFixed(1) + '" y="' + Math.max(7, basePt.y - 3).toFixed(1) + '">Base</text>';
+
+    html += '<circle class="field-map-entry" cx="' + entryPt.x.toFixed(1) + '" cy="' + entryPt.y.toFixed(1) + '" r="3.4"></circle>';
+    html += '<text class="field-map-label" x="' + Math.min(82, entryPt.x + 3).toFixed(1) + '" y="' + Math.min(96, entryPt.y + 5).toFixed(1) + '">Entry</text>';
+
+    html += '<text class="field-map-small" x="47" y="6">NORTH</text>';
+    html += '<text class="field-map-small" x="47" y="98">SOUTH</text>';
+    html += '<text class="field-map-small" x="3" y="52">W</text>';
+    html += '<text class="field-map-small" x="94" y="52">E</text>';
+
+    fieldMapSvg.innerHTML = html;
+  }
 
   function normalizedToLatLon(nx, ny) {
     const minLon = Number(payload.bbox[0] || 0), minLat = Number(payload.bbox[1] || 0), maxLon = Number(payload.bbox[2] || 0), maxLat = Number(payload.bbox[3] || 0);
@@ -753,6 +843,7 @@ function getAnchorPoint(kind) {
     const accessEntry = getAnchorPoint('accessEntry');
     if (baseCampSummary && baseCamp) baseCampSummary.textContent = Number(baseCamp.lat).toFixed(5) + ', ' + Number(baseCamp.lon).toFixed(5);
     if (accessEntrySummary && accessEntry) accessEntrySummary.textContent = Number(accessEntry.lat).toFixed(5) + ', ' + Number(accessEntry.lon).toFixed(5);
+    update2DFieldMap();
   }
   function escapeSummaryText(value) {
     return String(value == null ? '' : value).replace(/\r?\n/g, ' ').trim();
@@ -936,7 +1027,7 @@ function getAnchorPoint(kind) {
       window.alert('Summary download failed.');
     }
   }
-  function updateSelectedSiteCard(site) { if (!site) return; state.invisibleApproachRank = Number(site.rank || state.invisibleApproachRank || 1); if (selectedSiteTitle) selectedSiteTitle.textContent = site.title || 'Selected sit'; if (selectedSiteCoords) selectedSiteCoords.textContent = formatSiteCoords(site); if (copyCoordsBtn) copyCoordsBtn.dataset.copyText = site.lat.toFixed(6) + ', ' + site.lon.toFixed(6); updateExecutiveSummaryForSite(site); updateFocusOverlay(site); if (typeof rebuildInvisibleApproachOverlay === 'function') rebuildInvisibleApproachOverlay(site); }
+  function updateSelectedSiteCard(site) { if (!site) return; state.invisibleApproachRank = Number(site.rank || state.invisibleApproachRank || 1); if (selectedSiteTitle) selectedSiteTitle.textContent = site.title || 'Selected sit'; if (selectedSiteCoords) selectedSiteCoords.textContent = formatSiteCoords(site); if (copyCoordsBtn) copyCoordsBtn.dataset.copyText = site.lat.toFixed(6) + ', ' + site.lon.toFixed(6); updateExecutiveSummaryForSite(site); update2DFieldMap(site); updateFocusOverlay(site); if (typeof rebuildInvisibleApproachOverlay === 'function') rebuildInvisibleApproachOverlay(site); }
   async function copySelectedCoords() { const text = (copyCoordsBtn && copyCoordsBtn.dataset.copyText) || ''; if (!text) return; try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); copyCoordsBtn.textContent = 'Copied'; setTimeout(() => { copyCoordsBtn.textContent = 'Copy coordinates'; }, 1200); } } catch (err) {} }
   function addTrustTag(tags, seen, source, matchers, label) { if (!source) return; for (const matcher of matchers) { if (source.includes(matcher)) { const key = label.toLowerCase(); if (!seen.has(key)) { seen.add(key); tags.push(label); } return; } } }
   function buildTrustTags() {
@@ -1534,6 +1625,7 @@ savedPins.forEach((pin, i) => {
 });
         renderOverlays();
         applyPadusMode(state.currentPadusMode);
+        update2DFieldMap();
       }
       function applyPadusMode(mode) { state.currentPadusMode = mode; fillGroup.visible = (mode === 'hybrid' || mode === 'fill'); boundaryGroup.visible = (mode === 'hybrid' || mode === 'lines'); setPadusModeActive(mode); }
       function loadTexture(src) {
