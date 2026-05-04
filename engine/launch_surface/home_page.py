@@ -85,6 +85,7 @@ h1 {
   grid-template-columns: minmax(0,1.15fr) minmax(340px,.85fr);
   gap:18px;
   margin-top:22px;
+  align-items:start; /* MONAHINGA_PAGE1_STOP_GRID_CARD_STRETCH_2026_05_04: prevent right cards from stretching to map height */
 }
 .card {
   padding:20px;
@@ -451,6 +452,349 @@ small { color:#8ea0ac; }
   h1 { font-size:38px; }
   #bbox-map { height:360px; }
 }
+
+/* MONAHINGA_PAGE1_REMOVE_BRAND_CARD_2026_05_04
+   Page 1 visual simplification only.
+   Removed the oversized brand card and lets the launch intro use the available space.
+   Does not touch BBox, PAD-US/legal checks, species selector, map, run launch, backend, or Render config.
+*/
+.hero-grid{
+  grid-template-columns: 1fr !important;
+}
+.hero-copy{
+  max-width: 980px !important;
+}
+.hero-band{
+  padding-bottom: 18px !important;
+}
+@media (max-width: 900px){
+  .hero-copy{
+    max-width: none !important;
+  }
+}
+
+
+/* MONAHINGA_PAGE1_RESTORE_HIDE_OPERATOR_FIELDS_2026_05_04
+   Repair pass: keep operator coordinate/wind/mode fields in the DOM for map/default-BBox scripts,
+   but hide those repetitive fields visually. Species selector remains visible.
+*/
+.monahinga-hidden-operator-field{
+  display:none !important;
+}
+
+
+/* MONAHINGA_PAGE1_REMOVE_DUPLICATE_INSTRUCTION_NOTES_2026_05_04
+   Page 1 visual cleanup only.
+   Hide duplicate bottom Instructions button and Operator Notes field.
+   Keep top Instructions button, species selector, map, BBox workflow, and launch logic.
+*/
+.monahinga-page1-hidden-control{
+  display:none !important;
+}
+
+button,
+a,
+[role="button"]{
+  text-rendering: geometricPrecision;
+}
+
+.monahinga-top-instructions-strong{
+  font-weight: 950 !important;
+  font-size: 15px !important;
+  letter-spacing: -.01em !important;
+  padding: 12px 16px !important;
+}
+
+
+/* MONAHINGA_PAGE1_DIRECT_HERO_CLEANUP_2026_05_04
+   Direct page-1 hero cleanup.
+   Top product header gets stronger; deprecated U.S.-only sub-kicker and chip/story cluster are removed from source.
+   Does not touch map logic, BBox logic, species selector, PAD-US/legal checks, terrain generation, backend, or Render config.
+*/
+.header-row > .kicker{
+  color:#ffffff !important;
+  font-weight:950 !important;
+  font-size:clamp(20px, 1.55vw, 28px) !important;
+  letter-spacing:.08em !important;
+  line-height:1.15 !important;
+}
+.hero-copy h1{
+  margin-top:4px !important;
+}
+.hero-copy .sub{
+  margin-top:10px !important;
+}
+
+
+/* MONAHINGA_REDUCE_H1_2026_05_04 */
+.hero-copy h1 {
+  font-size: clamp(16px, 1.2vw, 22px) !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+}
+
+
+/* MONAHINGA_PAGE1_RIGHT_COLUMN_STACK_2026_05_04
+   Page 1 layout-only pass.
+   Uses the blank right-side space by stacking lower info cards under the run setup column.
+   Does not touch map logic, BBox logic, species selector, run buttons, backend, terrain, PAD-US, or Render config.
+*/
+.monahinga-right-stack-card{
+  max-width: 100% !important;
+  margin-top: 16px !important;
+}
+
+.monahinga-right-stack-card h3{
+  font-size: 18px !important;
+  margin-bottom: 12px !important;
+}
+
+.monahinga-right-stack-card p,
+.monahinga-right-stack-card div,
+.monahinga-right-stack-card span{
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+.monahinga-right-stack-card pre,
+.monahinga-right-stack-card code{
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  font-size: 12px !important;
+  max-height: 180px !important;
+  overflow: auto !important;
+}
+
+.monahinga-right-stack-card .disclaimer,
+.monahinga-right-stack-card [class*="disclaimer"]{
+  margin-top: 12px !important;
+  padding: 12px !important;
+}
+
+/* Keep map side dominant while the right column carries compact supporting info. */
+@media (min-width: 901px){
+  .monahinga-right-stack-card{
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 900px){
+  .monahinga-right-stack-card{
+    margin-top: 14px !important;
+  }
+}
+
+
+/* MONAHINGA_PAGE1_SHRINK_OPERATOR_CARD_2026_05_04
+   Page 1 layout-only fix.
+   Prevents the Operator Run Setup card from stretching far below its tip text.
+   Does not touch species selector, buttons, map, BBox logic, backend, terrain, PAD-US, or Render config.
+*/
+.card:has(h3),
+.panel:has(h3){
+  align-self: start !important;
+}
+
+.card:has(h3:nth-child(1)),
+.panel:has(h3:nth-child(1)){
+  min-height: 0 !important;
+}
+
+.card:has(h3),
+.panel:has(h3){
+  height: auto !important;
+  max-height: none !important;
+}
+
+section:has(h3),
+div:has(> h3){
+  align-self: start !important;
+}
+
+h3 + * {
+  margin-top: 10px;
+}
+
+/* Narrower direct targeting: the card containing Operator Run Setup should end after its content. */
+h3{
+  scroll-margin-top: 12px;
+}
+
+@supports selector(:has(*)){
+  div:has(> h3:first-child){
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  div:has(> h3:first-child) p:last-child{
+    margin-bottom: 0 !important;
+  }
+}
+
+
+/* MONAHINGA_PAGE1_STOP_GRID_CARD_STRETCH_2026_05_04
+   Layout-only fix: CSS Grid normally stretches cards to match the tallest card in the row.
+   This lets Operator Run Setup end after its own content instead of matching the map height.
+   Does not touch map logic, BBox logic, species selector, run buttons, backend, terrain, PAD-US, or Render config.
+*/
+.layout > .card{
+  align-self:start !important;
+}
+
+
+/* MONAHINGA_PAGE1_MOVE_INFO_CARDS_RIGHT_2026_05_04
+   Page 1 layout-only pass.
+   Moves Status and How this launch works into the right column under Operator Run Setup.
+   Compacts both cards so the map remains the dominant work area.
+   Does not touch map logic, BBox logic, species selector, run buttons, backend, terrain, PAD-US, or Render config.
+*/
+.monahinga-right-info-stack{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:14px !important;
+  margin-top:14px !important;
+}
+
+.monahinga-right-info-stack .card{
+  width:100% !important;
+  min-height:0 !important;
+  height:auto !important;
+  padding:16px !important;
+  border-radius:18px !important;
+}
+
+.monahinga-right-info-stack h2,
+.monahinga-right-info-stack h3{
+  font-size:18px !important;
+  line-height:1.15 !important;
+  margin:0 0 10px 0 !important;
+}
+
+.monahinga-right-info-stack p,
+.monahinga-right-info-stack div,
+.monahinga-right-info-stack span{
+  font-size:12px !important;
+  line-height:1.33 !important;
+}
+
+.monahinga-right-info-stack pre,
+.monahinga-right-info-stack code,
+.monahinga-right-info-stack textarea{
+  font-size:11px !important;
+  line-height:1.28 !important;
+  white-space:pre-wrap !important;
+  word-break:break-word !important;
+  max-height:115px !important;
+  overflow:auto !important;
+}
+
+.monahinga-right-info-stack .disclaimer,
+.monahinga-right-info-stack [class*="disclaimer"]{
+  margin-top:10px !important;
+  padding:10px 12px !important;
+  font-size:11px !important;
+  line-height:1.3 !important;
+}
+
+@media (max-width: 900px){
+  .monahinga-right-info-stack{
+    margin-top:14px !important;
+  }
+}
+
+
+/* MONAHINGA_PAGE1_INFO_BLOCKS_RIGHT_CARD_2026_05_04
+   Source layout fix: move selected-box hint, Status, and How this launch works into the right column.
+   Keep them compact so they fit under Operator Run Setup beside the map.
+   Does not touch map logic, BBox logic, species selector, run buttons, backend, terrain, PAD-US, or Render config.
+*/
+.monahinga-right-info-stack{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:14px;
+}
+
+.monahinga-right-info-stack .inline-warning{
+  margin-top:0 !important;
+  padding:10px 12px !important;
+  font-size:12px !important;
+  line-height:1.3 !important;
+}
+
+.mini-card{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.025);
+  border-radius:16px;
+  padding:12px;
+  min-height:0 !important;
+  height:auto !important;
+}
+
+.mini-card h2{
+  font-size:16px !important;
+  line-height:1.15 !important;
+  margin:0 0 8px 0 !important;
+}
+
+.mini-card .helper,
+.mini-card .helper *,
+.mini-card .disclaimer,
+.mini-card .disclaimer *{
+  font-size:11px !important;
+  line-height:1.28 !important;
+}
+
+.compact-status-card pre#status{
+  min-height:70px !important;
+  height:90px !important;
+  max-height:90px !important;
+  overflow:auto !important;
+  font-size:11px !important;
+  line-height:1.3 !important;
+  padding:10px !important;
+}
+
+.compact-launch-card .disclaimer{
+  margin-top:9px !important;
+  padding:9px 10px !important;
+}
+
+@media (max-width:900px){
+  .monahinga-right-info-stack{
+    margin-top:12px;
+  }
+  .compact-status-card pre#status{
+    height:76px !important;
+    max-height:76px !important;
+  }
+}
+
+
+/* MONAHINGA_PAGE1_TIGHTEN_SPACING_2026_05_04 */
+/* Tighten spacing between:
+   1) top MONAHINGA header and first card
+   2) first card and map card
+*/
+
+.hero {
+  margin-bottom: 10px !important;
+}
+
+.hero + .card {
+  margin-top: 10px !important;
+}
+
+.card + .layout {
+  margin-top: 10px !important;
+}
+
+/* fallback if class names differ */
+h1 + .card {
+  margin-top: 10px !important;
+}
+
+
 </style>
 </head>
 <body>
@@ -470,45 +814,13 @@ small { color:#8ea0ac; }
   <div class="hero-band">
     <div class="hero-grid">
       <div class="hero-copy">
-        <div class="kicker">Monahinga™ · U.S.-Only Deer Setup Launch</div>
         <h1>Draw one U.S. box and get a truthful stand answer</h1>
         <div class="sub">
           This build is for the lower 48 only. Draw one box, keep the analysis inside that exact box, and launch a cleaner hunting run with legal-land messaging, hillshade terrain, and top-ranked stand options.
         </div>
-        <div class="version-line">Version 1 — Local polish build. Built for hunters. Evolving with you.</div>
-        <div class="hero-pills">
-          <div class="hero-pill">Lower 48 only</div>
-          <div class="hero-pill">Exact box authority</div>
-          <div class="hero-pill">PAD-US legal truth</div>
-          <div class="hero-pill">Rectangle draw → form sync → live run</div>
-          <div class="hero-pill region"><strong id="region_badge">Appalachian whitetail terrain</strong></div>
-          <div class="hero-pill region" id="game_badge">Whitetail · Turkey country</div>
-        </div>
-        <div class="hero-story" id="region_story">
-          This box currently reads like <span class="region-emphasis">Appalachian whitetail country</span>: broken hills, shaded side-slopes, and decision points that reward disciplined access and terrain-aware setups.
-        </div>
+        <!-- MONAHINGA_PAGE1_DIRECT_HERO_CLEANUP_2026_05_04: removed version chips and regional marketing story. -->
       </div>
-      <div class="hero-visual">
-        <div class="brand-stage">
-          <div class="brand-topline">
-            <div class="brand-chip">Version 1 Field Intelligence</div>
-            <div class="brand-chip">Lower 48 Hunt Box</div>
-          </div>
-          <div class="brand-core">
-            <div>
-              <div class="monahinga-mark" aria-hidden="true"></div>
-              <h2 class="brand-word">Monahinga<sup>™</sup></h2>
-              <div class="brand-line">Built for hunters who study ground, wind, cover, and movement.</div>
-              <div class="brand-subline">A modern terrain lens inspired by patient observation of land, animals, weather, and approach.</div>
-            </div>
-          </div>
-          <div class="brand-bottom">
-            <div class="brand-proof"><strong>Terrain-aware</strong><span>Ridges, benches, drains, and access pressure.</span></div>
-            <div class="brand-proof"><strong>Wildlife-aware</strong><span>Regional species and movement context after launch.</span></div>
-            <div class="brand-proof"><strong>Field-first</strong><span>Simple enough to use before a real scouting trip.</span></div>
-          </div>
-        </div>
-      </div>
+      <!-- MONAHINGA_PAGE1_REMOVE_BRAND_CARD_2026_05_04: removed oversized launch brand card to simplify page 1. -->
     </div>
   </div>
 
@@ -534,7 +846,6 @@ small { color:#8ea0ac; }
       </div>
       <div id="bbox-map"></div>
       <div class="bbox-readout">Current bbox: <code id="bbox_readout">not drawn yet</code></div>
-      <div id="bbox_hint" class="inline-warning info">Draw a box fully inside the lower 48, or paste one exact bbox and apply it. That keeps the legal check and stand ranking truthful.</div>
     </div>
 
     <div class="card">
@@ -611,28 +922,31 @@ small { color:#8ea0ac; }
         <button class="ghost" type="button" onclick="window.location='/instructions'">Open instructions</button>
       </div>
       <div style="margin-top:12px"><small>Tip: keep width and height at 512 for public web speed; use 768 only for slower high-detail testing. Wind is optional. Mode stays locked to hunter so the output stays focused.</small></div>
+
+      <div class="monahinga-right-info-stack" data-monahinga-created-by="MONAHINGA_PAGE1_INFO_BLOCKS_RIGHT_CARD_2026_05_04">
+        <div id="bbox_hint" class="inline-warning info">Draw a box fully inside the lower 48, or paste one exact bbox and apply it. That keeps the legal check and stand ranking truthful.</div>
+
+        <div class="mini-card compact-status-card">
+          <h2>Status</h2>
+          <pre id="status">Ready.</pre>
+        </div>
+
+        <div class="mini-card compact-launch-card">
+          <h2>How this launch works</h2>
+          <div class="helper">
+            <strong>U.S.-only guardrail:</strong> the run only accepts boxes fully inside the lower 48.<br>
+            <strong>Legal truth:</strong> PAD-US is used as a land-status signal inside the selected box.<br>
+            <strong>Truthful sync:</strong> draw rectangle → bbox fields update → launch uses those exact values.<br>
+            <strong>Manual fallback:</strong> typing into the fields or pasting one bbox redraws the rectangle so the map and form stay aligned.
+          </div>
+          <div class="disclaimer">
+            <strong>Field-use disclaimer:</strong> Monahinga™ is an AI-assisted terrain intelligence and decision-support tool. It is not legal, safety, hunting, land access, firearm, or wildlife-regulation advice. Always verify land access, seasons, tags, weapon rules, safety conditions, and local regulations before entering or hunting any area.
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="layout" style="margin-top:18px;grid-template-columns: minmax(0,.92fr) minmax(0,1.08fr);">
-    <div class="card">
-      <h2>How this launch works</h2>
-      <div class="helper">
-        <strong>U.S.-only guardrail:</strong> the run only accepts boxes fully inside the lower 48.<br>
-        <strong>Legal truth:</strong> PAD-US is used as a land-status signal inside the selected box.<br>
-        <strong>Truthful sync:</strong> draw rectangle → bbox fields update → launch uses those exact values.<br>
-        <strong>Manual fallback:</strong> typing into the fields or pasting one bbox redraws the rectangle so the map and form stay aligned.
-      </div>
-      <div class="disclaimer">
-        <strong>Field-use disclaimer:</strong> Monahinga™ is an AI-assisted terrain intelligence and decision-support tool. It is not legal, safety, hunting, land access, firearm, or wildlife-regulation advice. Always verify land access, seasons, tags, weapon rules, safety conditions, and local regulations before entering or hunting any area.
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Status</h2>
-      <pre id="status">Ready.</pre>
-    </div>
-  </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -1219,6 +1533,210 @@ if (speciesSelect) {
   });
 }
 </script>
+
+<script>
+(function(){
+  const marker = "MONAHINGA_PAGE1_RESTORE_HIDE_OPERATOR_FIELDS_2026_05_04";
+  const hiddenLabels = new Set([
+    'min lon',
+    'min lat',
+    'max lon',
+    'max lat',
+    'width',
+    'height',
+    'wind direction',
+    'mode'
+  ]);
+
+  function hideRedundantOperatorFields(){
+    const labels = Array.from(document.querySelectorAll('label'));
+    labels.forEach((label) => {
+      const labelText = (label.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase();
+      if (!hiddenLabels.has(labelText)) return;
+
+      let node = label.closest('.field, .form-field, .input-field, .control, .form-control, .input-group, div');
+      if (!node) node = label.parentElement;
+      if (!node) return;
+
+      node.classList.add('monahinga-hidden-operator-field');
+      node.setAttribute('data-monahinga-hidden-by', marker);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideRedundantOperatorFields);
+  } else {
+    hideRedundantOperatorFields();
+  }
+  window.addEventListener('load', hideRedundantOperatorFields);
+})();
+</script>
+
+
+<script>
+(function(){
+  const marker = "MONAHINGA_PAGE1_REMOVE_DUPLICATE_INSTRUCTION_NOTES_2026_05_04";
+
+  function closestField(el){
+    return el.closest('.field, .form-field, .input-field, .control, .form-control, .input-group, label, div') || el;
+  }
+
+  function cleanPageOne(){
+    // Keep the first/top Instructions control; hide later duplicate Open instructions controls.
+    const instructionControls = Array.from(document.querySelectorAll('button, a, [role="button"]'))
+      .filter(el => {
+        const t = (el.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase();
+        return t === 'instructions' || t === 'open instructions';
+      });
+
+    if (instructionControls.length > 0) {
+      instructionControls[0].classList.add('monahinga-top-instructions-strong');
+    }
+
+    instructionControls.slice(1).forEach(el => {
+      el.classList.add('monahinga-page1-hidden-control');
+      el.setAttribute('aria-hidden', 'true');
+      el.setAttribute('data-monahinga-hidden-by', marker);
+    });
+
+    // Hide only the Operator Notes label + textarea field. Do not hide parent cards.
+    const labels = Array.from(document.querySelectorAll('label'));
+    labels.forEach(label => {
+      const t = (label.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase();
+      if (t !== 'operator notes') return;
+
+      const field = closestField(label);
+      field.classList.add('monahinga-page1-hidden-control');
+      field.setAttribute('aria-hidden', 'true');
+      field.setAttribute('data-monahinga-hidden-by', marker);
+
+      // If the textarea is not inside the same field wrapper, hide the closest following textarea too.
+      let next = field.nextElementSibling;
+      for (let i = 0; next && i < 3; i++, next = next.nextElementSibling) {
+        if (next.matches && next.matches('textarea, .field, .form-field, .input-field, .control, .form-control, .input-group')) {
+          const textArea = next.matches('textarea') ? next : next.querySelector('textarea');
+          if (textArea) {
+            next.classList.add('monahinga-page1-hidden-control');
+            next.setAttribute('aria-hidden', 'true');
+            next.setAttribute('data-monahinga-hidden-by', marker);
+            break;
+          }
+        }
+      }
+    });
+
+    // Extra narrow fallback: hide standalone textarea with the exact operator-notes placeholder.
+    Array.from(document.querySelectorAll('textarea')).forEach(area => {
+      const p = (area.getAttribute('placeholder') || '').toLowerCase();
+      if (p.includes('trail cam') && p.includes('access low pressure')) {
+        const field = closestField(area);
+        field.classList.add('monahinga-page1-hidden-control');
+        field.setAttribute('aria-hidden', 'true');
+        field.setAttribute('data-monahinga-hidden-by', marker);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', cleanPageOne);
+  } else {
+    cleanPageOne();
+  }
+  window.addEventListener('load', cleanPageOne);
+})();
+</script>
+
+
+<script>
+(function(){
+  const marker = "MONAHINGA_PAGE1_RIGHT_COLUMN_STACK_2026_05_04";
+
+  function findCardByHeading(textNeedle){
+    const headings = Array.from(document.querySelectorAll('h2, h3, h4'));
+    const heading = headings.find(h => (h.textContent || '').trim().toLowerCase() === textNeedle);
+    if (!heading) return null;
+    return heading.closest('.card, .panel, section, div') || heading.parentElement;
+  }
+
+  function findOperatorCard(){
+    const headings = Array.from(document.querySelectorAll('h2, h3, h4'));
+    const heading = headings.find(h => (h.textContent || '').trim().toLowerCase() === 'operator run setup');
+    if (!heading) return null;
+    return heading.closest('.card, .panel, section, div') || heading.parentElement;
+  }
+
+  function moveCards(){
+    const operatorCard = findOperatorCard();
+    if (!operatorCard) return;
+
+    const cardsToMove = [
+      findCardByHeading('how this launch works'),
+      findCardByHeading('status')
+    ].filter(Boolean);
+
+    cardsToMove.forEach(card => {
+      if (card === operatorCard) return;
+      if (card.getAttribute('data-monahinga-moved-by') === marker) return;
+
+      card.classList.add('monahinga-right-stack-card');
+      card.setAttribute('data-monahinga-moved-by', marker);
+      operatorCard.insertAdjacentElement('afterend', card);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', moveCards);
+  } else {
+    moveCards();
+  }
+  window.addEventListener('load', moveCards);
+})();
+</script>
+
+
+<script>
+(function(){
+  const marker = "MONAHINGA_PAGE1_MOVE_INFO_CARDS_RIGHT_2026_05_04";
+
+  function cardForHeading(exactText){
+    const heading = Array.from(document.querySelectorAll('h1,h2,h3,h4')).find(h =>
+      (h.textContent || '').trim().toLowerCase() === exactText
+    );
+    if (!heading) return null;
+    return heading.closest('.card, section, .panel, div') || heading.parentElement;
+  }
+
+  function moveInfoCards(){
+    const operator = cardForHeading('operator run setup');
+    const status = cardForHeading('status');
+    const how = cardForHeading('how this launch works');
+
+    if (!operator || !status || !how) return;
+
+    let stack = operator.parentElement.querySelector('.monahinga-right-info-stack');
+    if (!stack) {
+      stack = document.createElement('div');
+      stack.className = 'monahinga-right-info-stack';
+      stack.setAttribute('data-monahinga-created-by', marker);
+      operator.insertAdjacentElement('afterend', stack);
+    }
+
+    [status, how].forEach(card => {
+      if (!card || card === operator || card.parentElement === stack) return;
+      card.setAttribute('data-monahinga-moved-by', marker);
+      stack.appendChild(card);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', moveInfoCards);
+  } else {
+    moveInfoCards();
+  }
+  window.addEventListener('load', moveInfoCards);
+})();
+</script>
+
 </body>
 </html>'''
 
