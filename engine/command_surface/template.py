@@ -139,6 +139,301 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
 .field-map-legend{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px;font-size:10px;color:#c4d0d8}
 .field-map-legend span{display:flex;align-items:center;gap:5px}
 .field-map-dot{width:9px;height:9px;border-radius:999px;display:inline-block}
+/* monahinga-pass-tiny-h-left-focus
+   Goal: simplify LEFT panel to only actionable controls
+   - keeps wind, terrain toggles, sliders
+   - hides descriptive clutter
+*/
+.left .note,
+.left .block p,
+.left .block span{
+  display:none !important;
+}
+
+.left .block{
+  padding:8px !important;
+}
+
+.left .block:nth-of-type(1),
+.left .block:nth-of-type(2),
+.left .block:nth-of-type(3){
+  display:block !important;
+}
+
+.left .block:nth-of-type(n+4){
+  display:none !important;
+}
+
+/* Make controls tighter */
+.left button,
+.left .chip{
+  font-size:11px !important;
+  padding:6px 8px !important;
+}
+
+@media (max-width:760px){
+  .left{
+    display:none !important;
+  }
+}
+
+/* monahinga-pass-tiny-g-clean-header
+   Safe visual-only page-2 header cleanup:
+   - removes trust-reducing explanatory clutter from the command surface header
+   - keeps launch/back controls and all active tools
+   - does NOT touch scoring, species logic, PAD-US, terrain rendering, backend, or Render setup
+   - remove this block to bring the hidden header copy back
+*/
+.sub,
+.region-stack,
+.region-story,
+.topbar div[style*="AI-optimized guidance"],
+.topbar div[style*="Huntability warning"]{
+  display:none !important;
+}
+.topbar{
+  padding:7px 10px 6px !important;
+  align-items:flex-start !important;
+}
+.brandline{
+  font-size:9px !important;
+  letter-spacing:.16em !important;
+}
+h1{
+  font-size:24px !important;
+  line-height:1.02 !important;
+  margin:3px 0 0 !important;
+}
+.command-tools{
+  margin-top:0 !important;
+  gap:6px !important;
+}
+.command-tools-row{
+  justify-content:flex-end !important;
+}
+.command-tool-btn,
+.visual-focus-toggle,
+#saveViewHelpBtn{
+  font-size:12px !important;
+}
+@media (max-width:760px){
+  .topbar{
+    padding:6px !important;
+  }
+  .brandline{
+    display:none !important;
+  }
+  h1{
+    font-size:18px !important;
+  }
+  .command-tools-row{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    width:100% !important;
+  }
+}
+
+/* monahinga-pass-tiny-d-focus-view
+   Safe visual-only focus pass:
+   - reduces header/side clutter on page 2
+   - keeps the engine, scoring, species, PAD-US, and terrain code untouched
+   - hides only presentation layers; remove this block to restore them
+*/
+.sub,
+.region-stack,
+.region-story,
+.topbar div[style*="AI-optimized guidance"],
+.topbar div[style*="Huntability warning"]{
+  display:none !important;
+}
+.topbar{
+  padding:8px 12px 6px !important;
+  align-items:flex-start !important;
+}
+h1{
+  font-size:26px !important;
+  margin:4px 0 0 !important;
+}
+.command-tools{
+  margin-top:2px !important;
+}
+.layout{
+  grid-template-columns:230px minmax(0,1fr) 250px !important;
+}
+.left{
+  gap:8px !important;
+}
+.left .block{
+  padding:8px !important;
+}
+.left .block:nth-of-type(3) .note,
+.left .pin-help,
+.left #focusReadHint,
+.left .block:nth-of-type(4),
+.left .block:nth-of-type(5),
+.left .block:nth-of-type(6){
+  display:none !important;
+}
+.scene-shell{
+  height:min(78vh,880px) !important;
+  min-height:640px !important;
+}
+.wildlife-atmo-layer{
+  display:none !important;
+}
+.hud-strip{
+  left:10px !important;
+  right:10px !important;
+  bottom:10px !important;
+  width:auto !important;
+  transform:none !important;
+  max-height:92px !important;
+  opacity:.86 !important;
+}
+.hud-card{
+  max-width:220px !important;
+  font-size:11px !important;
+  padding:5px 7px !important;
+}
+.cursor-hud{
+  display:none !important;
+}
+.right{
+  font-size:12px !important;
+}
+.right .side-rail{
+  padding:8px !important;
+}
+.right .primary-reason,
+.right .trust-tags,
+.right .meta,
+.right .section-kicker,
+.right .intel-row,
+.right ul,
+.right .mode-stack,
+.right .row-reason{
+  display:none !important;
+}
+.right .row{
+  padding:7px !important;
+  grid-template-columns:30px 1fr 38px !important;
+  gap:6px !important;
+  margin-bottom:6px !important;
+}
+.right .row-rank{
+  width:30px !important;
+  height:30px !important;
+  font-size:15px !important;
+}
+.right .row-title{
+  font-size:12px !important;
+}
+.right .row-score{
+  font-size:15px !important;
+}
+@media (max-width:760px){
+  .layout{
+    display:block !important;
+  }
+  .left,
+  .right{
+    display:none !important;
+  }
+  .center{
+    padding:6px !important;
+  }
+  .scene-shell{
+    height:72vh !important;
+    min-height:480px !important;
+  }
+  .hud-strip{
+    display:none !important;
+  }
+}
+
+/* monahinga-pass-tiny-b-mobile-header
+   Safe visual-only mobile cleanup:
+   - reduces page-2 header height on phone-sized screens
+   - hides long explanatory copy on mobile only
+   - keeps action buttons visible
+   - does NOT alter terrain, scoring, PAD-US, species, or backend logic
+*/
+@media (max-width:760px){
+  .topbar{
+    display:block !important;
+    padding:8px 8px 6px !important;
+  }
+  .brandline{
+    font-size:9px !important;
+    letter-spacing:.14em !important;
+    margin-bottom:3px !important;
+  }
+  h1{
+    font-size:20px !important;
+    line-height:1.05 !important;
+    margin:2px 0 6px !important;
+  }
+  .sub,
+  .region-stack,
+  .region-story{
+    display:none !important;
+  }
+  .topbar div[style*="AI-optimized guidance"],
+  .topbar div[style*="Huntability warning"]{
+    display:none !important;
+  }
+  .command-tools{
+    margin-top:6px !important;
+    align-items:stretch !important;
+  }
+  .command-tools-row{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:7px !important;
+    width:100% !important;
+  }
+  .command-tools-row .command-tool-btn,
+  .command-tools-row .visual-focus-toggle,
+  #saveViewHelpBtn{
+    width:100% !important;
+    min-height:40px !important;
+    font-size:12px !important;
+    padding:8px 7px !important;
+  }
+}
+
+/* monahinga-pass-tiny-a-hide-top-clutter
+   Safe visual-only cleanup:
+   - hides developer/debug pills, legend chips, and orientation note
+   - does NOT delete HTML
+   - does NOT change terrain generation, scoring, PAD-US, species, or backend logic
+   - remove this block to bring those visual items back
+*/
+.pills,
+.legend,
+.scene-orientation-note{
+  display:none !important;
+}
+
+/* monahinga-pass-debug-clutter-cleanup */
+.pills{
+  display:none !important;
+}
+.scene-orientation-note{
+  display:none !important;
+}
+.legend{
+  display:none !important;
+}
+@media (max-width:760px){
+  .topbar{
+    padding-bottom:6px;
+  }
+  .scene-shell{
+    margin-top:0;
+  }
+}
+
 /* monahinga-pass-button-cleanup */
 .command-tools-row .visual-focus-toggle{
   position:static;
@@ -172,6 +467,1347 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
 @media (max-width: 1280px){.wildlife-atmo-layer{position:relative;z-index:3;padding:8px 0 10px;display:grid;grid-template-columns:1fr}.wildlife-atmo-panel{width:100%}.wildlife-atmo-right{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.wildlife-legal-note{grid-column:1 / -1}.scene-shell{overflow:auto}}
 @media (max-width: 760px){.wildlife-atmo-layer{display:none}}
 @media (max-width: 1280px) {.layout{grid-template-columns:1fr} .left{border-right:0;border-bottom:1px solid rgba(255,255,255,.05)} .right{padding:0 10px 10px} .scene-shell{height:min(60vh,620px);min-height:500px} .side-rail{height:auto;max-height:none}}
+
+/* monahinga-pass-tiny-i-right-panel-cleanup
+   Safe visual-only cleanup:
+   - hides the current synthetic 2D map and field-anchor instruction card
+   - restores the cursor terrain/GPS readout
+   - keeps Hunter 2.0 Brain and ranked sit intelligence visible
+   - does NOT touch terrain generation, scoring, species, PAD-US, backend, or Render
+*/
+#fieldAnchorGuide,
+#fieldOrientationMap{
+  display:none !important;
+}
+.cursor-hud{
+  display:block !important;
+  visibility:visible !important;
+  opacity:.95 !important;
+  right:14px !important;
+  bottom:94px !important;
+  z-index:20 !important;
+  pointer-events:none !important;
+}
+@media (max-width:760px){
+  #fieldAnchorGuide,
+  #fieldOrientationMap{
+    display:none !important;
+  }
+  .cursor-hud{
+    display:block !important;
+    left:10px !important;
+    right:10px !important;
+    bottom:10px !important;
+    min-width:0 !important;
+    max-width:none !important;
+    font-size:11px !important;
+    padding:8px 9px !important;
+  }
+}
+
+
+/* monahinga-pass-tiny-k-decision-view-polish
+   Low-risk visual polish:
+   - aligns the live cursor/GPS readout with the bottom HUD rail
+   - reduces how much the bottom widgets cover the 3D terrain
+   - further compresses the right-side presentation without deleting intelligence
+   - keeps all scoring, species, PAD-US, terrain rendering, backend, and Render logic untouched
+*/
+.hud-strip{
+  left:12px !important;
+  right:342px !important;
+  bottom:10px !important;
+  width:auto !important;
+  transform:none !important;
+  max-height:62px !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+  padding:6px !important;
+  border-radius:12px !important;
+  background:rgba(0,0,0,.44) !important;
+  backdrop-filter:blur(7px) !important;
+}
+.hud-strip:hover{
+  max-height:118px !important;
+  overflow-y:auto !important;
+}
+.hud-card{
+  max-width:210px !important;
+  min-width:120px !important;
+  font-size:10.5px !important;
+  padding:5px 7px !important;
+  line-height:1.18 !important;
+}
+.hud-card .label{
+  font-size:8px !important;
+  margin-bottom:2px !important;
+}
+.hud-card .micro-copy{
+  display:none !important;
+}
+.hud-card button{
+  padding:4px 6px !important;
+  font-size:10px !important;
+  margin-top:3px !important;
+}
+.cursor-hud{
+  display:block !important;
+  right:12px !important;
+  bottom:10px !important;
+  z-index:22 !important;
+  min-width:310px !important;
+  max-width:318px !important;
+  min-height:62px !important;
+  padding:7px 9px !important;
+  font-size:10.5px !important;
+  line-height:1.25 !important;
+  opacity:.94 !important;
+  background:rgba(8,15,25,.76) !important;
+}
+.cursor-hud strong{
+  font-size:8.5px !important;
+  margin-bottom:2px !important;
+}
+.cursor-hud .micro-copy{
+  display:none !important;
+}
+#fieldAnchorGuide,
+#fieldOrientationMap{
+  display:none !important;
+}
+.right .side-rail{
+  padding:8px !important;
+}
+.right .primary-reason{
+  max-height:4.2em !important;
+  overflow:hidden !important;
+}
+.right .trust-tags,
+.right .meta,
+.right .section-kicker,
+.right .intel-row,
+.right ul,
+.right .mode-stack,
+.right .row-reason{
+  display:none !important;
+}
+.right .row{
+  padding:7px !important;
+  grid-template-columns:28px 1fr 38px !important;
+  gap:6px !important;
+  margin-bottom:5px !important;
+}
+.right .row-rank{
+  width:28px !important;
+  height:28px !important;
+  font-size:14px !important;
+}
+.right .row-title{
+  font-size:12px !important;
+  line-height:1.08 !important;
+}
+.right .row-score{
+  font-size:14px !important;
+}
+@media (max-width:1280px){
+  .hud-strip{
+    right:12px !important;
+    bottom:78px !important;
+  }
+  .cursor-hud{
+    bottom:10px !important;
+    right:12px !important;
+  }
+}
+@media (max-width:760px){
+  .hud-strip{
+    display:none !important;
+  }
+  .cursor-hud{
+    left:8px !important;
+    right:8px !important;
+    bottom:8px !important;
+    min-width:0 !important;
+    max-width:none !important;
+    min-height:0 !important;
+    font-size:10.5px !important;
+  }
+}
+
+
+/* monahinga-pass-tiny-n-right-panel-summary
+   Safe visual-only pass:
+   - hides the right panel without deleting it
+   - adds a compact bottom decision summary using existing template values
+   - keeps all intelligence/scoring data intact in the DOM and backend
+   - does NOT touch terrain generation, species logic, PAD-US, backend, or Render
+*/
+.layout{
+  grid-template-columns:210px minmax(0,1fr) 0px !important;
+}
+.right{
+  display:none !important;
+}
+.center{
+  padding-right:10px !important;
+}
+.scene-shell{
+  height:min(82vh,920px) !important;
+  min-height:670px !important;
+}
+.decision-summary-bar{
+  /* MONAHINGA_VISUAL_FOCUS_PASS_2026_05_04
+     Keep Best Sit / Why / When visible without covering the 3D terrain.
+     This is layout-only; scoring, species logic, PAD-US, and terrain generation are untouched.
+  */
+  position:relative;
+  z-index:6;
+  display:grid;
+  grid-template-columns:1fr 2fr 1fr;
+  gap:8px;
+  padding:8px;
+  margin:0 0 8px 0;
+  border-radius:14px;
+  border:1px solid rgba(174,241,134,.18);
+  background:rgba(3,10,12,.64);
+  backdrop-filter:blur(9px);
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
+.decision-summary-bar div{
+  min-width:0;
+  padding:6px 8px;
+  border-radius:11px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.07);
+}
+.decision-summary-bar span{
+  display:block;
+  font-size:8.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#9eb1be;
+  margin-bottom:2px;
+}
+.decision-summary-bar strong{
+  display:block;
+  font-size:11px;
+  line-height:1.22;
+  color:#f3eadb;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.decision-summary-bar div:nth-child(2) strong{
+  white-space:normal;
+  max-height:2.5em;
+}
+.hud-strip{
+  bottom:10px !important;
+  right:340px !important;
+}
+.cursor-hud{
+  bottom:10px !important;
+  right:12px !important;
+}
+@media (max-width:760px){
+  .layout{
+    display:block !important;
+  }
+  .left,
+  .right{
+    display:none !important;
+  }
+  .decision-summary-bar{
+    grid-template-columns:1fr;
+    gap:5px;
+    padding:6px;
+    margin-bottom:8px;
+  }
+  .decision-summary-bar div{
+    padding:5px 7px;
+  }
+  .decision-summary-bar span{
+    font-size:8px;
+  }
+  .decision-summary-bar strong{
+    font-size:10.5px;
+    white-space:normal;
+    max-height:2.4em;
+  }
+  .hud-strip{
+    display:none !important;
+  }
+  .cursor-hud{
+    left:8px !important;
+    right:8px !important;
+    bottom:8px !important;
+    max-width:none !important;
+    min-width:0 !important;
+  }
+  .scene-shell{
+    height:76vh !important;
+    min-height:500px !important;
+  }
+}
+
+
+/* MONAHINGA_HIDE_BEST_SIT_MOBILE_LEGIBILITY_2026_05_04
+   Visual-only page-2 simplification.
+   Hide the Best Sit summary tile because the primary sit is now the only visible sit marker.
+   Improve legibility for desktop and phone use without touching scoring, terrain, PAD-US, species, or backend logic.
+*/
+.decision-summary-bar{
+  grid-template-columns: minmax(0, 2fr) minmax(190px, .85fr) !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+}
+.decision-summary-bar > div:first-child{
+  display: none !important;
+}
+.decision-summary-bar span{
+  font-size: clamp(12px, .9vw, 15px) !important;
+  letter-spacing: .08em !important;
+  font-weight: 950 !important;
+}
+.decision-summary-bar strong{
+  font-size: clamp(15px, 1.05vw, 18px) !important;
+  line-height: 1.28 !important;
+  letter-spacing: -.018em !important;
+  font-weight: 900 !important;
+}
+body{
+  font-family: "Arial Narrow", "Roboto Condensed", "Inter Tight", "Segoe UI", Arial, sans-serif !important;
+  text-rendering: geometricPrecision;
+}
+.title h1{
+  font-size: clamp(28px, 2.1vw, 38px) !important;
+  letter-spacing: -.045em !important;
+}
+.title .eyebrow{
+  font-size: clamp(11px, .8vw, 13px) !important;
+  letter-spacing: .16em !important;
+}
+.warning,.guidance{
+  font-size: clamp(13px, .88vw, 16px) !important;
+  line-height: 1.38 !important;
+  font-weight: 850 !important;
+  letter-spacing: -.012em !important;
+}
+.top-actions button,.nav-back{
+  font-size: clamp(13px, .88vw, 16px) !important;
+  line-height: 1.15 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.015em !important;
+  padding: 13px 15px !important;
+}
+.card .label,.metric .label,.panel-title{
+  font-size: clamp(11px, .8vw, 14px) !important;
+  letter-spacing: .10em !important;
+  font-weight: 950 !important;
+}
+.card strong,.metric strong{
+  font-size: clamp(17px, 1.1vw, 21px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.025em !important;
+  font-weight: 950 !important;
+}
+.toggle{
+  font-size: clamp(12px, .82vw, 15px) !important;
+  font-weight: 950 !important;
+  padding: 8px 11px !important;
+}
+.cursor-hud,.hud-strip,.micro-copy{
+  font-size: clamp(12px, .82vw, 15px) !important;
+  line-height: 1.25 !important;
+}
+.scene-orientation-note{
+  font-size: clamp(12px, .82vw, 15px) !important;
+  line-height: 1.25 !important;
+}
+
+@media (max-width: 760px){
+  .decision-summary-bar{
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    padding: 8px !important;
+  }
+  .decision-summary-bar > div:first-child{
+    display: none !important;
+  }
+  .top-actions{
+    gap: 7px !important;
+  }
+  .top-actions button,.nav-back{
+    padding: 11px 12px !important;
+    font-size: 14px !important;
+  }
+  .warning,.guidance{
+    font-size: 14px !important;
+  }
+  .card strong,.metric strong{
+    font-size: 18px !important;
+  }
+}
+
+
+/* MONAHINGA_PAGE2_GLOBAL_UI_LEGIBILITY_2026_05_04
+   Visual-only UI legibility pass.
+   Enlarges the small page-2 interface text while preserving layout, scoring, markers, terrain generation, PAD-US, and backend logic.
+*/
+body{
+  font-family: "Arial Narrow", "Roboto Condensed", "Inter Tight", "Segoe UI", Arial, sans-serif !important;
+  font-size: 15px !important;
+  letter-spacing: -.01em;
+}
+
+.title h1{
+  font-size: clamp(30px, 2.25vw, 40px) !important;
+  line-height: 1.02 !important;
+}
+
+.title .eyebrow{
+  font-size: clamp(12px, .9vw, 15px) !important;
+  letter-spacing: .14em !important;
+}
+
+.warning,.guidance{
+  font-size: clamp(14px, .95vw, 17px) !important;
+  line-height: 1.42 !important;
+  padding: 12px 14px !important;
+}
+
+.top-actions button,
+.nav-back{
+  font-size: clamp(14px, .95vw, 17px) !important;
+  line-height: 1.15 !important;
+  padding: 13px 16px !important;
+  min-height: 42px !important;
+}
+
+.panel-title,
+.section-title,
+.card .label,
+.metric .label,
+.control-label,
+.layers-label,
+.scene-orientation-note strong{
+  font-size: clamp(12px, .86vw, 15px) !important;
+  letter-spacing: .09em !important;
+  font-weight: 950 !important;
+}
+
+.card strong,
+.metric strong{
+  font-size: clamp(18px, 1.18vw, 22px) !important;
+  line-height: 1.12 !important;
+}
+
+.toggle,
+button,
+input,
+select{
+  font-size: clamp(13px, .9vw, 16px) !important;
+}
+
+.toggle{
+  padding: 8px 12px !important;
+  min-height: 34px !important;
+}
+
+label,
+small,
+.micro-copy,
+.cursor-hud,
+.cursor-hud strong,
+.cursor-hud div,
+.hud-strip,
+.hud-strip *,
+.scene-orientation-note{
+  font-size: clamp(13px, .88vw, 16px) !important;
+  line-height: 1.32 !important;
+}
+
+input[type="range"]{
+  min-height: 24px !important;
+}
+
+.sidebar,
+.left-panel,
+.operator-panel,
+.setup-panel{
+  font-size: 15px !important;
+}
+
+@media (max-width: 760px){
+  body{
+    font-size: 16px !important;
+  }
+
+  .title h1{
+    font-size: 30px !important;
+  }
+
+  .title .eyebrow{
+    font-size: 12px !important;
+  }
+
+  .warning,.guidance{
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+  }
+
+  .top-actions button,
+  .nav-back{
+    font-size: 15px !important;
+    padding: 12px 13px !important;
+    min-height: 42px !important;
+  }
+
+  .card .label,
+  .metric .label,
+  .panel-title{
+    font-size: 12px !important;
+  }
+
+  .card strong,
+  .metric strong{
+    font-size: 19px !important;
+  }
+
+  .toggle,
+  .cursor-hud,
+  .hud-strip,
+  .micro-copy,
+  .scene-orientation-note{
+    font-size: 14px !important;
+  }
+}
+
+
+/* MONAHINGA_HEADER_SIDEBAR_LEGIBILITY_2026_05_04
+   Visual-only pass focused on the top/header controls and left operator sidebar.
+   This intentionally avoids terrain, scoring, PAD-US, species logic, backend validation, and Render config.
+*/
+
+/* Use a readable condensed stack so larger text fits the same controls. */
+body, body *{
+  font-family: "Arial Narrow", "Roboto Condensed", "Inter Tight", "Segoe UI", Arial, sans-serif !important;
+  text-rendering: geometricPrecision;
+}
+
+/* Header/title zone */
+header,
+.header,
+.topbar,
+.app-header,
+.hero,
+.title,
+.title *{
+  font-size: max(15px, 1vw) !important;
+}
+
+.title h1,
+h1{
+  font-size: clamp(32px, 2.45vw, 44px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -.045em !important;
+  font-weight: 950 !important;
+}
+
+.title .eyebrow,
+.eyebrow{
+  font-size: clamp(12px, .9vw, 15px) !important;
+  letter-spacing: .13em !important;
+  font-weight: 950 !important;
+}
+
+/* Guidance and warning strips near the top */
+.guidance,
+.warning,
+[class*="guidance"],
+[class*="warning"],
+[class*="alert"],
+[class*="notice"]{
+  font-size: clamp(15px, 1vw, 18px) !important;
+  line-height: 1.42 !important;
+  font-weight: 850 !important;
+  letter-spacing: -.014em !important;
+}
+
+/* Top-right buttons and nav controls */
+.top-actions,
+.top-actions *,
+nav,
+nav *,
+button,
+.nav-back,
+[class*="button"],
+[class*="action"]{
+  font-size: clamp(14px, .96vw, 17px) !important;
+  line-height: 1.16 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.015em !important;
+}
+
+.top-actions button,
+.nav-back,
+button{
+  min-height: 42px !important;
+  padding: 12px 15px !important;
+}
+
+/* Left setup/sidebar region.
+   These selectors are intentionally broad because the current template has several generations of class names. */
+aside,
+.sidebar,
+.left,
+.left-panel,
+.operator,
+.operator-panel,
+.setup,
+.setup-panel,
+.controls,
+.control-panel,
+.rail,
+.panel{
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+}
+
+aside *,
+.sidebar *,
+.left-panel *,
+.operator-panel *,
+.setup-panel *,
+.controls *,
+.control-panel *,
+.rail *,
+.panel *{
+  font-size: clamp(14px, .94vw, 17px) !important;
+  line-height: 1.24 !important;
+  letter-spacing: -.01em !important;
+}
+
+/* Labels inside the left panel */
+aside .label,
+.sidebar .label,
+.left-panel .label,
+.operator-panel .label,
+.setup-panel .label,
+.controls .label,
+.control-panel .label,
+.metric .label,
+.card .label,
+.panel-title,
+[class*="label"],
+[class*="title"]{
+  font-size: clamp(12px, .84vw, 15px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: .08em !important;
+  font-weight: 950 !important;
+}
+
+/* Values inside cards: Hunter, wind, direction, Huntable, etc. */
+aside strong,
+.sidebar strong,
+.left-panel strong,
+.operator-panel strong,
+.setup-panel strong,
+.controls strong,
+.control-panel strong,
+.metric strong,
+.card strong{
+  font-size: clamp(18px, 1.16vw, 22px) !important;
+  line-height: 1.12 !important;
+  letter-spacing: -.025em !important;
+  font-weight: 950 !important;
+}
+
+/* Terrain layer pills/buttons and small controls */
+.toggle,
+.pill,
+.chip,
+.badge,
+[class*="toggle"],
+[class*="pill"],
+[class*="chip"],
+[class*="badge"]{
+  font-size: clamp(13px, .9vw, 16px) !important;
+  line-height: 1.1 !important;
+  font-weight: 950 !important;
+  padding: 8px 11px !important;
+  min-height: 33px !important;
+}
+
+/* Slider labels such as TILT and DEPTH EXAGGERATION */
+label,
+.control-label,
+.slider-label,
+[class*="slider"],
+input[type="range"] + *,
+input[type="range"]{
+  font-size: clamp(13px, .9vw, 16px) !important;
+  font-weight: 850 !important;
+}
+
+/* Phone safety: keep the same readability target without exploding the layout. */
+@media (max-width: 760px){
+  .title h1,
+  h1{
+    font-size: 31px !important;
+  }
+
+  .guidance,
+  .warning,
+  [class*="guidance"],
+  [class*="warning"],
+  [class*="alert"],
+  [class*="notice"]{
+    font-size: 15px !important;
+  }
+
+  .top-actions button,
+  .nav-back,
+  button{
+    font-size: 14px !important;
+    padding: 11px 12px !important;
+    min-height: 40px !important;
+  }
+
+  aside *,
+  .sidebar *,
+  .left-panel *,
+  .operator-panel *,
+  .setup-panel *,
+  .controls *,
+  .control-panel *,
+  .rail *,
+  .panel *{
+    font-size: 14px !important;
+  }
+
+  aside strong,
+  .sidebar strong,
+  .left-panel strong,
+  .operator-panel strong,
+  .setup-panel strong,
+  .metric strong,
+  .card strong{
+    font-size: 18px !important;
+  }
+}
+
+
+/* MONAHINGA_TOP_LEFT_CLEANUP_2026_05_04
+   Visual-only top/left cleanup.
+   Hides the obsolete Hide AI Panel control, normalizes the Back to Box / Launch button,
+   and improves header/sidebar legibility without touching scoring, terrain, PAD-US, species, backend, or Render config.
+*/
+
+/* Top button row: consistent readable sizing */
+.top-actions button,
+.top-actions a,
+.nav-back,
+a.nav-back,
+button.nav-back{
+  font-family: "Arial Narrow", "Roboto Condensed", "Inter Tight", "Segoe UI", Arial, sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1.15 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.015em !important;
+  min-height: 44px !important;
+  padding: 13px 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+/* Specifically stop Back to Box / Launch from looking smaller than the others. */
+.nav-back,
+a[href*="launch"],
+a[href*="box"],
+a[href*="index"]{
+  font-size: 16px !important;
+  font-weight: 950 !important;
+}
+
+/* Top title and warning/guidance bars */
+.title h1,
+h1{
+  font-size: clamp(33px, 2.55vw, 45px) !important;
+  line-height: 1.02 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.045em !important;
+}
+
+.title .eyebrow,
+.eyebrow{
+  font-size: clamp(12px, .92vw, 15px) !important;
+  letter-spacing: .13em !important;
+  font-weight: 950 !important;
+}
+
+.guidance,
+.warning,
+[class*="guidance"],
+[class*="warning"]{
+  font-size: clamp(15px, 1vw, 18px) !important;
+  line-height: 1.42 !important;
+  font-weight: 850 !important;
+  letter-spacing: -.012em !important;
+}
+
+/* Left operator/setup area: stronger readable labels and values */
+aside,
+.sidebar,
+.left-panel,
+.operator-panel,
+.setup-panel,
+.controls,
+.control-panel,
+.rail,
+.panel{
+  font-family: "Arial Narrow", "Roboto Condensed", "Inter Tight", "Segoe UI", Arial, sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1.24 !important;
+}
+
+aside .label,
+.sidebar .label,
+.left-panel .label,
+.operator-panel .label,
+.setup-panel .label,
+.controls .label,
+.control-panel .label,
+.metric .label,
+.card .label,
+.panel-title,
+[class*="label"]{
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+  letter-spacing: .08em !important;
+  font-weight: 950 !important;
+}
+
+aside strong,
+.sidebar strong,
+.left-panel strong,
+.operator-panel strong,
+.setup-panel strong,
+.controls strong,
+.control-panel strong,
+.metric strong,
+.card strong{
+  font-size: 20px !important;
+  line-height: 1.12 !important;
+  letter-spacing: -.025em !important;
+  font-weight: 950 !important;
+}
+
+.toggle,
+.pill,
+.chip,
+.badge,
+[class*="toggle"],
+[class*="pill"],
+[class*="chip"],
+[class*="badge"]{
+  font-size: 14px !important;
+  line-height: 1.12 !important;
+  font-weight: 950 !important;
+  padding: 8px 12px !important;
+  min-height: 34px !important;
+}
+
+@media (max-width: 760px){
+  .top-actions button,
+  .top-actions a,
+  .nav-back,
+  a.nav-back,
+  button.nav-back{
+    font-size: 15px !important;
+    min-height: 42px !important;
+    padding: 11px 12px !important;
+  }
+
+  .title h1,
+  h1{
+    font-size: 31px !important;
+  }
+
+  .guidance,
+  .warning,
+  [class*="guidance"],
+  [class*="warning"]{
+    font-size: 15px !important;
+  }
+
+  aside .label,
+  .sidebar .label,
+  .left-panel .label,
+  .operator-panel .label,
+  .setup-panel .label,
+  .metric .label,
+  .card .label,
+  .panel-title,
+  [class*="label"]{
+    font-size: 12px !important;
+  }
+
+  aside strong,
+  .sidebar strong,
+  .left-panel strong,
+  .operator-panel strong,
+  .setup-panel strong,
+  .metric strong,
+  .card strong{
+    font-size: 18px !important;
+  }
+}
+
+
+/* MONAHINGA_FINAL_TITLE_LEFT_CLEARANCE_2026_05_04
+   Final visual polish only.
+   Protects left operator cards from being crowded by the 3D scene and improves upper-left title readability.
+   Does not touch scoring, terrain generation, markers, PAD-US, species logic, backend, or Render config.
+*/
+
+/* Upper-left product/title text */
+.title h1,
+h1{
+  font-size: clamp(34px, 2.65vw, 46px) !important;
+  line-height: 1.02 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.045em !important;
+}
+
+.title .eyebrow,
+.eyebrow,
+[class*="eyebrow"]{
+  font-size: clamp(13px, .96vw, 16px) !important;
+  line-height: 1.18 !important;
+  letter-spacing: .12em !important;
+  font-weight: 950 !important;
+  opacity: .98 !important;
+}
+
+/* Keep the left operator panel readable and above scene edges. */
+aside,
+.sidebar,
+.left-panel,
+.operator-panel,
+.setup-panel,
+.controls,
+.control-panel,
+.rail,
+.panel:first-child{
+  min-width: 205px !important;
+  max-width: 245px !important;
+  position: relative !important;
+  z-index: 18 !important;
+  overflow: visible !important;
+}
+
+/* Make the left cards themselves stay fully readable. */
+aside .card,
+.sidebar .card,
+.left-panel .card,
+.operator-panel .card,
+.setup-panel .card,
+.metric,
+.card{
+  min-width: 78px !important;
+  overflow: visible !important;
+}
+
+aside strong,
+.sidebar strong,
+.left-panel strong,
+.operator-panel strong,
+.setup-panel strong,
+.metric strong,
+.card strong{
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Give the 3D scene a tiny breathing gap from the left panel without changing the engine. */
+.scene-shell,
+.center,
+main.center{
+  margin-left: 8px !important;
+}
+
+/* If the page uses grid/flex, preserve a safe gutter between left panel and scene. */
+.layout,
+.app-grid,
+.viewer-grid,
+.surface-grid,
+.main-grid,
+.main-layout{
+  column-gap: 14px !important;
+  gap: 14px !important;
+}
+
+/* Phone: avoid forcing a wide sidebar on narrow screens. */
+@media (max-width: 760px){
+  aside,
+  .sidebar,
+  .left-panel,
+  .operator-panel,
+  .setup-panel,
+  .controls,
+  .control-panel,
+  .rail,
+  .panel:first-child{
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .scene-shell,
+  .center,
+  main.center{
+    margin-left: 0 !important;
+  }
+
+  .title h1,
+  h1{
+    font-size: 32px !important;
+  }
+
+  .title .eyebrow,
+  .eyebrow,
+  [class*="eyebrow"]{
+    font-size: 13px !important;
+  }
+}
+
+
+/* MONAHINGA_PAGE2_TITLE_BALANCE_2026_05_04
+   Final title hierarchy balance.
+   Reduces the oversized viewer title and strengthens the small brand line.
+   CSS-only: no terrain, scoring, marker, PAD-US, species, backend, or Render changes.
+*/
+
+.title h1,
+h1{
+  font-size: clamp(28px, 2.05vw, 36px) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -.04em !important;
+  font-weight: 950 !important;
+  margin-top: 4px !important;
+  margin-bottom: 8px !important;
+}
+
+.title .eyebrow,
+.eyebrow,
+[class*="eyebrow"]{
+  font-size: clamp(12px, .9vw, 14px) !important;
+  line-height: 1.18 !important;
+  letter-spacing: .15em !important;
+  font-weight: 950 !important;
+  opacity: .98 !important;
+  margin-bottom: 2px !important;
+}
+
+@media (max-width: 760px){
+  .title h1,
+  h1{
+    font-size: 29px !important;
+    line-height: 1.05 !important;
+  }
+
+  .title .eyebrow,
+  .eyebrow,
+  [class*="eyebrow"]{
+    font-size: 12px !important;
+  }
+}
+
+
+/* MONAHINGA_TITLE_RATIO_ADJUST_2026_05_04
+   Adjust title hierarchy per request:
+   - Main viewer title ~50% size
+   - Eyebrow + guidance/warnings ~2x stronger
+   CSS only.
+*/
+
+/* Main title smaller */
+.title h1,
+h1{
+  font-size: clamp(18px, 1.3vw, 24px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.03em !important;
+  font-weight: 900 !important;
+}
+
+/* Brand line bigger */
+.title .eyebrow,
+.eyebrow,
+[class*="eyebrow"]{
+  font-size: clamp(14px, 1.1vw, 18px) !important;
+  letter-spacing: .16em !important;
+  font-weight: 950 !important;
+}
+
+/* Guidance + warning bigger */
+.guidance,
+.warning,
+[class*="guidance"],
+[class*="warning"]{
+  font-size: clamp(16px, 1.2vw, 20px) !important;
+  line-height: 1.4 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.01em !important;
+}
+
+@media (max-width: 760px){
+  .title h1,
+  h1{
+    font-size: 20px !important;
+  }
+
+  .title .eyebrow,
+  .eyebrow{
+    font-size: 14px !important;
+  }
+
+  .guidance,
+  .warning,
+  [class*="guidance"],
+  [class*="warning"]{
+    font-size: 16px !important;
+  }
+}
+
+
+/* MONAHINGA_HEADER_AND_SCENE_FIT_2026_05_04
+   Visual-only page-2 balance pass.
+   Makes the brand/warning text much more readable, reduces the oversized viewer title,
+   and tightens the 3D scene into the viewport so the bottom HUD is less buried.
+   Does not touch scoring, terrain generation, marker logic, PAD-US, species logic, backend, or Render config.
+*/
+
+/* Header hierarchy: small main title, strong supporting lines. */
+.title h1,
+h1{
+  font-size: clamp(16px, 1.05vw, 22px) !important;
+  line-height: 1.03 !important;
+  letter-spacing: -.025em !important;
+  font-weight: 850 !important;
+  margin-top: 2px !important;
+  margin-bottom: 7px !important;
+}
+
+.title .eyebrow,
+.eyebrow,
+[class*="eyebrow"]{
+  font-size: clamp(18px, 1.45vw, 24px) !important;
+  line-height: 1.12 !important;
+  letter-spacing: .12em !important;
+  font-weight: 950 !important;
+  opacity: 1 !important;
+  margin-bottom: 3px !important;
+}
+
+.guidance,
+.warning,
+[class*="guidance"],
+[class*="warning"]{
+  font-size: clamp(20px, 1.55vw, 26px) !important;
+  line-height: 1.32 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.018em !important;
+  padding: 11px 14px !important;
+}
+
+/* Compact the top stack so the 3D view can sit higher and fit better. */
+header,
+.header,
+.topbar,
+.app-header,
+.hero{
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.top-actions{
+  gap: 8px !important;
+}
+
+.top-actions button,
+.top-actions a,
+.nav-back,
+button.nav-back,
+a.nav-back{
+  min-height: 38px !important;
+  padding: 10px 14px !important;
+}
+
+/* Pull the summary and scene upward; reduce wasted gap above terrain. */
+.decision-summary-bar{
+  margin-top: 3px !important;
+  margin-bottom: 6px !important;
+  padding: 8px 10px !important;
+}
+
+.scene-shell{
+  margin-top: 0 !important;
+  min-height: 0 !important;
+  height: calc(100vh - 285px) !important;
+  max-height: 690px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Make the actual 3D canvas/container fill the centered scene instead of sliding below the fold. */
+.scene-shell canvas,
+.scene-shell #scene,
+.scene-shell #terrain,
+.scene-shell [id*="scene"],
+.scene-shell [id*="terrain"],
+.scene-shell [class*="scene"],
+.scene-shell [class*="terrain"]{
+  max-height: 100% !important;
+}
+
+/* Keep bottom HUD readable but less blocking. */
+.hud-strip{
+  bottom: 10px !important;
+  left: 14px !important;
+  right: 280px !important;
+  padding: 6px 8px !important;
+  opacity: .92 !important;
+}
+
+.cursor-hud{
+  bottom: 10px !important;
+  right: 14px !important;
+  max-width: 260px !important;
+  padding: 9px 10px !important;
+  opacity: .94 !important;
+}
+
+/* Main layout should avoid extra vertical creep. */
+main.center,
+.center{
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+@media (max-width: 760px){
+  .title h1,
+  h1{
+    font-size: 18px !important;
+  }
+
+  .title .eyebrow,
+  .eyebrow,
+  [class*="eyebrow"]{
+    font-size: 16px !important;
+    letter-spacing: .08em !important;
+  }
+
+  .guidance,
+  .warning,
+  [class*="guidance"],
+  [class*="warning"]{
+    font-size: 17px !important;
+    line-height: 1.3 !important;
+    padding: 9px 11px !important;
+  }
+
+  .scene-shell{
+    height: calc(100vh - 330px) !important;
+    max-height: none !important;
+  }
+
+  .hud-strip{
+    right: 12px !important;
+    bottom: 58px !important;
+  }
+
+  .cursor-hud{
+    left: 12px !important;
+    right: 12px !important;
+    max-width: none !important;
+    bottom: 10px !important;
+  }
+}
+
+
+/* MONAHINGA_FONT_BALANCE_REFINE_2026_05_04
+   Refine font balance:
+   - Brand line much bigger
+   - Warning/guidance bigger
+   - Sidebar values slightly smaller (Hunter, Huntable, etc.)
+   CSS only, no logic touched
+*/
+
+/* Brand line (top small text) */
+.title .eyebrow,
+.eyebrow,
+[class*="eyebrow"]{
+  font-size: clamp(20px, 1.6vw, 26px) !important;
+  font-weight: 950 !important;
+  letter-spacing: .14em !important;
+}
+
+/* Warning + guidance */
+.guidance,
+.warning,
+[class*="guidance"],
+[class*="warning"]{
+  font-size: clamp(20px, 1.6vw, 26px) !important;
+  line-height: 1.35 !important;
+  font-weight: 950 !important;
+}
+
+/* Sidebar labels slightly refined */
+.card .label,
+.metric .label,
+.panel-title,
+[class*="label"]{
+  font-size: clamp(11px, .8vw, 13px) !important;
+  letter-spacing: .08em !important;
+}
+
+/* Sidebar values (Hunter, Huntable, etc.) slightly reduced */
+.card strong,
+.metric strong,
+aside strong,
+.sidebar strong,
+.left-panel strong{
+  font-size: clamp(16px, 1vw, 18px) !important;
+  font-weight: 900 !important;
+}
+
+/* WHY / WHEN text slightly more readable but not oversized */
+.decision-summary-bar strong{
+  font-size: clamp(15px, 1.05vw, 18px) !important;
+}
+
+@media (max-width: 760px){
+  .title .eyebrow,
+  .eyebrow{
+    font-size: 18px !important;
+  }
+
+  .guidance,
+  .warning{
+    font-size: 17px !important;
+  }
+
+  .card strong,
+  .metric strong{
+    font-size: 16px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -199,7 +1835,7 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
   <div class="block decision-card"><span class="decision-label">Hunt window</span><strong id="bestTimeLabel" class="decision-title">$best_time_label</strong><span id="bestTimeWindow" class="decision-sub">$best_time_window</span><div class="viewer-micro-note">Use this as the fast decision read first, then verify with wind, legality, access, and field sign.</div><div class="atmo-note" id="terrainIdentityNote">Regional terrain identity helps the scene feel grounded, but your sit decision still comes from the live run data.</div></div>
   <div class="block"><h3>Cover Intelligence</h3><div class="intel-row provider-ok"><strong>Terrain + Cover Read Active</strong><span>Movement bias: reading concealed lower-shelf routes first.</span></div><div class="intel-row"><strong>Exposure watch</strong><span>Open ridge crossings and crest-top travel stay higher risk.</span></div><div class="intel-row"><strong>How cover factors in</strong><span>Cover now supports the movement read, not a separate button mode.</span></div></div>
 </aside>
-<main class="center"><div class="scene-shell"><div class="scene-orientation-note"><strong>Orientation:</strong> Starting view is intended to read north/south from above. You can rotate, tilt, and explore the terrain after launch.</div>$wildlife_atmosphere_markup<div class="legend"><div class="chip">Green ring = best sit</div><div class="chip">Gold ring = backup sit</div><div class="chip">Amber ring = fringe option</div><div class="chip">PAD-US glow follows the terrain</div><div id="modeStatusChip" class="chip">Terrain + Cover Read</div><div id="coverKeyLegend" class="cover-key"><div class="chip cover-chip"><span class="cover-swatch cover-swatch-dense"></span>Dense cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-moderate"></span>Moderate cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-open"></span>Open / exposed</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-bowl"></span>Sheltered bowl</div></div></div><div class="scene-tools" aria-hidden="true" style="display:none"></div><div id="viewer"></div>
+<main class="center"><div class="decision-summary-bar" id="decisionSummaryBar"><div><span>Best sit</span><strong>$primary_title</strong></div><div><span>Why</span><strong>$primary_reason</strong></div><div><span>When</span><strong>$best_time_window</strong></div></div><div class="scene-shell"><div class="scene-orientation-note"><strong>Orientation:</strong> Starting view is intended to read north/south from above. You can rotate, tilt, and explore the terrain after launch.</div>$wildlife_atmosphere_markup<div class="legend"><div class="chip">Green ring = best sit</div><div class="chip">Gold ring = backup sit</div><div class="chip">Amber ring = fringe option</div><div class="chip">PAD-US glow follows the terrain</div><div id="modeStatusChip" class="chip">Terrain + Cover Read</div><div id="coverKeyLegend" class="cover-key"><div class="chip cover-chip"><span class="cover-swatch cover-swatch-dense"></span>Dense cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-moderate"></span>Moderate cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-open"></span>Open / exposed</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-bowl"></span>Sheltered bowl</div></div></div><div class="scene-tools" aria-hidden="true" style="display:none"></div><div id="viewer"></div>
 <style>
 .hud-strip {
     position: absolute !important;
@@ -1631,6 +3267,9 @@ function approachRiskExplanation(avgRisk, risks) {
         });
         (payload.corridors || []).forEach((corridor) => { const pts=(corridor.points || []).map(pt => { const p=corridorPoint(pt); return worldPoint(p.nx,p.ny,0.16);}); if (pts.length < 2) return; corridorGroup.add(makeTube(pts, corridor.strength === 'dominant' ? 0.038 : 0.026, corridor.strength === 'dominant' ? 0xd6ff80 : 0xffd275, corridor.strength === 'dominant' ? 0.34 : 0.24)); });
         (payload.sites || []).forEach((site) => {
+          // Visual-only simplification: keep the primary sit marker, but do not draw alternate sit markers.
+          // The full payload, scoring, ranked intelligence, and summary text remain intact elsewhere.
+          if (Number(site.rank || 0) !== 1) return;
           registerOverlay({
             id: 'site-' + Number(site.rank || 0),
             type: FEATURE_TYPES.MARKER,
@@ -2165,5 +3804,33 @@ if (viewerSpecies) {
   }).catch(err => showError(err && err.message ? err.message : err));
 })();
 </script>
+
+<script>
+(function(){
+  const marker = "MONAHINGA_TOP_LEFT_CLEANUP_2026_05_04";
+  function hideDeadAiPanelButton(){
+    const candidates = Array.from(document.querySelectorAll('button, a, [role="button"]'));
+    candidates.forEach((el) => {
+      const label = (el.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase();
+      if (label === 'hide ai panel') {
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden', 'true');
+        el.setAttribute('data-monahinga-hidden-by', marker);
+      }
+      if (label === 'back to box / launch' || label === 'back to box/launch') {
+        el.style.fontSize = '16px';
+        el.style.fontWeight = '950';
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideDeadAiPanelButton);
+  } else {
+    hideDeadAiPanelButton();
+  }
+  window.addEventListener('load', hideDeadAiPanelButton);
+})();
+</script>
+
 </body>
 </html>''')
