@@ -30,6 +30,14 @@ button{font:inherit}
 h1{margin:6px 0 3px;font-size:30px;line-height:1.02}.sub{color:var(--muted);font-size:14px;max-width:720px}
 .pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;max-width:720px}.pill{padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:12px;color:#dce5ea}
 .layout{display:grid;grid-template-columns:280px minmax(0,1fr) 320px;min-height:calc(100vh - 92px);align-items:start}
+.layout.visual-focus{grid-template-columns:280px minmax(0,1fr) 0px}
+.layout.visual-focus .right{display:none}
+.visual-focus .center{padding-right:10px}
+.visual-focus .scene-shell{height:min(80vh,900px);min-height:640px}
+.visual-focus-toggle{position:absolute;right:14px;top:14px;z-index:8;display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(8,15,25,.86);color:var(--text);cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 8px 26px rgba(0,0,0,.28)}
+.visual-focus-toggle:hover{background:rgba(20,30,44,.96)}
+.scene-orientation-note{position:absolute;left:12px;top:54px;z-index:5;max-width:430px;padding:8px 10px;border-radius:12px;border:1px solid rgba(143,208,255,.22);background:rgba(8,15,25,.72);backdrop-filter:blur(10px);font-size:11px;line-height:1.35;color:#dceaf2}
+.scene-orientation-note strong{color:#eef8ff}
 .left{padding:10px;border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:10px}.center{padding:10px;min-width:0}.right{padding:10px 10px 10px 0;min-height:0}
 .block{padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(4,8,14,.78)}.block h3{margin:0 0 6px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#9fb1bf}
 .status-block strong{display:block;margin-bottom:4px}.tone-strong{border-color:rgba(174,241,134,.22);background:rgba(174,241,134,.08)}.tone-partial{border-color:rgba(243,213,138,.18);background:rgba(243,213,138,.06)}.tone-none{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.03)}
@@ -37,11 +45,11 @@ h1{margin:6px 0 3px;font-size:30px;line-height:1.02}.sub{color:var(--muted);font
 .note{color:#c4d0d8;line-height:1.38;font-size:13px}.layer-stack,.mode-stack{display:flex;flex-wrap:wrap;gap:8px}
 .layer-btn,.mode-btn{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);padding:8px 10px;border-radius:12px;cursor:pointer}.layer-btn.active,.mode-btn.active{background:rgba(174,241,134,.14);border-color:rgba(174,241,134,.24)}
 .slider-group{margin-top:10px}.slider-group label{display:block;font-size:11px;color:#9fb1bf;margin-bottom:5px;text-transform:uppercase;letter-spacing:.12em}.slider-group input{width:100%}
-.scene-shell{position:relative;height:min(68vh,720px);min-height:560px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg, #243b4f 0%, #132331 18%, #08131d 52%, #040a12 100%);box-shadow:var(--shadow)}
+.scene-shell{position:relative;height:min(74vh,820px);min-height:600px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg, #243b4f 0%, #132331 18%, #08131d 52%, #040a12 100%);box-shadow:var(--shadow)}
 #viewer{position:absolute;inset:0} #viewer canvas{display:block;width:100%;height:100%} #viewer .error-card{position:absolute;left:16px;right:16px;top:16px;padding:14px 16px;border-radius:16px;background:rgba(60,12,16,.92);border:1px solid rgba(255,120,120,.35);color:#ffd8d8;z-index:9;white-space:pre-wrap}
 .hud-strip{position:absolute;left:12px;right:84px;bottom:0px;display:flex;gap:8px;flex-wrap:wrap;z-index:4;opacity:0.92}
 .hud-card{padding:6px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(5,10,16,.72);backdrop-filter:blur(10px);max-width:min(30%,260px);font-size:12px}
-.side-rail{width:100%;padding:10px;border-radius:18px;border:1px solid rgba(255,255,255,.075);background:linear-gradient(180deg, rgba(4,8,14,.88), rgba(3,6,11,.94));box-shadow:0 18px 56px rgba(0,0,0,.36);height:min(68vh,720px);overflow:auto}.primary-box{padding:10px;border-radius:16px;border:1px solid rgba(173,241,129,.14);background:linear-gradient(180deg, rgba(173,241,129,.055), rgba(173,241,129,.018));margin-bottom:8px}
+.side-rail{width:100%;padding:10px;border-radius:18px;border:1px solid rgba(255,255,255,.075);background:linear-gradient(180deg, rgba(4,8,14,.88), rgba(3,6,11,.94));box-shadow:0 18px 56px rgba(0,0,0,.36);height:min(74vh,820px);overflow:auto}.primary-box{padding:10px;border-radius:16px;border:1px solid rgba(173,241,129,.14);background:linear-gradient(180deg, rgba(173,241,129,.055), rgba(173,241,129,.018));margin-bottom:8px}
 .primary-title{font-size:10px;letter-spacing:.16em;color:#a4b7c4;text-transform:uppercase;margin-bottom:6px}.primary-name{font-size:20px;line-height:1.04;font-weight:700;margin-bottom:6px}.primary-reason{color:#c8d2d9;line-height:1.28;font-size:13px}.trust-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.trust-tag{padding:6px 9px;border-radius:999px;border:1px solid rgba(174,241,134,.18);background:rgba(174,241,134,.07);color:#d7ecd7;font-size:11px;letter-spacing:.04em;line-height:1;white-space:nowrap}.trust-tag-primary{border-color:rgba(174,241,134,.28);background:rgba(174,241,134,.12);color:#eef8e5;font-weight:600}.trust-tag-support{border-color:rgba(174,241,134,.14);background:rgba(174,241,134,.05);color:#cfe3cf}.trust-tag-caution{border-color:rgba(243,213,138,.24);background:rgba(243,213,138,.08);color:#f0ddad}
 .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.chip{padding:6px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);font-size:11px;color:#dae0e5}.section-kicker{font-size:10px;letter-spacing:.16em;color:#9fb2bf;text-transform:uppercase;margin:8px 2px 6px}
 .row{display:grid;grid-template-columns:42px 1fr 52px;gap:10px;padding:10px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.02);margin-bottom:8px}.row-button{width:100%;text-align:left;color:var(--text);cursor:pointer}.row-button.active,.row-button:hover{border-color:rgba(174,241,134,.24);background:rgba(174,241,134,.08)}.row-rank{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:22px;font-weight:700;background:rgba(255,255,255,.05)}.row-tier{font-size:9px;letter-spacing:.16em;color:#9eb1be;margin-bottom:4px}.row-title{font-size:15px;font-weight:700;line-height:1.14;margin-bottom:4px}.row-reason{color:#b7c2ca;line-height:1.28;font-size:12px}.row-score{font-size:20px;font-weight:700;align-self:center;text-align:right;color:#efe6d8}
@@ -131,6 +139,28 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
 .field-map-legend{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px;font-size:10px;color:#c4d0d8}
 .field-map-legend span{display:flex;align-items:center;gap:5px}
 .field-map-dot{width:9px;height:9px;border-radius:999px;display:inline-block}
+/* monahinga-pass-button-cleanup */
+.command-tools-row .visual-focus-toggle{
+  position:static;
+  right:auto;
+  top:auto;
+  z-index:auto;
+  box-shadow:none;
+  min-height:38px;
+}
+.command-tools-row .command-back-link{
+  min-height:38px;
+  font-weight:700;
+  border-color:rgba(243,213,138,.24);
+  background:rgba(243,213,138,.10);
+}
+.command-tools-row .command-back-link:hover{
+  background:rgba(243,213,138,.18);
+}
+.scene-tools[aria-hidden="true"]{
+  display:none !important;
+}
+
 .wildlife-atmo-layer{position:absolute;inset:0;z-index:2;pointer-events:none;display:flex;justify-content:space-between;align-items:stretch;padding:76px 16px 108px;gap:18px}
 .wildlife-atmo-panel{width:min(21%,248px);border-radius:18px;border:1px solid rgba(255,255,255,.065);background:linear-gradient(180deg, rgba(4,8,14,.44), rgba(3,6,11,.20));box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 14px 36px rgba(0,0,0,.18);backdrop-filter:blur(7px);overflow:hidden}
 .wildlife-atmo-left{align-self:flex-start;padding:12px 13px 14px;min-height:112px;background:radial-gradient(circle at 20% 20%, rgba(243,213,138,.055), transparent 30%),linear-gradient(180deg, rgba(5,10,16,.50), rgba(5,10,16,.14))}
@@ -153,6 +183,8 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
     <button id="resetViewBtn" class="command-tool-btn" type="button">Reset View</button>
     <button id="downloadSummaryBtn" class="command-tool-btn" type="button">Download Summary</button>
     <button id="invisibleApproachBtn" class="command-tool-btn" type="button">Invisible Approach</button>
+    <button id="visualFocusToggle" class="visual-focus-toggle" type="button">Hide AI Panel</button>
+    <a class="command-tool-btn command-back-link" href="/">Back to Box / Launch</a>
   </div>
 </div>
 
@@ -167,9 +199,7 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
   <div class="block decision-card"><span class="decision-label">Hunt window</span><strong id="bestTimeLabel" class="decision-title">$best_time_label</strong><span id="bestTimeWindow" class="decision-sub">$best_time_window</span><div class="viewer-micro-note">Use this as the fast decision read first, then verify with wind, legality, access, and field sign.</div><div class="atmo-note" id="terrainIdentityNote">Regional terrain identity helps the scene feel grounded, but your sit decision still comes from the live run data.</div></div>
   <div class="block"><h3>Cover Intelligence</h3><div class="intel-row provider-ok"><strong>Terrain + Cover Read Active</strong><span>Movement bias: reading concealed lower-shelf routes first.</span></div><div class="intel-row"><strong>Exposure watch</strong><span>Open ridge crossings and crest-top travel stay higher risk.</span></div><div class="intel-row"><strong>How cover factors in</strong><span>Cover now supports the movement read, not a separate button mode.</span></div></div>
 </aside>
-<main class="center"><div class="scene-shell">$wildlife_atmosphere_markup<div class="legend"><div class="chip">Green ring = best sit</div><div class="chip">Gold ring = backup sit</div><div class="chip">Amber ring = fringe option</div><div class="chip">PAD-US glow follows the terrain</div><div id="modeStatusChip" class="chip">Terrain + Cover Read</div><div id="coverKeyLegend" class="cover-key"><div class="chip cover-chip"><span class="cover-swatch cover-swatch-dense"></span>Dense cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-moderate"></span>Moderate cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-open"></span>Open / exposed</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-bowl"></span>Sheltered bowl</div></div></div><div class="scene-tools"><div style="margin-bottom:8px">
-
-</div><a class="scene-tool-btn" href="/">Back to Box / Launch</a></div><div id="viewer"></div>
+<main class="center"><div class="scene-shell"><div class="scene-orientation-note"><strong>Orientation:</strong> Starting view is intended to read north/south from above. You can rotate, tilt, and explore the terrain after launch.</div>$wildlife_atmosphere_markup<div class="legend"><div class="chip">Green ring = best sit</div><div class="chip">Gold ring = backup sit</div><div class="chip">Amber ring = fringe option</div><div class="chip">PAD-US glow follows the terrain</div><div id="modeStatusChip" class="chip">Terrain + Cover Read</div><div id="coverKeyLegend" class="cover-key"><div class="chip cover-chip"><span class="cover-swatch cover-swatch-dense"></span>Dense cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-moderate"></span>Moderate cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-open"></span>Open / exposed</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-bowl"></span>Sheltered bowl</div></div></div><div class="scene-tools" aria-hidden="true" style="display:none"></div><div id="viewer"></div>
 <style>
 .hud-strip {
     position: absolute !important;
@@ -273,8 +303,32 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
   const cursorHud = document.getElementById('cursorHud');
   const cursorCoords = document.getElementById('cursorCoords');
   const fieldMapSvg = document.getElementById('fieldMapSvg');
+  const visualFocusToggle = document.getElementById('visualFocusToggle');
+  const layoutRoot = document.querySelector('.layout');
   let updateFocusOverlay = function() {};
   let liveWindState = null;
+
+  function refreshViewerAfterLayoutChange() {
+    try {
+      window.dispatchEvent(new Event('resize'));
+    } catch (err) {}
+  }
+  function setVisualFocusMode(enabled) {
+    if (!layoutRoot) return;
+    layoutRoot.classList.toggle('visual-focus', !!enabled);
+    if (visualFocusToggle) {
+      visualFocusToggle.textContent = enabled ? 'Show AI Panel' : 'Hide AI Panel';
+      visualFocusToggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+    }
+    setTimeout(refreshViewerAfterLayoutChange, 80);
+    setTimeout(refreshViewerAfterLayoutChange, 260);
+  }
+  if (visualFocusToggle) {
+    visualFocusToggle.addEventListener('click', function() {
+      const enabled = !(layoutRoot && layoutRoot.classList.contains('visual-focus'));
+      setVisualFocusMode(enabled);
+    });
+  }
 
   function deriveRegionIdentity() {
     if (wildlifeAtmosphere && wildlifeAtmosphere.label) {
