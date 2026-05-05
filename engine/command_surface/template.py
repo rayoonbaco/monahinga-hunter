@@ -1808,7 +1808,391 @@ aside strong,
   }
 }
 
+
+/* MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04
+   Gold-label foundation: real 2D command map beside the 3D terrain.
+   The 2D map is north-up and fits the exact same bbox as the 3D run.
+   This pass is visual/read-only sync; scoring, terrain generation, PAD-US, backend, and Render config are untouched.
+*/
+.command-dual-workbench{
+  display:grid;
+  grid-template-columns:minmax(300px, 40fr) minmax(520px, 60fr); /* MONAHINGA_PAGE2_SPLIT_40_60_SAFE_2026_05_05: left map 40%, right terrain 60% */
+  gap:10px;
+  align-items:stretch;
+  width:100%;
+  height:calc(100vh - 285px);
+  min-height:520px;
+}
+
+.command-map-panel,
+.command-terrain-panel{
+  min-width:0;
+  min-height:0;
+  position:relative;
+}
+
+.command-map-panel{
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(5,12,18,.88);
+  overflow:hidden;
+  box-shadow:0 18px 38px rgba(0,0,0,.24);
+}
+
+.command-map-header{
+  position:absolute;
+  top:10px;
+  left:10px;
+  right:10px;
+  z-index:410;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  pointer-events:none;
+}
+
+.command-map-title,
+.command-map-badge{
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(6,13,20,.78);
+  color:#f3fff0;
+  border-radius:999px;
+  padding:7px 10px;
+  font-size:12px;
+  line-height:1.1;
+  font-weight:950;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  backdrop-filter:blur(8px);
+}
+
+.command-map-badge{
+  color:#9fd7ff;
+}
+
+/* MONAHINGA_PAGE2_MAP_GUIDE_LEGEND_2026_05_05:
+   Small guide-style legend for the real 2D command map.
+   Visual-only. Does not touch scoring, terrain generation, backend, or 3D logic.
+*/
+.command-map-guide-legend{
+  position:absolute;
+  left:12px;
+  bottom:12px;
+  z-index:420;
+  width:min(250px, calc(100% - 24px));
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:16px;
+  background:rgba(5,12,18,.84);
+  color:#edf7ef;
+  box-shadow:0 16px 34px rgba(0,0,0,.26);
+  backdrop-filter:blur(10px);
+  padding:10px 11px;
+  pointer-events:none;
+}
+
+.command-map-guide-legend strong{
+  display:block;
+  font-size:12px;
+  line-height:1.1;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:#f4fff0;
+  margin-bottom:8px;
+}
+
+.command-map-guide-legend-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  line-height:1.25;
+  color:#d8e7de;
+  margin-top:6px;
+}
+
+.command-map-guide-symbol{
+  flex:0 0 auto;
+  width:13px;
+  height:13px;
+  border-radius:999px;
+  border:2px solid rgba(255,255,255,.82);
+  box-shadow:0 0 0 2px rgba(0,0,0,.24);
+}
+
+.command-map-guide-symbol.primary{ background:#aef186; }
+.command-map-guide-symbol.base{ background:#5ec8ff; }
+.command-map-guide-symbol.entry{ background:#ffb347; }
+
+.command-map-guide-line{
+  flex:0 0 auto;
+  width:24px;
+  height:0;
+  border-top:3px dashed #aef186;
+  opacity:.95;
+}
+
+.command-map-guide-box{
+  flex:0 0 auto;
+  width:18px;
+  height:13px;
+  border:2px solid #aef186;
+  border-radius:3px;
+  background:rgba(174,241,134,.08);
+}
+
+.command-map-guide-note{
+  margin-top:8px;
+  padding-top:7px;
+  border-top:1px solid rgba(255,255,255,.10);
+  font-size:11px;
+  line-height:1.35;
+  color:#9fb2a8;
+}
+
+#commandLeafletMap{
+  width:100%;
+  height:100%;
+  min-height:520px;
+  background:#0b1318;
+}
+
+.command-terrain-panel .scene-shell{
+  height:100% !important;
+  min-height:520px !important;
+}
+
+.command-map-pin-label{
+  font-size:12px;
+  font-weight:950;
+  color:#f8fff2;
+  text-shadow:0 1px 3px rgba(0,0,0,.75);
+}
+
+/* MONAHINGA_PAGE2_PRIMARY_SIT_STRONG_FOCUS_2026_05_05:
+   Strong visual emphasis for the Primary Sit marker and invisible approach.
+   Leaflet visual-only change. No backend, scoring, 3D terrain generation, or Render setup touched.
+*/
+.command-map-primary-focus{
+  position:relative;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  pointer-events:none;
+}
+
+.command-map-primary-focus::before,
+.command-map-primary-focus::after{
+  content:"";
+  position:absolute;
+  inset:2px;
+  border-radius:999px;
+  border:2px solid rgba(174,241,134,.82);
+  box-shadow:0 0 18px rgba(174,241,134,.85), 0 0 34px rgba(174,241,134,.42);
+  animation:commandPrimaryPulse 1.55s ease-out infinite;
+}
+
+.command-map-primary-focus::after{
+  inset:7px;
+  border-color:rgba(255,255,255,.62);
+  animation-duration:2.15s;
+  animation-delay:.22s;
+}
+
+.command-map-primary-dot{
+  position:absolute;
+  left:7px;
+  top:7px;
+  width:20px;
+  height:20px;
+  border-radius:999px;
+  background:#bfff85;
+  border:4px solid #111f09;
+  box-shadow:
+    0 0 0 4px rgba(174,241,134,.34),
+    0 0 22px rgba(174,241,134,.95),
+    0 0 42px rgba(174,241,134,.52);
+  z-index:2;
+}
+
+.command-map-approach-glow{
+  filter:drop-shadow(0 0 8px rgba(174,241,134,.95)) drop-shadow(0 0 18px rgba(174,241,134,.42));
+}
+
+.command-map-approach-line{
+  filter:drop-shadow(0 0 5px rgba(174,241,134,.85));
+}
+
+.command-map-approach-arrow{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#112006;
+  background:rgba(200,255,141,.94);
+  border:2px solid rgba(255,255,255,.72);
+  box-shadow:0 0 16px rgba(174,241,134,.82), 0 0 32px rgba(174,241,134,.34);
+  font-size:18px;
+  font-weight:950;
+  line-height:1;
+  text-shadow:none;
+  pointer-events:none;
+}
+
+.command-map-approach-arrow span{
+  display:block;
+  transform:translateY(-1px);
+}
+
+.command-map-approach-label{
+  border:1px solid rgba(200,255,141,.45);
+  border-radius:999px;
+  background:rgba(5,12,18,.86);
+  color:#eaffd6;
+  box-shadow:0 10px 24px rgba(0,0,0,.24), 0 0 18px rgba(174,241,134,.28);
+  padding:5px 9px;
+  font-size:11px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+/* MONAHINGA_PAGE2_ACTION_COMMAND_AFTER_APPROACH_LABEL_2026_05_05:
+   Direct field action command placed beside the already-visible approach label.
+   Visual-only Leaflet overlay. No backend, scoring, 3D, Render setup, or terrain generation touched.
+*/
+.command-map-action-command{
+  border:2px solid rgba(255,255,255,.20);
+  border-radius:14px;
+  background:rgba(5,12,18,.94);
+  color:#f6fff2;
+  box-shadow:0 16px 34px rgba(0,0,0,.36);
+  padding:8px 11px;
+  min-width:188px;
+  max-width:238px;
+  font-size:12px;
+  line-height:1.18;
+  font-weight:950;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+  white-space:normal;
+  pointer-events:none;
+}
+
+.command-map-action-command.safe{
+  border-color:rgba(174,241,134,.95);
+  background:rgba(17,44,13,.94);
+  color:#eaffd6;
+  box-shadow:0 16px 34px rgba(0,0,0,.36), 0 0 28px rgba(174,241,134,.44);
+}
+
+.command-map-action-command.risk{
+  border-color:rgba(255,207,74,.98);
+  background:rgba(66,46,5,.96);
+  color:#fff2b8;
+  box-shadow:0 16px 34px rgba(0,0,0,.38), 0 0 32px rgba(255,207,74,.54);
+}
+
+.command-map-action-command.bad{
+  border-color:rgba(255,82,82,1);
+  background:rgba(76,8,8,.97);
+  color:#ffe1e1;
+  box-shadow:0 16px 34px rgba(0,0,0,.40), 0 0 38px rgba(255,82,82,.66);
+}
+
+.command-map-action-command.unknown{
+  border-color:rgba(159,215,255,.92);
+  background:rgba(9,27,42,.95);
+  color:#eef8ff;
+  box-shadow:0 16px 34px rgba(0,0,0,.38), 0 0 30px rgba(159,215,255,.48);
+}
+
+.command-map-action-command small{
+  display:block;
+  margin-top:4px;
+  color:rgba(255,255,255,.72);
+  font-size:10px;
+  line-height:1.15;
+  font-weight:800;
+  letter-spacing:.02em;
+  text-transform:none;
+}
+
+@keyframes commandPrimaryPulse{
+  0%{
+    transform:scale(.62);
+    opacity:.95;
+  }
+  72%{
+    transform:scale(1.22);
+    opacity:.20;
+  }
+  100%{
+    transform:scale(1.36);
+    opacity:0;
+  }
+}
+
+.command-map-base-dot{
+  width:15px;
+  height:15px;
+  border-radius:999px;
+  background:#5ec8ff;
+  border:3px solid #071824;
+  box-shadow:0 0 0 3px rgba(94,200,255,.22), 0 0 14px rgba(94,200,255,.42);
+}
+
+.command-map-entry-dot{
+  width:15px;
+  height:15px;
+  border-radius:999px;
+  background:#ffb347;
+  border:3px solid #271807;
+  box-shadow:0 0 0 3px rgba(255,179,71,.24), 0 0 14px rgba(255,179,71,.40);
+}
+
+.command-map-fallback{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  color:#d7e3da;
+  text-align:center;
+  font-weight:850;
+  background:rgba(5,12,18,.92);
+  z-index:405;
+}
+
+@media (max-width: 980px){
+  .command-dual-workbench{
+    grid-template-columns:1fr;
+    height:auto;
+    min-height:0;
+  }
+  .command-map-panel,
+  .command-terrain-panel .scene-shell,
+  #commandLeafletMap{
+    min-height:420px !important;
+  }
+}
+
 </style>
+
+<!-- MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04: Leaflet assets for real 2D command map -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  crossorigin=""
+>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
 </head>
 <body>
 <div class="shell"><div class="chrome"><div class="topbar"><div><div class="brandline">Monahinga™ · Terrain-First Hunter Surface</div><h1>3D Terrain Intelligence Viewer</h1><div class="sub">Real heightmap mesh, clean viewer authority, PAD-US display modes, and ranked hunting intelligence in one operator-facing surface.</div><div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.24);color:#ffd166;font-size:12px;line-height:1.4;max-width:760px">AI-optimized guidance: confirm legality, access, safety, and field conditions before acting on any recommendation.</div><div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(255,120,120,.08);border:1px solid rgba(255,120,120,.28);color:#ffd1d1;font-size:12px;line-height:1.4;max-width:760px"><strong>Huntability warning:</strong> Do not use city blocks, suburbs, parking lots, houses, roads, or non-hunting land. Draw boxes only over real natural/legal hunting ground and verify permission before entering.</div><div class="region-stack"><div class="region-chip"><strong id="regionIdentityLabel">Appalachian whitetail terrain</strong></div><div class="region-chip" id="regionSpeciesLabel">Whitetail · Turkey country</div><div class="region-chip" id="regionMoodLabel">Shaded timber folds</div></div><div id="regionStory" class="region-story">This box reads like Appalachian whitetail country: layered timber folds, protected side-hill movement, and setup value that rewards disciplined access.</div></div>
@@ -1835,7 +2219,25 @@ aside strong,
   <div class="block decision-card"><span class="decision-label">Hunt window</span><strong id="bestTimeLabel" class="decision-title">$best_time_label</strong><span id="bestTimeWindow" class="decision-sub">$best_time_window</span><div class="viewer-micro-note">Use this as the fast decision read first, then verify with wind, legality, access, and field sign.</div><div class="atmo-note" id="terrainIdentityNote">Regional terrain identity helps the scene feel grounded, but your sit decision still comes from the live run data.</div></div>
   <div class="block"><h3>Cover Intelligence</h3><div class="intel-row provider-ok"><strong>Terrain + Cover Read Active</strong><span>Movement bias: reading concealed lower-shelf routes first.</span></div><div class="intel-row"><strong>Exposure watch</strong><span>Open ridge crossings and crest-top travel stay higher risk.</span></div><div class="intel-row"><strong>How cover factors in</strong><span>Cover now supports the movement read, not a separate button mode.</span></div></div>
 </aside>
-<main class="center"><div class="decision-summary-bar" id="decisionSummaryBar"><div><span>Best sit</span><strong>$primary_title</strong></div><div><span>Why</span><strong>$primary_reason</strong></div><div><span>When</span><strong>$best_time_window</strong></div></div><div class="scene-shell"><div class="scene-orientation-note"><strong>Orientation:</strong> Starting view is intended to read north/south from above. You can rotate, tilt, and explore the terrain after launch.</div>$wildlife_atmosphere_markup<div class="legend"><div class="chip">Green ring = best sit</div><div class="chip">Gold ring = backup sit</div><div class="chip">Amber ring = fringe option</div><div class="chip">PAD-US glow follows the terrain</div><div id="modeStatusChip" class="chip">Terrain + Cover Read</div><div id="coverKeyLegend" class="cover-key"><div class="chip cover-chip"><span class="cover-swatch cover-swatch-dense"></span>Dense cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-moderate"></span>Moderate cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-open"></span>Open / exposed</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-bowl"></span>Sheltered bowl</div></div></div><div class="scene-tools" aria-hidden="true" style="display:none"></div><div id="viewer"></div>
+<main class="center"><div class="decision-summary-bar" id="decisionSummaryBar"><div><span>Best sit</span><strong>$primary_title</strong></div><div><span>Why</span><strong>$primary_reason</strong></div><div><span>When</span><strong>$best_time_window</strong></div></div><div class="command-dual-workbench" data-monahinga-created-by="MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04">
+  <section class="command-map-panel" aria-label="2D command map aligned with 3D terrain">
+    <div class="command-map-header">
+      <div class="command-map-title">2D Command Map · North Up</div>
+      <div class="command-map-badge">Topo / Satellite / Street</div>
+    </div>
+    <div id="commandLeafletMap" role="application" aria-label="Interactive 2D map showing the same bbox, primary sit, base camp, and invisible approach"></div>
+    <div class="command-map-guide-legend" aria-hidden="true">
+      <strong>Guide Map Read</strong>
+      <div class="command-map-guide-legend-row"><span class="command-map-guide-symbol primary"></span><span>Primary Sit</span></div>
+      <div class="command-map-guide-legend-row"><span class="command-map-guide-symbol base"></span><span>Base Camp</span></div>
+      <div class="command-map-guide-legend-row"><span class="command-map-guide-symbol entry"></span><span>Access Entry</span></div>
+      <div class="command-map-guide-legend-row"><span class="command-map-guide-line"></span><span>Invisible Approach</span></div>
+      <div class="command-map-guide-legend-row"><span class="command-map-guide-box"></span><span>Same BBox Boundary</span></div>
+      <div class="command-map-guide-note">North-up 2D map uses the same bbox and sit data as the 3D terrain.</div>
+    </div>
+  </section>
+  <section class="command-terrain-panel" aria-label="3D terrain view">
+    <div class="scene-shell"><div class="scene-orientation-note"><strong>Orientation:</strong> Starting view is intended to read north/south from above. You can rotate, tilt, and explore the terrain after launch.</div>$wildlife_atmosphere_markup<div class="legend"><div class="chip">Green ring = best sit</div><div class="chip">Gold ring = backup sit</div><div class="chip">Amber ring = fringe option</div><div class="chip">PAD-US glow follows the terrain</div><div id="modeStatusChip" class="chip">Terrain + Cover Read</div><div id="coverKeyLegend" class="cover-key"><div class="chip cover-chip"><span class="cover-swatch cover-swatch-dense"></span>Dense cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-moderate"></span>Moderate cover</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-open"></span>Open / exposed</div><div class="chip cover-chip"><span class="cover-swatch cover-swatch-bowl"></span>Sheltered bowl</div></div></div><div class="scene-tools" aria-hidden="true" style="display:none"></div><div id="viewer"></div>
 <style>
 .hud-strip {
     position: absolute !important;
@@ -1856,7 +2258,7 @@ aside strong,
 }
 </style>
 
-<div class="cursor-hud" id="cursorHud"><strong>Cursor terrain read</strong><div id="cursorCoords">Move over the terrain to read live GPS.</div><div class="micro-copy">Reads the current terrain point under your cursor.</div></div><div class="hud-strip"><div class="hud-card"><span class="label">Primary sit</span><strong>$primary_title</strong></div><div class="hud-card"><span class="label">Confidence</span><strong>$confidence_label</strong> · $confidence</div><div class="hud-card" id="selectedSiteHud"><span class="label">Selected sit coordinates</span><strong id="selectedSiteTitle">$primary_title</strong><div id="selectedSiteCoords">Loading coordinates…</div><button id="copyCoordsBtn" type="button">Copy coordinates</button></div><div class="hud-card" id="liveWindHud"><span class="label">Live wind near primary sit</span><strong id="liveWindHudSummary">Loading live wind…</strong><div id="liveWindHudMeta" class="micro-copy">Fetching current direction and speed.</div></div><div class="hud-card approach-hud" id="invisibleApproachHud"><span class="label">Invisible Approach</span><strong id="invisibleApproachSummary">Layer off</strong><div id="invisibleApproachMeta" class="micro-copy">Toggle to show approach risk from Access Entry to the selected sit.</div></div></div></div></main>
+<div class="cursor-hud" id="cursorHud"><strong>Cursor terrain read</strong><div id="cursorCoords">Move over the terrain to read live GPS.</div><div class="micro-copy">Reads the current terrain point under your cursor.</div></div><div class="hud-strip"><div class="hud-card"><span class="label">Primary sit</span><strong>$primary_title</strong></div><div class="hud-card"><span class="label">Confidence</span><strong>$confidence_label</strong> · $confidence</div><div class="hud-card" id="selectedSiteHud"><span class="label">Selected sit coordinates</span><strong id="selectedSiteTitle">$primary_title</strong><div id="selectedSiteCoords">Loading coordinates…</div><button id="copyCoordsBtn" type="button">Copy coordinates</button></div><div class="hud-card" id="liveWindHud"><span class="label">Live wind near primary sit</span><strong id="liveWindHudSummary">Loading live wind…</strong><div id="liveWindHudMeta" class="micro-copy">Fetching current direction and speed.</div></div><div class="hud-card approach-hud" id="invisibleApproachHud"><span class="label">Invisible Approach</span><strong id="invisibleApproachSummary">Layer off</strong><div id="invisibleApproachMeta" class="micro-copy">Toggle to show approach risk from Access Entry to the selected sit.</div></div></div></div></section></div></main>
 <aside class="right"><div class="side-rail">$hunter_core_spotlight_markup<div class="block" id="fieldAnchorGuide" style="margin-bottom:8px;border-color:rgba(94,200,255,.22);background:rgba(8,18,28,.78)">
   <h3 style="margin-bottom:6px">Field Anchors</h3>
   <div class="note">
@@ -1892,6 +2294,7 @@ aside strong,
 <script>
 (function() {
   const payload = $payload_json;
+  window.__MONAHINGA_COMMAND_PAYLOAD = payload;
   const wildlifeAtmosphere = payload.wildlife_atmosphere || null;
   const viewer = document.getElementById('viewer');
   const tiltSlider = document.getElementById('tiltSlider');
@@ -3829,6 +4232,628 @@ if (viewerSpecies) {
     hideDeadAiPanelButton();
   }
   window.addEventListener('load', hideDeadAiPanelButton);
+})();
+</script>
+
+
+<script>
+(function(){
+  const marker = "MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04";
+  let commandMap = null;
+  let mapLayers = null;
+  let mapObjects = [];
+
+  function readStoredPoint(key){
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const lat = Number(parsed.lat);
+      const lon = Number(parsed.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+      return { lat, lon, label: parsed.label || key };
+    } catch (_err) {
+      return null;
+    }
+  }
+
+  function bboxCenter(bbox){
+    return {
+      lat: (Number(bbox[1]) + Number(bbox[3])) / 2,
+      lon: (Number(bbox[0]) + Number(bbox[2])) / 2
+    };
+  }
+
+  function pointInsideBbox(point, bbox){
+    if (!point || !bbox) return false;
+    return point.lon >= Number(bbox[0]) && point.lon <= Number(bbox[2]) &&
+           point.lat >= Number(bbox[1]) && point.lat <= Number(bbox[3]);
+  }
+
+  function makeIcon(kind){
+    const className = kind === 'base' ? 'command-map-base-dot' : (kind === 'entry' ? 'command-map-entry-dot' : 'command-map-primary-dot');
+    const isPrimary = kind === 'primary';
+    return L.divIcon({
+      className: '',
+      html: isPrimary ? '<div class="command-map-primary-focus"><div class="' + className + '"></div></div>' : '<div class="' + className + '"></div>',
+      iconSize: isPrimary ? [34, 34] : [22, 22],
+      iconAnchor: isPrimary ? [17, 17] : [11, 11],
+    });
+  }
+
+  function addLabel(marker, text){
+    marker.bindTooltip(text, {
+      permanent: true,
+      direction: 'top',
+      offset: [0, -12],
+      className: 'command-map-pin-label'
+    });
+  }
+
+  function clearObjects(){
+    mapObjects.forEach((obj) => {
+      try { obj.remove(); } catch (_err) {}
+    });
+    mapObjects = [];
+  }
+
+  function getPayload(){
+    return window.__MONAHINGA_COMMAND_PAYLOAD || null;
+  }
+
+  // MONAHINGA_PAGE2_MAP_STRONG_SIT_CAMERA_BIAS_2026_05_05
+  // Strong guide-style map bias: start with the bbox, then gently favor the Primary Sit.
+  // Front-end Leaflet only. No backend, scoring, terrain generation, or 3D logic touched.
+  function commandMapBiasToPrimarySit(payload, bounds){
+    try{
+      if (!commandMap || !payload || !bounds || !bounds.getCenter) return;
+      const primary = (payload.sites || []).find((s) => Number(s.rank) === 1) || (payload.sites || [])[0];
+      const lat = Number(primary && primary.lat);
+      const lon = Number(primary && (primary.lon ?? primary.lng));
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+      const center = bounds.getCenter();
+      const bias = 0.72;
+      const biasedLat = (center.lat * (1 - bias)) + (lat * bias);
+      const biasedLon = (center.lng * (1 - bias)) + (lon * bias);
+
+      const currentZoom = Number(commandMap.getZoom());
+      const maxZoom = Number(commandMap.getMaxZoom && commandMap.getMaxZoom()) || 19;
+      const targetZoom = Number.isFinite(currentZoom) ? Math.min(currentZoom + 1, maxZoom, 16) : undefined;
+
+      if (Number.isFinite(targetZoom)) {
+        commandMap.setView([biasedLat, biasedLon], targetZoom, { animate: false });
+      } else {
+        commandMap.panTo([biasedLat, biasedLon], { animate: false });
+      }
+    }catch(_err){
+      // Stay silent. The 2D camera helper must never block the command surface.
+    }
+  }
+
+  function initCommandMap(){
+    const el = document.getElementById('commandLeafletMap');
+    const payload = getPayload();
+    if (!el || !payload || !payload.bbox || !window.L) return false;
+
+    const bbox = payload.bbox.map(Number);
+    const bounds = L.latLngBounds(
+      [bbox[1], bbox[0]],
+      [bbox[3], bbox[2]]
+    );
+
+    if (!commandMap) {
+      commandMap = L.map(el, {
+        zoomControl: true,
+        attributionControl: true,
+        worldCopyJump: false
+      });
+
+      const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        maxZoom: 17,
+        attribution: '&copy; OpenTopoMap contributors'
+      });
+
+      const street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      });
+
+      const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri'
+      });
+
+      topo.addTo(commandMap);
+      mapLayers = { 'Topo': topo, 'Street': street, 'Satellite': satellite };
+      L.control.layers(mapLayers, null, { collapsed: true }).addTo(commandMap);
+
+      /* MONAHINGA_PAGE2_MAP_GUIDE_LEGEND_2026_05_05:
+         Add distance scale to help field-read access and approach.
+         Visual-only Leaflet control. Safe for Render and independent of backend.
+      */
+      if (L.control && L.control.scale) {
+        L.control.scale({
+          position: 'bottomright',
+          imperial: true,
+          metric: true
+        }).addTo(commandMap);
+      }
+    }
+
+    commandMap.fitBounds(bounds, { padding: [16, 16] });
+    commandMapBiasToPrimarySit(payload, bounds);
+    setTimeout(() => {
+      commandMap.invalidateSize();
+      commandMapBiasToPrimarySit(payload, bounds);
+    }, 120);
+    renderCommandMapObjects(payload, bbox, bounds);
+    return true;
+  }
+
+  function renderCommandMapObjects(payload, bbox, bounds){
+    if (!commandMap) return;
+    clearObjects();
+
+    const bboxRect = L.rectangle(bounds, {
+      color: '#aef186',
+      weight: 2,
+      opacity: 0.9,
+      fillOpacity: 0.06
+    }).addTo(commandMap);
+    mapObjects.push(bboxRect);
+
+    const primary = (payload.sites || []).find((s) => Number(s.rank) === 1) || (payload.sites || [])[0] || null;
+    const center = bboxCenter(bbox);
+
+    let base = readStoredPoint('baseCampGps') || { lat: Number((payload.bbox_center || {}).lat || center.lat), lon: Number((payload.bbox_center || {}).lon || center.lon), label: 'Base Camp' };
+    let entry = readStoredPoint('accessEntryGps') || base;
+
+    if (!pointInsideBbox(base, bbox)) base = { lat: center.lat, lon: center.lon, label: 'Base Camp' };
+    if (!pointInsideBbox(entry, bbox)) entry = base;
+
+    if (primary && Number.isFinite(Number(primary.lat)) && Number.isFinite(Number(primary.lon))) {
+      const p = [Number(primary.lat), Number(primary.lon)];
+      const primaryMarker = L.marker(p, { icon: makeIcon('primary'), title: 'Primary Sit' }).addTo(commandMap);
+      addLabel(primaryMarker, 'Primary Sit');
+      primaryMarker.bindPopup('<strong>Primary Sit</strong><br>' + (primary.title || 'Core convergence') + '<br>' + Number(primary.lat).toFixed(6) + ', ' + Number(primary.lon).toFixed(6));
+      mapObjects.push(primaryMarker);
+
+      const baseMarker = L.marker([base.lat, base.lon], { icon: makeIcon('base'), title: 'Base Camp' }).addTo(commandMap);
+      addLabel(baseMarker, 'Base Camp');
+      baseMarker.bindPopup('<strong>Base Camp</strong><br>' + base.lat.toFixed(6) + ', ' + base.lon.toFixed(6));
+      mapObjects.push(baseMarker);
+
+      const entryMarker = L.marker([entry.lat, entry.lon], { icon: makeIcon('entry'), title: 'Access Entry' }).addTo(commandMap);
+      addLabel(entryMarker, 'Access');
+      entryMarker.bindPopup('<strong>Access Entry</strong><br>' + entry.lat.toFixed(6) + ', ' + entry.lon.toFixed(6));
+      mapObjects.push(entryMarker);
+
+      const approachGlow = L.polyline([[entry.lat, entry.lon], p], {
+        color: '#aef186',
+        weight: 9,
+        opacity: 0.30,
+        dashArray: '10 7',
+        lineCap: 'round',
+        className: 'command-map-approach-glow'
+      }).addTo(commandMap);
+      mapObjects.push(approachGlow);
+
+      const approach = L.polyline([[entry.lat, entry.lon], p], {
+        color: '#c8ff8d',
+        weight: 5,
+        opacity: 0.98,
+        dashArray: '10 7',
+        lineCap: 'round',
+        className: 'command-map-approach-line'
+      }).addTo(commandMap);
+      approach.bindPopup('<strong>Invisible Approach</strong><br>Access Entry to Primary Sit');
+      mapObjects.push(approach);
+
+      // MONAHINGA_PAGE2_CLEAR_APPROACH_ARROWS_2026_05_05
+      // Clear directional approach arrows. Leaflet visual-only; safe if any coordinate is missing.
+      try {
+        const from = { lat: Number(entry.lat), lon: Number(entry.lon) };
+        const to = { lat: Number(p[0]), lon: Number(p[1]) };
+        if ([from.lat, from.lon, to.lat, to.lon].every(Number.isFinite)) {
+          const bearingRad = Math.atan2(to.lon - from.lon, to.lat - from.lat);
+          const bearingDeg = bearingRad * 180 / Math.PI;
+
+          [0.38, 0.62].forEach((t) => {
+            const arrowLat = from.lat + ((to.lat - from.lat) * t);
+            const arrowLon = from.lon + ((to.lon - from.lon) * t);
+            const arrow = L.marker([arrowLat, arrowLon], {
+              interactive: false,
+              keyboard: false,
+              icon: L.divIcon({
+                className: '',
+                html: '<div class="command-map-approach-arrow" style="transform:rotate(' + bearingDeg.toFixed(2) + 'deg)"><span>↑</span></div>',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14],
+              })
+            }).addTo(commandMap);
+            mapObjects.push(arrow);
+          });
+
+          const labelLat = from.lat + ((to.lat - from.lat) * 0.50);
+          const labelLon = from.lon + ((to.lon - from.lon) * 0.50);
+          const approachLabel = L.marker([labelLat, labelLon], {
+            interactive: false,
+            keyboard: false,
+            icon: L.divIcon({
+              className: '',
+              html: '<div class="command-map-approach-label">Approach → Sit</div>',
+              iconSize: [112, 24],
+              iconAnchor: [56, 34],
+            })
+          }).addTo(commandMap);
+          mapObjects.push(approachLabel);
+
+          // MONAHINGA_PAGE2_ACTION_COMMAND_AFTER_APPROACH_LABEL_2026_05_05
+          // Direct action command beside the already-visible APPROACH label.
+          // Uses windAssessment if available; otherwise gives a safe verification command.
+          try {
+            const actionState = (windAssessment && windAssessment.state) ? windAssessment.state : 'unknown';
+            const actionText = actionState === 'bad'
+              ? 'Do NOT approach from this side'
+              : (actionState === 'risk'
+                ? 'Shift entry downwind'
+                : (actionState === 'safe'
+                  ? 'Proceed as planned'
+                  : 'Verify wind before approach'));
+            const actionNote = actionState === 'bad'
+              ? 'Pick a new entry or wait for wind shift.'
+              : (actionState === 'risk'
+                ? 'Keep scent off the sit funnel.'
+                : (actionState === 'safe'
+                  ? 'Still verify access, terrain, and permission.'
+                  : 'Wind could not be confirmed from payload.'));
+            const actionLat = from.lat + ((to.lat - from.lat) * 0.58);
+            const actionLon = from.lon + ((to.lon - from.lon) * 0.58);
+            const actionCommand = L.marker([actionLat, actionLon], {
+              interactive:false,
+              keyboard:false,
+              icon:L.divIcon({
+                className:'',
+                html:'<div class="command-map-action-command ' + actionState + '">' + actionText + '<small>' + actionNote + '</small></div>',
+                iconSize:[238,58],
+                iconAnchor:[30,-6],
+              })
+            }).addTo(commandMap);
+            mapObjects.push(actionCommand);
+          } catch (_actionErr) {
+            // Stay silent. Action command must never block map or 3D terrain rendering.
+          }
+        }
+      } catch (_err) {
+        // Stay silent. Directional helpers must never block map or 3D terrain rendering.
+      }
+    }
+
+    const fallback = document.querySelector('.command-map-fallback');
+    if (fallback) fallback.remove();
+  }
+
+  function boot(){
+    let attempts = 0;
+    const timer = setInterval(() => {
+      attempts += 1;
+      if (initCommandMap() || attempts > 40) {
+        clearInterval(timer);
+        if (attempts > 40) {
+          const el = document.getElementById('commandLeafletMap');
+          if (el && !el.querySelector('.command-map-fallback')) {
+            const msg = document.createElement('div');
+            msg.className = 'command-map-fallback';
+            msg.textContent = '2D map could not load yet. The 3D terrain and run data are unchanged.';
+            el.appendChild(msg);
+          }
+        }
+      }
+    }, 150);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+  window.addEventListener('resize', () => {
+    if (commandMap) setTimeout(() => commandMap.invalidateSize(), 100);
+  });
+})();
+</script>
+
+
+<!-- MONAHINGA_RUNTIME_FIELD_COMMAND_2026_05_05 -->
+<style>
+#runtimeFieldCommandBox{
+  position:absolute;
+  right:16px;
+  bottom:90px;
+  z-index:9999;
+  width:260px;
+  border:2px solid rgba(159,215,255,.9);
+  border-radius:14px;
+  background:rgba(10,25,35,.92);
+  color:#eef8ff;
+  padding:10px;
+  font-weight:900;
+  font-size:13px;
+  box-shadow:0 12px 30px rgba(0,0,0,.4);
+  pointer-events:none;
+}
+#runtimeFieldCommandBox.safe{border-color:#9fffa0;color:#eaffd6;background:rgba(10,40,15,.9);}
+#runtimeFieldCommandBox.risk{border-color:#ffd35a;color:#fff2b8;background:rgba(60,40,5,.92);}
+#runtimeFieldCommandBox.bad{border-color:#ff5252;color:#ffe1e1;background:rgba(70,10,10,.95);}
+</style>
+
+<script>
+(function(){
+  function injectBox(){
+    const map = document.querySelector("#commandLeafletMap");
+    if(!map) return;
+
+    if(document.getElementById("runtimeFieldCommandBox")) return;
+
+    const box = document.createElement("div");
+    box.id = "runtimeFieldCommandBox";
+    box.innerHTML = "VERIFY WIND BEFORE APPROACH";
+    map.parentElement.style.position = "relative";
+    map.parentElement.appendChild(box);
+
+    try{
+      if(window.commandMapAssessApproachWind && window.lastPayload){
+        const p = window.lastPayload;
+        const site = (p.sites||[])[0];
+        const entry = p.access_entry || p.access || p.entry;
+
+        if(site && entry){
+          const res = commandMapAssessApproachWind(
+            p,
+            {lat:entry.lat, lon:entry.lon},
+            {lat:site.lat, lon:(site.lon||site.lng)}
+          );
+
+          if(res && res.state){
+            box.className = res.state;
+            if(res.state==="bad") box.innerHTML="DO NOT APPROACH FROM THIS SIDE";
+            else if(res.state==="risk") box.innerHTML="SHIFT ENTRY DOWNWIND";
+            else if(res.state==="safe") box.innerHTML="PROCEED AS PLANNED";
+          }
+        }
+      }
+    }catch(e){}
+  }
+
+  window.addEventListener("load", function(){
+    setTimeout(injectBox, 800);
+  });
+})();
+</script>
+
+
+<!-- MONAHINGA_DEBUG_WIND_OUTPUT_2026_05_05 -->
+<style>
+#debugWindBox{
+  position:absolute;
+  right:16px;
+  bottom:150px;
+  z-index:9999;
+  width:260px;
+  border:2px solid rgba(159,215,255,.9);
+  border-radius:12px;
+  background:rgba(15,20,30,.95);
+  color:#e8f4ff;
+  padding:10px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 10px 28px rgba(0,0,0,.5);
+  pointer-events:none;
+  white-space:pre-line;
+}
+</style>
+
+<script>
+(function(){
+  function injectDebug(){
+    const map = document.querySelector("#commandLeafletMap");
+    if(!map) return;
+
+    if(document.getElementById("debugWindBox")) return;
+
+    const box = document.createElement("div");
+    box.id = "debugWindBox";
+    box.innerHTML = "DEBUG: WAITING...";
+    map.parentElement.style.position = "relative";
+    map.parentElement.appendChild(box);
+
+    try{
+      const p = window.lastPayload || window.lastCommandPayload || window.__MONAHINGA_COMMAND_PAYLOAD || null;
+
+      if(!p){
+        box.innerHTML = "NO PAYLOAD FOUND";
+        return;
+      }
+
+      if(!window.commandMapAssessApproachWind){
+        box.innerHTML = "NO WIND FUNCTION";
+        return;
+      }
+
+      const site = ((p.sites||[]).find(s => Number(s.rank)===1) || (p.sites||[])[0]);
+      const entry = p.access_entry || p.access || p.entry || p.base_camp;
+
+      if(!site || !entry){
+        box.innerHTML = "MISSING SITE OR ENTRY";
+        return;
+      }
+
+      const res = window.commandMapAssessApproachWind(
+        p,
+        {lat:entry.lat, lon:(entry.lon||entry.lng)},
+        {lat:site.lat, lon:(site.lon||site.lng)}
+      );
+
+      if(!res){
+        box.innerHTML = "NO RESULT RETURNED";
+        return;
+      }
+
+      let out = "";
+      out += "STATE: " + (res.state || "none") + "
+";
+      if(res.angle !== undefined) out += "ANGLE: " + res.angle + "
+";
+      if(res.type !== undefined) out += "TYPE: " + res.type + "
+";
+      if(res.reason !== undefined) out += "REASON: " + res.reason + "
+";
+
+      box.innerHTML = out;
+
+    }catch(e){
+      box.innerHTML = "ERROR:
+" + e.message;
+    }
+  }
+
+  window.addEventListener("load", function(){
+    setTimeout(injectDebug, 900);
+  });
+})();
+</script>
+
+
+<!-- MONAHINGA_FORCE_FIELD_COMMAND_VISIBLE_WIND_2026_05_05 -->
+<script>
+(function(){
+  function cardinalToDeg(value){
+    const raw = String(value || "").toUpperCase();
+    const match = raw.match(/\b(NNE|ENE|ESE|SSE|SSW|WSW|WNW|NNW|NE|SE|SW|NW|N|E|S|W)\b/);
+    if(!match) return null;
+    const table = {
+      N:0, NNE:22.5, NE:45, ENE:67.5,
+      E:90, ESE:112.5, SE:135, SSE:157.5,
+      S:180, SSW:202.5, SW:225, WSW:247.5,
+      W:270, WNW:292.5, NW:315, NNW:337.5
+    };
+    return table[match[1]];
+  }
+
+  function angleDiff(a,b){
+    if(a === null || b === null || !Number.isFinite(Number(a)) || !Number.isFinite(Number(b))) return null;
+    const d = Math.abs(Number(a) - Number(b)) % 360;
+    return d > 180 ? 360 - d : d;
+  }
+
+  function ensureBox(){
+    const map = document.querySelector("#commandLeafletMap");
+    if(!map) return null;
+
+    let box = document.getElementById("runtimeFieldCommandBox");
+    if(!box){
+      box = document.createElement("div");
+      box.id = "runtimeFieldCommandBox";
+      map.parentElement.style.position = "relative";
+      map.parentElement.appendChild(box);
+    }
+
+    box.style.position = "absolute";
+    box.style.right = "16px";
+    box.style.bottom = "90px";
+    box.style.zIndex = "9999";
+    box.style.width = "260px";
+    box.style.borderRadius = "14px";
+    box.style.padding = "10px";
+    box.style.fontWeight = "900";
+    box.style.fontSize = "13px";
+    box.style.boxShadow = "0 12px 30px rgba(0,0,0,.4)";
+    box.style.pointerEvents = "none";
+    box.style.border = "2px solid rgba(159,215,255,.9)";
+    box.style.background = "rgba(10,25,35,.92)";
+    box.style.color = "#eef8ff";
+    box.style.lineHeight = "1.15";
+    return box;
+  }
+
+  function preferredWindText(){
+    const trust = document.querySelector("#trustTags");
+    if(trust && trust.dataset && trust.dataset.wind) return trust.dataset.wind;
+
+    const allStrong = Array.from(document.querySelectorAll("strong"));
+    for(const el of allStrong){
+      const prev = el.previousElementSibling;
+      if(prev && /preferred\s*wind/i.test(prev.textContent || "")) return el.textContent || "";
+    }
+
+    return "";
+  }
+
+  function currentWindText(){
+    const windEl = document.querySelector("#operatorWindValue");
+    return windEl ? (windEl.textContent || "") : "";
+  }
+
+  function paint(box, state, main, note){
+    box.className = state;
+    if(state === "safe"){
+      box.style.borderColor = "#9fffa0";
+      box.style.background = "rgba(10,40,15,.92)";
+      box.style.color = "#eaffd6";
+    } else if(state === "risk"){
+      box.style.borderColor = "#ffd35a";
+      box.style.background = "rgba(60,40,5,.94)";
+      box.style.color = "#fff2b8";
+    } else if(state === "bad"){
+      box.style.borderColor = "#ff5252";
+      box.style.background = "rgba(70,10,10,.95)";
+      box.style.color = "#ffe1e1";
+    } else {
+      box.style.borderColor = "rgba(159,215,255,.9)";
+      box.style.background = "rgba(10,25,35,.92)";
+      box.style.color = "#eef8ff";
+    }
+    box.innerHTML = main + (note ? '<br><small style="display:block;margin-top:4px;font-size:10px;line-height:1.2;color:rgba(255,255,255,.74);font-weight:800;">' + note + '</small>' : '');
+  }
+
+  function updateForcedFieldCommand(){
+    const box = ensureBox();
+    if(!box) return;
+
+    const currentText = currentWindText();
+    const preferredText = preferredWindText();
+
+    const currentDeg = cardinalToDeg(currentText);
+    const preferredDeg = cardinalToDeg(preferredText);
+    const diff = angleDiff(currentDeg, preferredDeg);
+
+    if(diff === null){
+      paint(box, "unknown", "VERIFY WIND BEFORE APPROACH", "Wind text not readable yet.");
+      return;
+    }
+
+    // Product-safe decision rule:
+    // close to preferred wind = proceed
+    // moderate mismatch = adjust entry
+    // major mismatch/opposite = do not commit from this entry
+    if(diff <= 45){
+      paint(box, "safe", "PROCEED AS PLANNED", "Current wind matches preferred wind. Still verify on site.");
+    } else if(diff <= 135){
+      paint(box, "risk", "SHIFT ENTRY DOWNWIND", "Current wind differs from preferred. Adjust entry before committing.");
+    } else {
+      paint(box, "bad", "DO NOT APPROACH FROM THIS SIDE", "Wind is opposite preferred. Pick a new entry or wait.");
+    }
+  }
+
+  window.addEventListener("load", function(){
+    setTimeout(updateForcedFieldCommand, 700);
+    setTimeout(updateForcedFieldCommand, 1500);
+    setTimeout(updateForcedFieldCommand, 3000);
+  });
+
+  // Keep it updated if live wind text changes after fetch.
+  setInterval(updateForcedFieldCommand, 2500);
 })();
 </script>
 
