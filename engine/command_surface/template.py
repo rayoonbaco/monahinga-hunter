@@ -4857,5 +4857,163 @@ if (viewerSpecies) {
 })();
 </script>
 
+
+<!-- MONAHINGA_RENDER_SAFE_WIND_COMMAND_FALLBACK_2026_05_05 -->
+<script>
+(function(){
+  function cardinalFromText(value){
+    const raw = String(value || "").toUpperCase();
+    if(/NOT\s*SET|UNKNOWN|UNAVAILABLE|LOADING|VERIFY/.test(raw)) return null;
+    const match = raw.match(/\b(NNE|ENE|ESE|SSE|SSW|WSW|WNW|NNW|NE|SE|SW|NW|N|E|S|W)\b/);
+    return match ? match[1] : null;
+  }
+
+  function cardinalToDeg(card){
+    const table = {
+      N:0, NNE:22.5, NE:45, ENE:67.5,
+      E:90, ESE:112.5, SE:135, SSE:157.5,
+      S:180, SSW:202.5, SW:225, WSW:247.5,
+      W:270, WNW:292.5, NW:315, NNW:337.5
+    };
+    return Object.prototype.hasOwnProperty.call(table, card) ? table[card] : null;
+  }
+
+  function angleDiff(a,b){
+    if(a === null || b === null) return null;
+    const d = Math.abs(Number(a) - Number(b)) % 360;
+    return d > 180 ? 360 - d : d;
+  }
+
+  function currentWindText(){
+    const el = document.querySelector("#operatorWindValue");
+    return el ? (el.textContent || "") : "";
+  }
+
+  function preferredWindText(){
+    const trust = document.querySelector("#trustTags");
+    if(trust && trust.dataset && trust.dataset.wind) return trust.dataset.wind;
+
+    const labels = Array.from(document.querySelectorAll("label"));
+    for(const label of labels){
+      if(/preferred\s*wind/i.test(label.textContent || "")){
+        const strong = label.parentElement && label.parentElement.querySelector("strong");
+        if(strong) return strong.textContent || "";
+      }
+    }
+
+    const allStrong = Array.from(document.querySelectorAll("strong"));
+    for(const el of allStrong){
+      const prev = el.previousElementSibling;
+      if(prev && /preferred\s*wind/i.test(prev.textContent || "")) return el.textContent || "";
+    }
+
+    return "";
+  }
+
+  function ensureBox(){
+    const map = document.querySelector("#commandLeafletMap");
+    if(!map) return null;
+
+    let box = document.getElementById("runtimeFieldCommandBox");
+    if(!box){
+      box = document.createElement("div");
+      box.id = "runtimeFieldCommandBox";
+      map.parentElement.style.position = "relative";
+      map.parentElement.appendChild(box);
+    }
+
+    box.style.position = "absolute";
+    box.style.right = "16px";
+    box.style.bottom = "90px";
+    box.style.zIndex = "10001";
+    box.style.width = "270px";
+    box.style.borderRadius = "14px";
+    box.style.padding = "10px";
+    box.style.fontWeight = "900";
+    box.style.fontSize = "13px";
+    box.style.boxShadow = "0 12px 30px rgba(0,0,0,.42)";
+    box.style.pointerEvents = "none";
+    box.style.lineHeight = "1.15";
+    return box;
+  }
+
+  function paint(box, state, main, note){
+    box.className = state;
+    if(state === "safe"){
+      box.style.border = "2px solid #9fffa0";
+      box.style.background = "rgba(10,40,15,.94)";
+      box.style.color = "#eaffd6";
+    } else if(state === "risk"){
+      box.style.border = "2px solid #ffd35a";
+      box.style.background = "rgba(60,40,5,.96)";
+      box.style.color = "#fff2b8";
+    } else if(state === "bad"){
+      box.style.border = "2px solid #ff5252";
+      box.style.background = "rgba(70,10,10,.96)";
+      box.style.color = "#ffe1e1";
+    } else {
+      box.style.border = "2px solid rgba(159,215,255,.92)";
+      box.style.background = "rgba(10,25,35,.94)";
+      box.style.color = "#eef8ff";
+    }
+    box.innerHTML = main + (note ? '<br><small style="display:block;margin-top:4px;font-size:10px;line-height:1.2;color:rgba(255,255,255,.75);font-weight:800;">' + note + '</small>' : '');
+  }
+
+  function updateRenderSafeWindCommand(){
+    const box = ensureBox();
+    if(!box) return;
+
+    const currentCard = cardinalFromText(currentWindText());
+    const preferredCard = cardinalFromText(preferredWindText());
+
+    // Render/demo-safe behavior:
+    // If current wind is not set but preferred wind exists, do not fake live wind.
+    // Give a clear conditional command tied to the planning wind.
+    if(!currentCard && preferredCard){
+      paint(
+        box,
+        "risk",
+        "HUNT ONLY IF " + preferredCard + " WIND HOLDS",
+        "Current wind is not set on Render. Set live wind to upgrade this command."
+      );
+      return;
+    }
+
+    if(!currentCard && !preferredCard){
+      paint(box, "unknown", "SET WIND TO ACTIVATE", "No current or preferred wind is readable yet.");
+      return;
+    }
+
+    if(currentCard && !preferredCard){
+      paint(box, "unknown", "SET PREFERRED WIND", "Current wind is readable, but preferred wind is missing.");
+      return;
+    }
+
+    const diff = angleDiff(cardinalToDeg(currentCard), cardinalToDeg(preferredCard));
+
+    if(diff === null){
+      paint(box, "unknown", "VERIFY WIND BEFORE APPROACH", "Wind direction could not be compared.");
+      return;
+    }
+
+    if(diff <= 45){
+      paint(box, "safe", "PROCEED AS PLANNED", "Current wind matches preferred wind. Still verify on site.");
+    } else if(diff <= 135){
+      paint(box, "risk", "SHIFT ENTRY DOWNWIND", "Current wind differs from preferred. Adjust entry before committing.");
+    } else {
+      paint(box, "bad", "DO NOT APPROACH FROM THIS SIDE", "Wind is opposite preferred. Pick a new entry or wait.");
+    }
+  }
+
+  window.addEventListener("load", function(){
+    setTimeout(updateRenderSafeWindCommand, 500);
+    setTimeout(updateRenderSafeWindCommand, 1200);
+    setTimeout(updateRenderSafeWindCommand, 2500);
+  });
+
+  setInterval(updateRenderSafeWindCommand, 2500);
+})();
+</script>
+
 </body>
 </html>''')
