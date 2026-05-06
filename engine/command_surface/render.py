@@ -586,6 +586,7 @@ def render_command_surface(run_root: Path, contract: TerrainTruthContract) -> Pa
         default_padus_mode=resolved_padus_mode,
     )
     payload["defaultPadusMode"] = resolved_padus_mode
+    payload["selection_polygon"] = (contract.operator_context or {}).get("selection_polygon") or []  # MONAHINGA_PAYLOAD_SELECTION_POLYGON_2026_05_06
     payload_json = json.dumps(payload)
 
     decision_summary = contract.decision.summary or {}

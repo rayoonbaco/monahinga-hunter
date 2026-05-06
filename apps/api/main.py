@@ -130,6 +130,7 @@ class RunRequest(BaseModel):
     notes: str = Field(default="")
     mode: str = Field(default="hunter")
     selected_species: str = Field(default="default")
+    selection_polygon: list[list[float]] | None = Field(default=None)  # MONAHINGA_ACCEPT_SELECTION_POLYGON_2026_05_06
 
 
 class TerrainValidationError(RuntimeError):
@@ -320,10 +321,26 @@ def _enforce_padus_huntability_preflight(bbox: BBox) -> None:
             eligible += 1
 
     if eligible <= 0:
-        raise HuntabilityGuardrailError(
-            "PAD-US did not identify hunting-eligible public land inside this BBox. "
-            "City parks, suburbs, parking lots, and general public/open land are not enough for a Monahinga hunting run. "
-            "Please select another BBox over real natural/legal hunting ground."
+        # MONAHINGA_SOFTEN_PADUS_NON_HUNTABLE_BLOCKING_2026_05_05
+        # Softened final PAD-US token gate:
+        # - Keep hard blocks for major-city guardrails, skipped PAD-US, unconfigured PAD-US,
+        #   and boxes with zero legal/public PAD-US features.
+        # - Allow boxes that have legal/public PAD-US features but lack a strict hunting token.
+        #   This avoids false hard-blocks when a cabin/road edge is inside the BBox but
+        #   nearby terrain may still be valid hunting context.
+        # - Existing UI warnings still tell the user to verify legality, access, safety,
+        #   permission, and local regulations before acting.
+        strict_padus = str(os.getenv("MONAHINGA_STRICT_PADUS_HUNTABILITY", "")).strip().lower() in {"1", "true", "yes", "on"}
+        if strict_padus:
+            raise HuntabilityGuardrailError(
+                "PAD-US did not identify hunting-eligible public land inside this BBox. "
+                "City parks, suburbs, parking lots, and general public/open land are not enough for a Monahinga hunting run. "
+                "Please select another BBox over real natural/legal hunting ground."
+            )
+
+        print(
+            "[huntability] soft-allowing PAD-US legal/public features without strict hunting token; "
+            "showing caution in UI and preserving field/legal verification responsibility."
         )
 
 
@@ -644,6 +661,72 @@ def health() -> dict:
     }
 
 
+# MONAHINGA_PADUS_PREVIEW_ENDPOINT_2026_05_06
+@app.get("/padus-preview")
+def padus_preview(min_lon: float, min_lat: float, max_lon: float, max_lat: float) -> dict:
+    try:
+        bbox = BBox.normalized(min_lon, min_lat, max_lon, max_lat)
+
+        width = abs(float(bbox.max_lon) - float(bbox.min_lon))
+        height = abs(float(bbox.max_lat) - float(bbox.min_lat))
+        if width <= 0 or height <= 0:
+            raise ValueError("BBox must have non-zero width and height.")
+        if width > 1.5 or height > 1.5:
+            raise ValueError("PAD-US preview BBox is too large. Zoom in or draw a smaller scouting area.")
+
+        cached_geojson_path, cached_summary_path = _preflight_cache_paths(bbox)
+
+        if not (cached_geojson_path.exists() and cached_summary_path.exists()):
+            preflight_root = RUNS_DIR / "_padus_preview"
+            preflight_root.mkdir(parents=True, exist_ok=True)
+
+            with tempfile.TemporaryDirectory(prefix="padus_preview_", dir=str(preflight_root)) as tmp:
+                tmp_root = Path(tmp)
+                geojson_path = tmp_root / "legal_surface.geojson"
+                summary_path = tmp_root / "legal_surface_summary.json"
+                PADUSLegalSurfaceClient().fetch_legal_surface(bbox, geojson_path, summary_path)
+
+                cached_geojson_path.parent.mkdir(parents=True, exist_ok=True)
+                if geojson_path.exists():
+                    shutil.copy2(geojson_path, cached_geojson_path)
+                if summary_path.exists():
+                    shutil.copy2(summary_path, cached_summary_path)
+
+        try:
+            geojson = json.loads(cached_geojson_path.read_text(encoding="utf-8")) if cached_geojson_path.exists() else {
+                "type": "FeatureCollection",
+                "features": [],
+            }
+        except Exception:
+            geojson = {
+                "type": "FeatureCollection",
+                "features": [],
+            }
+
+        try:
+            summary = json.loads(cached_summary_path.read_text(encoding="utf-8")) if cached_summary_path.exists() else {}
+        except Exception:
+            summary = {}
+
+        feature_count = len(geojson.get("features") or [])
+
+        return {
+            "ok": True,
+            "bbox": bbox.as_list(),
+            "feature_count": feature_count,
+            "summary": summary,
+            "geojson": geojson,
+            "message": (
+                "PAD-US public/hunting signal loaded for this selection. "
+                "Verify ownership, access, permission, season dates, and local regulations."
+            ),
+        }
+
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"PAD-US preview unavailable: {type(exc).__name__}: {exc}")
+
 @app.get("/live-wind")
 def live_wind(lat: float, lon: float) -> dict:
     """Return live wind for the command surface.
@@ -702,6 +785,7 @@ def run_terrain_truth(req: RunRequest):
                 "mode": req.mode or "hunter",
                 "selected_species": req.selected_species or "default",
                 "target_species": req.selected_species or "default",
+                "selection_polygon": req.selection_polygon,
             },
         )
 

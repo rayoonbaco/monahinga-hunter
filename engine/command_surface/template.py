@@ -2183,6 +2183,28 @@ aside strong,
   }
 }
 
+
+.command-map-guide-toggle-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,.14);
+}
+.command-map-guide-toggle-row label{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:11px;
+  color:#dce8e5;
+  font-weight:900;
+  cursor:pointer;
+}
+.command-map-guide-toggle-row input{
+  accent-color:#a8f183;
+}
+
 </style>
 
 <!-- MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04: Leaflet assets for real 2D command map -->
@@ -2233,6 +2255,12 @@ aside strong,
       <div class="command-map-guide-legend-row"><span class="command-map-guide-symbol entry"></span><span>Access Entry</span></div>
       <div class="command-map-guide-legend-row"><span class="command-map-guide-line"></span><span>Invisible Approach</span></div>
       <div class="command-map-guide-legend-row"><span class="command-map-guide-box"></span><span>Same BBox Boundary</span></div>
+      <div class="command-map-guide-legend-row"><span class="command-map-guide-box" style="border-color:#1f7a32;background:rgba(47,201,79,.26)"></span><span>PAD-US Signal</span></div>
+      <div class="command-map-guide-legend-row"><span class="command-map-guide-box" style="border-color:#9dff89;background:transparent;border-style:dashed"></span><span>Polygon Truth Boundary</span></div>
+      <div class="command-map-guide-toggle-row" data-created-by="MONAHINGA_PAGE2_MAP_LAYER_TOGGLES_2026_05_06">
+        <label><input id="toggle_command_padus" type="checkbox" checked> PAD-US</label>
+        <label><input id="toggle_command_polygon" type="checkbox" checked> Polygon truth</label>
+      </div>
       <div class="command-map-guide-note">North-up 2D map uses the same bbox and sit data as the 3D terrain.</div>
     </div>
   </section>
@@ -2458,7 +2486,7 @@ aside strong,
     if (regionStory) regionStory.textContent = identity.story;
     if (terrainIdentityNote) terrainIdentityNote.textContent = identity.note;
   }
-  const state = { baseExaggeration: 1.0, currentTexture: (payload.defaultLayer === 'cover' ? 'terrain' : (payload.defaultLayer || 'terrain')), currentPadusMode: payload.defaultPadusMode || 'hybrid', widthWorld: 24, depthWorld: 24, rotationY: -0.92, tiltDeg: Number(tiltSlider.value || 30), cameraRadius: 18, pinControlMode: null, pinControlIndex: -1, pinControlLabel: '', invisibleApproachVisible: false, invisibleApproachRank: 1 };
+  const state = { baseExaggeration: 1.0, currentTexture: (payload.defaultLayer === 'cover' ? 'terrain' : (payload.defaultLayer || 'terrain')), currentPadusMode: payload.defaultPadusMode || 'hybrid', widthWorld: 24, depthWorld: 24, rotationY: -0.92, tiltDeg: Number(tiltSlider.value || 30), cameraRadius: 18, pinControlMode: null, pinControlIndex: -1, pinControlLabel: '', invisibleApproachVisible: true, invisibleApproachRank: 1 /* MONAHINGA_INVISIBLE_APPROACH_DEFAULT_ON_2026_05_05 */ };
   const FEATURE_TYPES = Object.freeze({
     MARKER: 'marker',
     POLYLINE: 'polyline',
@@ -4017,7 +4045,7 @@ savedPins.forEach((pin, i) => {
       function moveTarget(nx, ny) { target.x = normToWorld(nx, ny, state.widthWorld, state.depthWorld).x; target.z = normToWorld(nx, ny, state.widthWorld, state.depthWorld).z; updateTargetHeight(nx, ny); }
       let dragging=false,lastX=0,lastY=0; renderer.domElement.addEventListener('pointerdown', (event) => { dragging=true; lastX=event.clientX; lastY=event.clientY; renderer.domElement.setPointerCapture(event.pointerId); }); renderer.domElement.addEventListener('pointermove', (event) => { if(!dragging)return; const dx=event.clientX-lastX, dy=event.clientY-lastY; lastX=event.clientX; lastY=event.clientY; state.rotationY -= dx*0.008; state.tiltDeg = clamp(state.tiltDeg + dy*0.08, 12, 42); tiltSlider.value = String(Math.round(state.tiltDeg)); updateCamera(); }); const endDrag=()=>{dragging=false;}; renderer.domElement.addEventListener('pointerup', endDrag); renderer.domElement.addEventListener('pointercancel', endDrag); renderer.domElement.addEventListener('wheel', (event) => { event.preventDefault(); state.cameraRadius = clamp(state.cameraRadius + event.deltaY*0.01, 10, 58); updateCamera(); }, { passive:false });
       const initialView = { rotationY: state.rotationY, tiltDeg: state.tiltDeg, cameraRadius: state.cameraRadius, depthValue: Number(depthSlider.value || 100), currentTexture: state.currentTexture, currentPadusMode: state.currentPadusMode, target: target.clone() };
-      function resetView() { clearPinControlMode(); setInvisibleApproachVisible(false); state.rotationY = initialView.rotationY; state.tiltDeg = initialView.tiltDeg; state.cameraRadius = initialView.cameraRadius; tiltSlider.value = String(Math.round(initialView.tiltDeg)); depthSlider.value = String(Math.round(initialView.depthValue)); target.copy(initialView.target.clone()); applyHeights(); rebuildOverlays(); applyTexture(initialView.currentTexture); applyPadusMode(initialView.currentPadusMode); setFocusActive(1); updateSelectedSiteCard(siteByRank(1)); updateCamera(); }
+      function resetView() { clearPinControlMode(); setInvisibleApproachVisible(true); state.rotationY = initialView.rotationY; state.tiltDeg = initialView.tiltDeg; state.cameraRadius = initialView.cameraRadius; tiltSlider.value = String(Math.round(initialView.tiltDeg)); depthSlider.value = String(Math.round(initialView.depthValue)); target.copy(initialView.target.clone()); applyHeights(); rebuildOverlays(); applyTexture(initialView.currentTexture); applyPadusMode(initialView.currentPadusMode); setFocusActive(1); updateSelectedSiteCard(siteByRank(1)); updateCamera(); }
       function focusSiteByRank(rank) { const site = siteByRank(rank); if (!site) return; const p = sitePoint(site); moveTarget(p.nx, p.ny); state.cameraRadius = Number(site.rank) === 1 ? 16.5 : 18.5; state.tiltDeg = Number(site.rank) === 1 ? 24 : 27; tiltSlider.value = String(Math.round(state.tiltDeg)); setFocusActive(rank); updateSelectedSiteCard(site); updateCamera(); }
       const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
 
@@ -4200,7 +4228,7 @@ if (viewerSpecies) {
       depthSlider.addEventListener('input', () => { applyHeights(); rebuildOverlays(); if (state.invisibleApproachVisible) rebuildInvisibleApproachOverlay(currentApproachSite()); updateCamera(); });
       window.addEventListener('resize', () => { const w=viewer.clientWidth||1200, h=viewer.clientHeight||720; camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h); });
       async function loadLiveWind() { const primarySite = siteByRank(1) || (payload.sites || [])[0]; const center = payload.bbox_center || {}; const lat = primarySite ? Number(primarySite.lat) : Number(center.lat || 0); const lon = primarySite ? Number(primarySite.lon) : Number(center.lon || 0); if (!lat && !lon) return; try { const resp = await fetch(window.location.origin + '/live-wind?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon), { cache: 'no-store' }); const read = await resp.json(); if (read && read.ok) { liveWindState = read; const summary = read.summary || 'Live wind loaded.'; const meta = (read.observed_at_label ? 'Updated ' + read.observed_at_label + '. ' : '') + (read.note || ''); if (liveWindSummary) liveWindSummary.textContent = summary; if (liveWindMeta) liveWindMeta.textContent = meta; if (liveWindHudSummary) liveWindHudSummary.textContent = summary; if (liveWindHudMeta) liveWindHudMeta.textContent = meta; if (operatorWindValue) operatorWindValue.textContent = (read.direction_label || 'Wind') + (read.speed_mph ? ' · ' + Math.round(Number(read.speed_mph)) + ' mph' : ''); drawWindOverlay(read); if (state.invisibleApproachVisible) rebuildInvisibleApproachOverlay(currentApproachSite()); const current = siteByRank(1); if (current) updateExecutiveSummaryForSite(current); } else { throw new Error((read && read.note) || 'Live wind unavailable'); } } catch (err) { const fallback = 'Live wind unavailable. Manual wind stays active.'; if (liveWindSummary) liveWindSummary.textContent = fallback; if (liveWindMeta) liveWindMeta.textContent = String(err && err.message ? err.message : err); if (liveWindHudSummary) liveWindHudSummary.textContent = fallback; if (liveWindHudMeta) liveWindHudMeta.textContent = 'Using manual or preferred wind guidance only for this run.'; } }
-      stripCoverLayerButton(); buildCoverOverlay(); updateAnchorSummaries(); updatePinControlStatus(); applyTexture(state.currentTexture); rebuildOverlays(); applyPadusMode(payload.defaultPadusMode || state.currentPadusMode); setFocusActive(1); updateSelectedSiteCard(siteByRank(1)); updateCamera(); loadLiveWind();
+      stripCoverLayerButton(); buildCoverOverlay(); updateAnchorSummaries(); updatePinControlStatus(); applyTexture(state.currentTexture); rebuildOverlays(); applyPadusMode(payload.defaultPadusMode || state.currentPadusMode); setFocusActive(1); updateSelectedSiteCard(siteByRank(1)); setInvisibleApproachVisible(true); updateCamera(); loadLiveWind();
       function animate() { renderer.render(scene, camera); requestAnimationFrame(animate); }
       animate();
     } catch (err) { showError(err && err.message ? err.message : err); }
@@ -4242,6 +4270,8 @@ if (viewerSpecies) {
   let commandMap = null;
   let mapLayers = null;
   let mapObjects = [];
+  let padusSignalMapObjects = []; // MONAHINGA_PAGE2_MAP_LAYER_TOGGLES_2026_05_06
+  let polygonTruthMapObjects = [];
 
   function readStoredPoint(key){
     try {
@@ -4295,10 +4325,46 @@ if (viewerSpecies) {
       try { obj.remove(); } catch (_err) {}
     });
     mapObjects = [];
+    padusSignalMapObjects = [];
+    polygonTruthMapObjects = [];
   }
 
   function getPayload(){
     return window.__MONAHINGA_COMMAND_PAYLOAD || null;
+  }
+
+  function layerToggleChecked(id, defaultValue=true){
+    const el = document.getElementById(id);
+    if (!el) return defaultValue;
+    return !!el.checked;
+  }
+
+  function setLayerGroupVisible(objects, visible){
+    if (!commandMap || !Array.isArray(objects)) return;
+    objects.forEach((layer) => {
+      try {
+        if (visible) {
+          if (!commandMap.hasLayer(layer)) layer.addTo(commandMap);
+        } else {
+          if (commandMap.hasLayer(layer)) commandMap.removeLayer(layer);
+        }
+      } catch (_err) {}
+    });
+  }
+
+  function updateCommandMapLandLayerVisibility(){
+    setLayerGroupVisible(padusSignalMapObjects, layerToggleChecked('toggle_command_padus', true));
+    setLayerGroupVisible(polygonTruthMapObjects, layerToggleChecked('toggle_command_polygon', true));
+  }
+
+  function wireCommandMapLayerToggles(){
+    const padusToggle = document.getElementById('toggle_command_padus');
+    const polygonToggle = document.getElementById('toggle_command_polygon');
+    [padusToggle, polygonToggle].forEach((el) => {
+      if (!el || el.dataset.wired === 'yes') return;
+      el.dataset.wired = 'yes';
+      el.addEventListener('change', updateCommandMapLandLayerVisibility);
+    });
   }
 
   // MONAHINGA_PAGE2_MAP_STRONG_SIT_CAMERA_BIAS_2026_05_05
@@ -4388,7 +4454,145 @@ if (viewerSpecies) {
       commandMapBiasToPrimarySit(payload, bounds);
     }, 120);
     renderCommandMapObjects(payload, bbox, bounds);
+    wireCommandMapLayerToggles();
+    updateCommandMapLandLayerVisibility();
     return true;
+  }
+
+
+  // MONAHINGA_PAGE2_2D_PADUS_SIGNAL_2026_05_06
+  // Draw already-clipped PAD-US/legal polygons on the 2D command map.
+  // Payload rings are normalized 0..1 coordinates inside the selected bbox.
+  function normalizedPointToLatLng(point, bbox){
+    const x = Number(point && point[0]);
+    const y = Number(point && point[1]);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const minLon = Number(bbox[0]);
+    const minLat = Number(bbox[1]);
+    const maxLon = Number(bbox[2]);
+    const maxLat = Number(bbox[3]);
+    const lon = minLon + ((maxLon - minLon) * x);
+    const lat = minLat + ((maxLat - minLat) * y);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return [lat, lon];
+  }
+
+  function drawPadusSignalOnCommandMap(payload, bbox){
+    if (!commandMap || !payload || !Array.isArray(payload.legal_polygons)) return;
+
+    let drawn = 0;
+    payload.legal_polygons.forEach((poly) => {
+      const rings = Array.isArray(poly && poly.rings) ? poly.rings : [];
+      if (!rings.length) return;
+
+      const latLngRings = rings
+        .map((ring) => {
+          if (!Array.isArray(ring)) return [];
+          return ring
+            .map((pt) => normalizedPointToLatLng(pt, bbox))
+            .filter(Boolean);
+        })
+        .filter((ring) => ring.length >= 3);
+
+      if (!latLngRings.length) return;
+
+      const cls = String((poly && poly.class) || 'unknown').toLowerCase();
+      const isStrong = cls.indexOf('hunt') >= 0 || cls.indexOf('legal') >= 0 || cls.indexOf('public') >= 0;
+      const layer = L.polygon(latLngRings, {
+        color: isStrong ? '#1f7a32' : '#6a7f38',
+        weight: 2,
+        opacity: 0.88,
+        fillColor: isStrong ? '#2fc94f' : '#c0d15a',
+        fillOpacity: isStrong ? 0.28 : 0.16,
+        interactive: true
+      }).addTo(commandMap);
+
+      layer.bindPopup(
+        '<strong>PAD-US signal</strong><br>' +
+        'Class: ' + cls + '<br>' +
+        'Verify ownership, access, permission, seasons, and local regulations.'
+      );
+      mapObjects.push(layer);
+      padusSignalMapObjects.push(layer);
+      drawn += 1;
+    });
+
+    if (drawn > 0) {
+      const badge = document.querySelector('.command-map-badge');
+      if (badge && !badge.dataset.padusSignalAdded) {
+        badge.dataset.padusSignalAdded = 'yes';
+        badge.textContent = badge.textContent + ' / PAD-US';
+      }
+    }
+  }
+
+
+  // MONAHINGA_PAGE2_POLYGON_VISUAL_MASK_2026_05_06
+  function polygonPointToLatLng(point, bbox){
+    const x = Number(point && point[0]);
+    const y = Number(point && point[1]);
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+
+    const minLon = Number(bbox[0]);
+    const minLat = Number(bbox[1]);
+    const maxLon = Number(bbox[2]);
+    const maxLat = Number(bbox[3]);
+
+    const lon = minLon + ((maxLon - minLon) * x);
+    const lat = minLat + ((maxLat - minLat) * y);
+
+    return [lat, lon];
+  }
+
+  // MONAHINGA_PAGE2_POLYGON_VISUAL_MASK_2026_05_06
+  function drawVisualPolygonTruthMask(payload, bbox, bounds){
+    if (!commandMap || !payload) return;
+
+    const polygonPoints = Array.isArray(payload.selection_polygon)
+      ? payload.selection_polygon
+      : [];
+
+    if (polygonPoints.length < 3) return;
+
+    const latLngs = polygonPoints
+      .map((pt) => polygonPointToLatLng(pt, bbox))
+      .filter(Boolean);
+
+    if (latLngs.length < 3) return;
+
+    const outerRing = [
+      [90, -180],
+      [90, 180],
+      [-90, 180],
+      [-90, -180]
+    ];
+
+    const mask = L.polygon(
+      [outerRing, latLngs],
+      {
+        stroke:false,
+        fillColor:'#041018',
+        fillOpacity:0.42,
+        interactive:false
+      }
+    ).addTo(commandMap);
+
+    const polygonOutline = L.polygon(
+      latLngs,
+      {
+        color:'#9dff89',
+        weight:3,
+        opacity:0.95,
+        fill:false,
+        dashArray:'6 6'
+      }
+    ).addTo(commandMap);
+
+    mapObjects.push(mask);
+    mapObjects.push(polygonOutline);
+    polygonTruthMapObjects.push(mask);
+    polygonTruthMapObjects.push(polygonOutline);
   }
 
   function renderCommandMapObjects(payload, bbox, bounds){
@@ -4402,6 +4606,10 @@ if (viewerSpecies) {
       fillOpacity: 0.06
     }).addTo(commandMap);
     mapObjects.push(bboxRect);
+
+    drawVisualPolygonTruthMask(payload, bbox, bounds);
+
+    drawPadusSignalOnCommandMap(payload, bbox);
 
     const primary = (payload.sites || []).find((s) => Number(s.rank) === 1) || (payload.sites || [])[0] || null;
     const center = bboxCenter(bbox);

@@ -795,6 +795,64 @@ h1 + .card {
 }
 
 
+.inline-land-layers{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:10px 0 12px;
+  padding:9px 11px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(10,16,22,.72);
+  color:#dce8e5;
+  font-size:12px;
+  line-height:1.3;
+}
+.inline-land-layers strong{
+  font-size:11px;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:#eef7f2;
+  margin-right:2px;
+}
+.inline-land-layers label{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.inline-land-layers input{
+  accent-color:#a8f183;
+}
+
+.inline-land-layers button{
+  border:1px solid rgba(168,241,131,.28);
+  background:rgba(168,241,131,.10);
+  color:#eaffd6;
+  border-radius:10px;
+  padding:5px 9px;
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+.inline-land-layers button:hover{
+  background:rgba(168,241,131,.18);
+}
+.inline-land-layers span{
+  color:#9fb0bc;
+  font-size:11px;
+  flex-basis:100%;
+}
+
+.inline-land-layers .layer-pending{
+  flex-basis:auto;
+  font-size:10px;
+  color:#ffd98a;
+  margin-left:2px;
+}
 </style>
 </head>
 <body>
@@ -835,17 +893,27 @@ h1 + .card {
       <div class="search-meta" id="search_meta">Topo is now the default scouting layer. Search jumps you to a place first, then you draw the hunt box exactly where you want it.</div>
       <div class="map-toolbar">
         <button class="ghost" type="button" onclick="goDefaultView()">Monahinga™ view</button>
-        <button class="ghost" type="button" onclick="clearDrawnBox()">Clear box</button>
+        <button class="ghost" type="button" onclick="clearDrawnBox()">Clear Current Selection</button>
         <button class="ghost" type="button" onclick="applyPastedBBox()">Use pasted coordinates</button>
-        <span class="toolbar-note">Draw the rectangle, or paste min lon, min lat, max lon, max lat and let the map build the box for you.</span>
+        <span class="toolbar-note">Clear the current selection first, then draw a BBox rectangle or polygon. Polygon currently launches using its bounding envelope while exact polygon scoring is built.</span>
       </div>
       <div class="field full" style="margin-bottom:12px;">
         <label>Paste bbox coordinates</label>
         <textarea id="bbox_text" class="coord-input" placeholder="Example: -78.102209, 41.891092, -78.074925, 41.909235">__DEFAULT_BBOX_TEXT__</textarea>
         <small>Format: min lon, min lat, max lon, max lat. Commas, spaces, brackets, and line breaks are all fine.</small>
       </div>
+      
+      <div class="inline-land-layers" data-created-by="MONAHINGA_INLINE_LAND_LAYER_CONTROL_2026_05_06">
+        <strong>Land Layers</strong>
+        <label><input id="padus_layer_toggle" type="checkbox"> PAD-US signal</label>
+        <button id="padus_refresh_btn" type="button">Refresh PAD-US</button>
+        <label><input id="parcel_layer_toggle" type="checkbox"> Private parcels <span class="layer-pending">(source needed)</span></label>
+        <span>Scouting context only. Verify access, ownership, permission, and regulations.</span>
+      </div>
+      <input id="selection_polygon_json" type="hidden" value="">
       <div id="bbox-map"></div>
-      <div class="bbox-readout">Current bbox: <code id="bbox_readout">not drawn yet</code></div>
+      <div class="bbox-readout">Current selection bounds: <code id="bbox_readout">not drawn yet</code></div>
+      <div class="search-meta" id="polygon_envelope_note" style="margin-top:8px;">Polygon mode is selection-first scaffolding: Page 2 still renders the bounding envelope until exact polygon terrain masking is added. Use Clear Current Selection before changing shapes.</div>
     </div>
 
     <div class="card">
@@ -962,8 +1030,8 @@ let suppressFieldSync = false;
 let activeRect = null;
 let searchMarker = null;
 
-const map = L.map('bbox-map', { zoomControl:true, worldCopyJump:false });
-const drawLayer = new L.FeatureGroup().addTo(map);
+const map = L.map('bbox-map' /* MONAHINGA_REPAIR_AFTER_PADUS_AUTOREFRESH_2026_05_06 */ /* MONAHINGA_REPAIR_PAGE1_MAP_AFTER_PADUS_SCAFFOLD_2026_05_06 */, { zoomControl:true, worldCopyJump:false });
+const drawLayer = new L.FeatureGroup().addTo(map); // MONAHINGA_AUTO_CLEAR_BEFORE_DRAW_2026_05_06 // MONAHINGA_KEEP_POLYGON_AS_POLYGON_2026_05_06
 
 const street = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
@@ -985,10 +1053,18 @@ L.control.layers(
   { position:'topright' }
 ).addTo(map);
 
-const drawControl = new L.Control.Draw({
+const drawControl = new L.Control.Draw({ // MONAHINGA_DRAW_UX_CLEANUP_2026_05_06
   position: 'topleft',
   draw: {
-    polygon: false,
+    polygon: {
+  allowIntersection: false,
+  showArea: true,
+  shapeOptions: {
+    color: '#83c9ff',
+    weight: 2,
+    fillOpacity: 0.12
+  }
+},
     polyline: false,
     circle: false,
     circlemarker: false,
@@ -1003,15 +1079,152 @@ const drawControl = new L.Control.Draw({
   },
   edit: {
     featureGroup: drawLayer,
-    edit: true,
-    remove: true
+    edit: false,
+    remove: false
   }
 });
 map.addControl(drawControl);
 
+
+
+map.on(L.Draw.Event.DRAWSTART, function () {
+  if (activeRect || drawLayer.getLayers().length) {
+    drawLayer.clearLayers();
+    activeRect = null;
+    const readout = document.getElementById('bbox_readout');
+    if (readout) readout.textContent = 'not drawn yet';
+    setStatus('Previous selection cleared. Draw the new BBox rectangle or polygon.');
+  }
+});
+
 function setStatus(message) {
   document.getElementById('status').textContent = message;
 }
+
+// Inline land-layer scaffold toggles.
+// These groups are intentionally empty until real BBox/viewport-based PAD-US and parcel data are wired in.
+const padusSignalLayer = window.padusSignalLayer || L.layerGroup();
+const privateParcelLayer = window.privateParcelLayer || L.layerGroup();
+window.padusSignalLayer = padusSignalLayer;
+window.privateParcelLayer = privateParcelLayer;
+
+// MONAHINGA_PADUS_PREVIEW_LAYER_2026_05_06
+let activePadusGeoJsonLayer = null;
+
+function currentBBoxPreviewQuery() {
+  const minLon = Number(document.getElementById('min_lon').value);
+  const minLat = Number(document.getElementById('min_lat').value);
+  const maxLon = Number(document.getElementById('max_lon').value);
+  const maxLat = Number(document.getElementById('max_lat').value);
+  if (![minLon, minLat, maxLon, maxLat].every(Number.isFinite)) {
+    throw new Error('Draw or paste a valid BBox before loading PAD-US.');
+  }
+  const params = new URLSearchParams({
+    min_lon: String(minLon),
+    min_lat: String(minLat),
+    max_lon: String(maxLon),
+    max_lat: String(maxLat)
+  });
+  return '/padus-preview?' + params.toString();
+}
+
+async function refreshPadusSignalLayer() {
+  if (!map.hasLayer(padusSignalLayer)) map.addLayer(padusSignalLayer);
+  padusSignalLayer.clearLayers();
+  setStatus('Loading PAD-US signal for the current selection...');
+
+  const url = currentBBoxPreviewQuery();
+  const res = await fetch(url);
+  const payload = await res.json().catch(function () { return {}; });
+
+  if (!res.ok || !payload.ok) {
+    const detail = payload && payload.detail ? String(payload.detail) : 'PAD-US preview failed.';
+    throw new Error(detail);
+  }
+
+  const geojson = payload.geojson || { type:'FeatureCollection', features:[] };
+  const featureCount = Number(payload.feature_count || (geojson.features ? geojson.features.length : 0));
+
+  activePadusGeoJsonLayer = L.geoJSON(geojson, {
+    style: function () {
+      return {
+        color:'#1f7a32',
+        weight:2,
+        fillColor:'#2fc94f',
+        fillOpacity:0.32
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      const props = feature && feature.properties ? feature.properties : {};
+      const name = props.Unit_Nm || props.Name || props.Loc_Nm || props.Own_Name || props.Manage_Name || 'PAD-US signal area';
+      layer.bindPopup(String(name) + '<br>Scouting signal only. Verify access, ownership, permission, and regulations.');
+    }
+  });
+
+  padusSignalLayer.addLayer(activePadusGeoJsonLayer);
+
+  if (featureCount > 0) {
+    setStatus('PAD-US signal loaded for this selection: ' + featureCount + ' feature(s). Verify access, permission, seasons, and local regulations.');
+  } else {
+    setStatus('PAD-US returned no signal features inside this selection. Land status may be private, unknown, outside coverage, or weakly classified.');
+  }
+}
+
+// MONAHINGA_MANUAL_PADUS_REFRESH_2026_05_06
+// MONAHINGA_PRIVATE_PARCELS_SOURCE_NEEDED_2026_05_06
+function wireLandLayerToggles() {
+  const padusToggle = document.getElementById('padus_layer_toggle');
+  const parcelToggle = document.getElementById('parcel_layer_toggle');
+  const padusRefreshBtn = document.getElementById('padus_refresh_btn');
+
+
+  if (padusRefreshBtn && !padusRefreshBtn.dataset.wired) {
+    padusRefreshBtn.dataset.wired = 'yes';
+    padusRefreshBtn.addEventListener('click', async function () {
+      try {
+        if (padusToggle) padusToggle.checked = true;
+        await refreshPadusSignalLayer();
+      } catch (err) {
+        setStatus('PAD-US refresh failed. ' + String(err && err.message ? err.message : err));
+      }
+    });
+  }
+
+  if (padusToggle && !padusToggle.dataset.wired) {
+    padusToggle.dataset.wired = 'yes';
+    padusToggle.addEventListener('change', async function () {
+      if (padusToggle.checked) {
+        try {
+          await refreshPadusSignalLayer();
+        } catch (err) {
+          padusToggle.checked = false;
+          if (map.hasLayer(padusSignalLayer)) map.removeLayer(padusSignalLayer);
+          setStatus('PAD-US preview failed. ' + String(err && err.message ? err.message : err));
+        }
+      } else {
+        padusSignalLayer.clearLayers();
+        if (map.hasLayer(padusSignalLayer)) map.removeLayer(padusSignalLayer);
+        setStatus('PAD-US signal layer hidden.');
+      }
+    });
+  }
+
+  if (parcelToggle && !parcelToggle.dataset.wired) {
+    parcelToggle.dataset.wired = 'yes';
+    parcelToggle.addEventListener('change', function () {
+      if (parcelToggle.checked) {
+        parcelToggle.checked = false;
+        if (map.hasLayer(privateParcelLayer)) map.removeLayer(privateParcelLayer);
+        setStatus('Private parcels need a parcel source/provider before they can display. Best next options: county GIS feed for the selected area, or a parcel data provider such as Regrid/ReportAll. PAD-US is active now; parcels come next.');
+      } else {
+        if (map.hasLayer(privateParcelLayer)) map.removeLayer(privateParcelLayer);
+        setStatus('Private parcels layer hidden.');
+      }
+    });
+  }
+}
+
+setTimeout(wireLandLayerToggles, 0);
 
 function showNotHuntableOverlay() {
   const overlay = document.getElementById('not_huntable_overlay');
@@ -1287,11 +1500,12 @@ async function searchPlace() {
 function clearDrawnBox() {
   drawLayer.clearLayers();
   activeRect = null;
+  clearStoredSelectionPolygon();
   document.getElementById('bbox_readout').textContent = 'not drawn yet';
   document.getElementById('bbox_hint').className = 'inline-warning info';
-  document.getElementById('bbox_hint').textContent = 'Draw a box fully inside the lower 48. Form values stay until you reset or redraw.';
+  document.getElementById('bbox_hint').textContent = 'Draw a BBox rectangle or polygon fully inside the lower 48. Use Clear Current Selection as the reliable reset.';
   applyRegionIdentityFromCurrent();
-  setStatus('Map rectangle cleared. Form values remain as-is until you reset or redraw.');
+  setStatus('Current selection cleared. Draw a new BBox rectangle or polygon when ready.');
 }
 
 function applyBBoxToForm(bounds) {
@@ -1306,13 +1520,25 @@ function applyBBoxToForm(bounds) {
   updateBboxReadout();
 }
 
-function drawRectangleFromBounds(bounds, fit=true) {
+function applySelectionLayer(layer, fit=true) {
   drawLayer.clearLayers();
-  activeRect = L.rectangle(bounds, { color:'#a8f183', weight:2, fillOpacity:0.08 });
+  activeRect = layer;
   drawLayer.addLayer(activeRect);
   applyBBoxToForm(activeRect.getBounds());
   updateBBoxTextFromCurrent();
+  storeSelectionPolygonFromLayer(activeRect);
   if (fit) map.fitBounds(activeRect.getBounds(), { padding:[20,20] });
+}
+
+function selectedShapeName(layer) {
+  if (layer instanceof L.Polygon && !(layer instanceof L.Rectangle)) return 'Polygon';
+  return 'BBox rectangle';
+}
+
+function drawRectangleFromBounds(bounds, fit=true) {
+  clearStoredSelectionPolygon();
+  const rect = L.rectangle(bounds, { color:'#a8f183', weight:2, fillOpacity:0.08 });
+  applySelectionLayer(rect, fit);
 }
 
 function normalizeBoundsFromInputs() {
@@ -1379,11 +1605,129 @@ if (bboxTextEl) {
   });
 }
 
+// MONAHINGA_SEND_SELECTION_POLYGON_2026_05_06
+function selectionPolygonForPayload(bounds) {
+  if (!activeRect) return null;
+  if (!(activeRect instanceof L.Polygon) || activeRect instanceof L.Rectangle) return null;
+
+  const rings = activeRect.getLatLngs();
+  const ring = Array.isArray(rings) && Array.isArray(rings[0]) ? rings[0] : [];
+  if (!ring || ring.length < 3) return null;
+
+  const minLon = Number(bounds.minLon);
+  const minLat = Number(bounds.minLat);
+  const maxLon = Number(bounds.maxLon);
+  const maxLat = Number(bounds.maxLat);
+  const width = maxLon - minLon;
+  const height = maxLat - minLat;
+
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width === 0 || height === 0) return null;
+
+  const points = ring
+    .map((pt) => {
+      const lng = Number(pt.lng);
+      const lat = Number(pt.lat);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      const x = (lng - minLon) / width;
+      const y = (lat - minLat) / height;
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return [
+        Math.max(0, Math.min(1, x)),
+        Math.max(0, Math.min(1, y))
+      ];
+    })
+    .filter(Boolean);
+
+  return points.length >= 3 ? points : null;
+}
+
+// MONAHINGA_FINAL_POLYGON_STORE_2026_05_06
+function polygonStoreEl() {
+  return document.getElementById('selection_polygon_json');
+}
+
+function clearStoredSelectionPolygon() {
+  const el = polygonStoreEl();
+  if (el) el.value = '';
+}
+
+function polygonBoundsObjectFromLayer(layer) {
+  const b = layer.getBounds();
+  const sw = b.getSouthWest();
+  const ne = b.getNorthEast();
+  return {
+    minLon: Number(sw.lng),
+    minLat: Number(sw.lat),
+    maxLon: Number(ne.lng),
+    maxLat: Number(ne.lat)
+  };
+}
+
+function selectionPolygonForLayer(layer) {
+  if (!layer) return null;
+  if (!(layer instanceof L.Polygon) || layer instanceof L.Rectangle) return null;
+
+  const bounds = polygonBoundsObjectFromLayer(layer);
+  const width = bounds.maxLon - bounds.minLon;
+  const height = bounds.maxLat - bounds.minLat;
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width === 0 || height === 0) return null;
+
+  const rings = layer.getLatLngs();
+  const ring = Array.isArray(rings) && Array.isArray(rings[0]) ? rings[0] : [];
+  if (!ring || ring.length < 3) return null;
+
+  const points = ring.map((pt) => {
+    const lng = Number(pt.lng);
+    const lat = Number(pt.lat);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+    return [
+      Math.max(0, Math.min(1, (lng - bounds.minLon) / width)),
+      Math.max(0, Math.min(1, (lat - bounds.minLat) / height))
+    ];
+  }).filter(Boolean);
+
+  return points.length >= 3 ? points : null;
+}
+
+function storeSelectionPolygonFromLayer(layer) {
+  const el = polygonStoreEl();
+  if (!el) return;
+
+  const points = selectionPolygonForLayer(layer);
+  el.value = points ? JSON.stringify(points) : '';
+}
+
+function storedSelectionPolygonForPayload() {
+  const el = polygonStoreEl();
+  if (!el || !el.value) return null;
+
+  try {
+    const parsed = JSON.parse(el.value);
+    if (!Array.isArray(parsed) || parsed.length < 3) return null;
+
+    const points = parsed.map((pt) => {
+      if (!Array.isArray(pt) || pt.length < 2) return null;
+      const x = Number(pt[0]);
+      const y = Number(pt[1]);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      return [
+        Math.max(0, Math.min(1, x)),
+        Math.max(0, Math.min(1, y))
+      ];
+    }).filter(Boolean);
+
+    return points.length >= 3 ? points : null;
+  } catch (err) {
+    return null;
+  }
+}
+
 function payloadFromForm() {
   const bounds = normalizeBoundsFromInputs();
   if (!bounds) throw new Error('Please enter or draw a valid bbox before running.');
   applyBBoxToForm(bounds);
-  return {
+  const payload = {
     min_lon: Number(document.getElementById('min_lon').value),
     min_lat: Number(document.getElementById('min_lat').value),
     max_lon: Number(document.getElementById('max_lon').value),
@@ -1395,6 +1739,13 @@ function payloadFromForm() {
     mode: String(document.getElementById('mode').value || 'hunter').trim(),
     selected_species: document.getElementById('target_species')?.value || 'default'
   };
+
+  const selectionPolygon = storedSelectionPolygonForPayload() || selectionPolygonForPayload(bounds);
+  if (selectionPolygon && selectionPolygon.length >= 3) {
+    payload.selection_polygon = selectionPolygon;
+  }
+
+  return payload;
 }
 
 function isNotHuntableRunError(message, statusCode) {
@@ -1492,21 +1843,30 @@ async function runDefault() {
 }
 
 map.on(L.Draw.Event.CREATED, function (event) {
-  drawRectangleFromBounds(event.layer.getBounds(), true);
-  setStatus('Rectangle captured. The form fields now match the selected hunting box exactly.');
+  const layer = event.layer;
+  applySelectionLayer(layer, true);
+  const shapeName = selectedShapeName(layer);
+  if (shapeName === 'Polygon') {
+    setStatus('Polygon captured and stored. Page 2 should now show the exact polygon boundary while terrain remains BBox-stable.');
+  } else {
+    setStatus('BBox rectangle captured. The form fields now match the selected hunting box exactly.');
+  }
 });
 
 map.on(L.Draw.Event.EDITED, function () {
   const layer = drawLayer.getLayers()[0];
   if (!layer) return;
-  drawRectangleFromBounds(layer.getBounds(), false);
-  setStatus('Rectangle edited. The form fields were updated.');
+  activeRect = layer;
+  storeSelectionPolygonFromLayer(layer);
+  applyBBoxToForm(layer.getBounds());
+  updateBBoxTextFromCurrent();
+  setStatus(selectedShapeName(layer) + ' edited. The form fields were updated from the current selection bounds.');
 });
 
 map.on(L.Draw.Event.DELETED, function () {
   activeRect = null;
   document.getElementById('bbox_readout').textContent = 'not drawn yet';
-  setStatus('Rectangle deleted. Form values remain until you reset, paste a bbox, or type a new lower-48 box.');
+  setStatus('Selection cleared. Draw a new rectangle or polygon when ready.');
 });
 
 for (const id of formIds) {
