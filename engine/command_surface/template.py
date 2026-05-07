@@ -1891,6 +1891,22 @@ aside strong,
   pointer-events:none;
 }
 
+/* MONAHINGA_ORIENTATION_DECLUTTER_PASS_2026_05_06 */
+.command-map-guide.compact-mode{
+  max-width:170px;
+  font-size:11px;
+  opacity:0.92;
+}
+
+.command-map-guide.compact-mode .guide-row{
+  margin-bottom:4px;
+}
+
+.command-map-declutter-hidden{
+  display:none !important;
+}
+
+
 .command-map-guide-legend strong{
   display:block;
   font-size:12px;
@@ -2205,6 +2221,117 @@ aside strong,
   accent-color:#a8f183;
 }
 
+
+/* MONAHINGA_COORDINATE_FRAME_DIAGNOSTIC_2026_05_06 */
+.coord-frame-label-2d{
+  background:rgba(3,8,12,.86);
+  color:#fff3b0;
+  border:1px solid rgba(255,211,122,.85);
+  border-radius:9px;
+  padding:3px 6px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.05em;
+  box-shadow:0 4px 14px rgba(0,0,0,.35);
+  white-space:nowrap;
+}
+.coord-frame-readout{
+  margin-top:8px;
+  padding-top:7px;
+  border-top:1px solid rgba(255,255,255,.12);
+  color:#fff3b0;
+  font-size:10px;
+  line-height:1.35;
+}
+
+
+/* MONAHINGA_PARCEL_SOURCE_TRUTH_LABELS_V1_2026_05_06 */
+.parcel-source-badge{
+  margin-top:9px;
+  padding:9px 11px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(5,9,12,.82);
+  font-size:11px;
+  line-height:1.38;
+  letter-spacing:.035em;
+  box-shadow:0 8px 22px rgba(0,0,0,.28);
+}
+.parcel-source-badge strong{
+  display:block;
+  margin-bottom:2px;
+  color:#ffe29a;
+  font-size:11px;
+}
+.parcel-source-badge.demo{
+  border-color:rgba(255,184,77,.52);
+  background:rgba(72,42,7,.48);
+}
+.parcel-source-badge.imported{
+  border-color:rgba(126,240,151,.46);
+  background:rgba(11,55,28,.42);
+}
+
+
+/* MONAHINGA_PAGE2_PARCEL_SOURCE_TRUTH_HUD_V4_SAFE_2026_05_06
+   Always-visible source truth HUD near the 2D command map.
+   This is a display-only repair. It does not change DEM, scoring, PAD-US,
+   polygon transport, parcel transport, or 2D/3D orientation math.
+*/
+.parcel-source-truth-hud{
+  position:absolute;
+  top:52px;
+  right:56px;
+  z-index:450;
+  max-width:min(390px, calc(100% - 88px));
+  padding:9px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.20);
+  background:rgba(5,9,12,.92);
+  color:#edf7ef;
+  box-shadow:0 12px 30px rgba(0,0,0,.34);
+  backdrop-filter:blur(10px);
+  pointer-events:none;
+  font-size:11px;
+  line-height:1.33;
+  letter-spacing:.025em;
+}
+.parcel-source-truth-hud strong{
+  display:block;
+  margin-bottom:3px;
+  color:#ffe29a;
+  font-size:12px;
+  line-height:1.15;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.045em;
+}
+.parcel-source-truth-hud span{
+  display:block;
+  color:#e8f5ec;
+  font-weight:750;
+}
+.parcel-source-truth-hud.demo{
+  border-color:rgba(255,184,77,.76);
+  background:linear-gradient(180deg,rgba(92,48,7,.94),rgba(41,24,7,.90));
+}
+.parcel-source-truth-hud.imported{
+  border-color:rgba(126,240,151,.68);
+  background:linear-gradient(180deg,rgba(11,63,31,.94),rgba(5,28,17,.90));
+}
+.parcel-source-truth-hud.none{
+  border-color:rgba(255,211,122,.48);
+  background:linear-gradient(180deg,rgba(54,39,13,.92),rgba(15,18,14,.88));
+}
+@media (max-width: 900px){
+  .parcel-source-truth-hud{
+    left:12px;
+    right:12px;
+    top:54px;
+    max-width:none;
+  }
+}
+
 </style>
 
 <!-- MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04: Leaflet assets for real 2D command map -->
@@ -2247,6 +2374,10 @@ aside strong,
       <div class="command-map-title">2D Command Map · North Up</div>
       <div class="command-map-badge">Topo / Satellite / Street</div>
     </div>
+    <div id="parcel_source_truth_hud" class="parcel-source-truth-hud none" data-created-by="MONAHINGA_PAGE2_PARCEL_SOURCE_TRUTH_HUD_V4_SAFE_2026_05_06">
+      <strong>PRIVATE PARCELS: SOURCE CHECKING</strong>
+      <span>Waiting for command surface payload.</span>
+    </div>
     <div id="commandLeafletMap" role="application" aria-label="Interactive 2D map showing the same bbox, primary sit, base camp, and invisible approach"></div>
     <div class="command-map-guide-legend" aria-hidden="true">
       <strong>Guide Map Read</strong>
@@ -2260,6 +2391,7 @@ aside strong,
       <div class="command-map-guide-toggle-row" data-created-by="MONAHINGA_PAGE2_MAP_LAYER_TOGGLES_2026_05_06">
         <label><input id="toggle_command_padus" type="checkbox" checked> PAD-US</label>
         <label><input id="toggle_command_polygon" type="checkbox" checked> Polygon truth</label>
+        <label><input id="toggle_command_parcels" type="checkbox" checked> Private parcels</label>
       </div>
       <div class="command-map-guide-note">North-up 2D map uses the same bbox and sit data as the 3D terrain.</div>
     </div>
@@ -2486,7 +2618,7 @@ aside strong,
     if (regionStory) regionStory.textContent = identity.story;
     if (terrainIdentityNote) terrainIdentityNote.textContent = identity.note;
   }
-  const state = { baseExaggeration: 1.0, currentTexture: (payload.defaultLayer === 'cover' ? 'terrain' : (payload.defaultLayer || 'terrain')), currentPadusMode: payload.defaultPadusMode || 'hybrid', widthWorld: 24, depthWorld: 24, rotationY: -0.92, tiltDeg: Number(tiltSlider.value || 30), cameraRadius: 18, pinControlMode: null, pinControlIndex: -1, pinControlLabel: '', invisibleApproachVisible: true, invisibleApproachRank: 1 /* MONAHINGA_INVISIBLE_APPROACH_DEFAULT_ON_2026_05_05 */ };
+  const state = { baseExaggeration: 1.0, currentTexture: (payload.defaultLayer === 'cover' ? 'terrain' : (payload.defaultLayer || 'terrain')), currentPadusMode: payload.defaultPadusMode || 'hybrid', widthWorld: 24, depthWorld: 24, rotationY:Math.PI*0.68, tiltDeg: Number(tiltSlider.value || 30), cameraRadius: 18, pinControlMode: null, pinControlIndex: -1, pinControlLabel: '', invisibleApproachVisible: true, invisibleApproachRank: 1 /* MONAHINGA_INVISIBLE_APPROACH_DEFAULT_ON_2026_05_05 */ };
   const FEATURE_TYPES = Object.freeze({
     MARKER: 'marker',
     POLYLINE: 'polyline',
@@ -2507,7 +2639,15 @@ aside strong,
   function legalColor(cls) { if (cls === 'legal') return new THREE.Color(0x8fe58f); if (cls === 'restricted') return new THREE.Color(0xd98686); return new THREE.Color(0xe4bb74); }
   function hexColor(colorObj) { return Number(colorObj.getHex()); }
   function safeNorm(v) { return clamp(Number(v) || 0, 0, 1); }
-  function normToWorld(x, y, width, depth) { const nx = safeNorm(x); const ny = safeNorm(y); return new THREE.Vector3((nx - 0.5) * width, 0, (ny - 0.5) * depth); }
+  function geoNyToRasterY(y) { return 1 - safeNorm(y); } // MONAHINGA_3D_NS_FRAME_CORRECTION_2026_05_06
+  function normToWorld(x, y, width, depth) {
+    const nx = safeNorm(x);
+    const geoNy = safeNorm(y);
+    // Geographic normalized Y: 0=south, 1=north.
+    // Three.js plane/raster rows: north is visually toward negative Z.
+    // Flip only the 3D world Z placement; do not change payload/scoring.
+    return new THREE.Vector3((nx - 0.5) * width, 0, (0.5 - geoNy) * depth);
+  }
   function sampleHeight(grid, rows, cols, x, y) { const fx = clamp(x,0,1)*(cols-1); const fy = clamp(y,0,1)*(rows-1); const x0=Math.floor(fx), y0=Math.floor(fy), x1=Math.min(cols-1,x0+1), y1=Math.min(rows-1,y0+1); const tx=fx-x0, ty=fy-y0; const q11=grid[y0*cols+x0]||0, q21=grid[y0*cols+x1]||0, q12=grid[y1*cols+x0]||0, q22=grid[y1*cols+x1]||0; const top=q11*(1-tx)+q21*tx; const bot=q12*(1-tx)+q22*tx; return top*(1-ty)+bot*ty; }
   function computeReliefFocus(grid, rows, cols) { let min=Infinity,max=-Infinity,peakIndex=0,total=0,sumX=0,sumY=0; for (let i=0;i<grid.length;i++){const v=Number(grid[i]||0); if(v<min)min=v; if(v>max){max=v; peakIndex=i;}} if(!Number.isFinite(min)||!Number.isFinite(max)||max<=min){return {nx:.5,ny:.5,relief:0};} for(let row=0;row<rows;row++){for(let col=0;col<cols;col++){const idx=row*cols+col; const v=Number(grid[idx]||0); const nx=cols<=1?0.5:col/(cols-1); const ny=rows<=1?0.5:row/(rows-1); const local=Math.max(0,(v-min)/(max-min)); const biasX=1-Math.abs(nx-.5)*.55; const biasY=1-Math.abs(ny-.5)*.55; const w=Math.max(.0001, local*local*biasX*biasY); total+=w; sumX+=nx*w; sumY+=ny*w; }} const peakCol=peakIndex%cols, peakRow=Math.floor(peakIndex/cols); const peakNx=cols<=1?.5:peakCol/(cols-1), peakNy=rows<=1?.5:peakRow/(rows-1); if(total<=0){return {nx:peakNx,ny:peakNy,relief:max-min};} return {nx:clamp((sumX/total)*0.68+peakNx*0.32,0.18,0.82), ny:clamp((sumY/total)*0.68+peakNy*0.32,0.18,0.82), relief:max-min}; }
   function setButtonActive(key) { layerButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.layer === key)); }
@@ -3287,7 +3427,9 @@ function getAnchorPoint(kind) {
       const fill = new THREE.DirectionalLight(0x90aec7, visualProfile.fill); fill.position.set(-12, 10, -14); scene.add(fill);
       const rim = new THREE.DirectionalLight(0xb9d1db, visualProfile.rim); rim.position.set(10, 7, -18); scene.add(rim);
       const geom = new THREE.PlaneGeometry(state.widthWorld, state.depthWorld, cols - 1, rows - 1); geom.rotateX(-Math.PI / 2); const pos = geom.attributes.position;
-      function currentHeight(nx, ny) { return sampleHeight(grid, rows, cols, nx, ny) * baseVerticalScale * state.baseExaggeration * (Number(depthSlider.value || 100) / 100) * 6.0; }
+      function currentHeight(nx, ny) {
+        return sampleHeight(grid, rows, cols, safeNorm(nx), geoNyToRasterY(ny)) * baseVerticalScale * state.baseExaggeration * (Number(depthSlider.value || 100) / 100) * 6.0;
+      }
       function applyHeights() { const depthScale = Number(depthSlider.value || 100) / 100; for (let row=0; row<rows; row++){ for (let col=0; col<cols; col++){ const idx=row*cols+col; pos.setY(idx, grid[idx] * baseVerticalScale * state.baseExaggeration * depthScale * 6.0); } } pos.needsUpdate = true; geom.computeVertexNormals(); }
       function updateTargetHeight(nx, ny) { target.y = currentHeight(nx, ny) * 0.40 + 0.35; }
       applyHeights(); updateTargetHeight(chosenFocus.nx, chosenFocus.ny);
@@ -3329,6 +3471,86 @@ function buildAnchorMarker(pinData) {
   anchorGroups.push(group);
   return group;
 }
+
+// MONAHINGA_COORDINATE_FRAME_DIAGNOSTIC_2026_05_06
+      function makeFrameTextSprite(label, colorHex) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 192;
+        canvas.height = 96;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(3,8,12,0.86)';
+        ctx.strokeStyle = '#ffd27a';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.roundRect(14, 18, 164, 54, 14);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fff3b0';
+        ctx.font = '900 34px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, 96, 46);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        const material = new THREE.SpriteMaterial({
+          map: texture,
+          transparent: true,
+          depthTest: false,
+          depthWrite: false
+        });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(2.4, 1.2, 1);
+        sprite.renderOrder = 999;
+        return sprite;
+      }
+
+      function buildCoordinateFrameCornerMarker(pinData) {
+        const group = new THREE.Group();
+        const p = worldPoint(pinData.nx, pinData.ny, 1.05);
+
+        const color = Number(pinData.color || 0xffd27a);
+        const stem = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.025, 0.025, 1.15, 8),
+          new THREE.MeshBasicMaterial({ color: color, transparent:true, opacity:0.72 })
+        );
+        stem.position.y = -0.58;
+
+        const sphere = new THREE.Mesh(
+          new THREE.SphereGeometry(0.18, 16, 16),
+          new THREE.MeshBasicMaterial({ color: color, depthTest:false })
+        );
+
+        const sprite = makeFrameTextSprite(pinData.label, color);
+        sprite.position.y = 0.62;
+
+        group.add(stem);
+        group.add(sphere);
+        group.add(sprite);
+        group.position.copy(p);
+        group.userData = Object.assign({}, pinData);
+        return group;
+      }
+
+      function registerCoordinateFrameDiagnostics3D() {
+        const corners = [
+          { id:'frame-nw', label:'NW', nx:0, ny:1, color:0xffd27a },
+          { id:'frame-ne', label:'NE', nx:1, ny:1, color:0xffd27a },
+          { id:'frame-sw', label:'SW', nx:0, ny:0, color:0xffd27a },
+          { id:'frame-se', label:'SE', nx:1, ny:0, color:0xffd27a }
+        ];
+
+        corners.forEach((corner) => {
+          registerOverlay({
+            id: corner.id,
+            type: FEATURE_TYPES.MARKER,
+            group: markerGroup,
+            data: corner,
+            build: buildCoordinateFrameCornerMarker
+          });
+        });
+      }
       function buildCoverOverlay() {
         while (coverOverlayGroup.children.length) coverOverlayGroup.remove(coverOverlayGroup.children[0]);
         const colorBuffer = [];
@@ -3734,6 +3956,8 @@ if (accessEntry) {
     build: buildAnchorMarker,
   });
 }
+
+registerCoordinateFrameDiagnostics3D();
 
 // USER PINS (SAFE OVERLAY SYSTEM)
 const savedPins = JSON.parse(localStorage.getItem(STORAGE_KEYS.userPins) || '[]');
@@ -4321,6 +4545,7 @@ if (viewerSpecies) {
   }
 
   function clearObjects(){
+    removeParcelSvgClip();
     mapObjects.forEach((obj) => {
       try { obj.remove(); } catch (_err) {}
     });
@@ -4352,15 +4577,18 @@ if (viewerSpecies) {
     });
   }
 
+  // MONAHINGA_PAGE2_PRIVATE_PARCEL_TOGGLE_2026_05_06
   function updateCommandMapLandLayerVisibility(){
     setLayerGroupVisible(padusSignalMapObjects, layerToggleChecked('toggle_command_padus', true));
     setLayerGroupVisible(polygonTruthMapObjects, layerToggleChecked('toggle_command_polygon', true));
+    setLayerGroupVisible(privateParcelMapObjects, layerToggleChecked('toggle_command_parcels', true));
   }
 
   function wireCommandMapLayerToggles(){
     const padusToggle = document.getElementById('toggle_command_padus');
     const polygonToggle = document.getElementById('toggle_command_polygon');
-    [padusToggle, polygonToggle].forEach((el) => {
+    const parcelsToggle = document.getElementById('toggle_command_parcels');
+    [padusToggle, polygonToggle, parcelsToggle].forEach((el) => {
       if (!el || el.dataset.wired === 'yes') return;
       el.dataset.wired = 'yes';
       el.addEventListener('change', updateCommandMapLandLayerVisibility);
@@ -4595,6 +4823,333 @@ if (viewerSpecies) {
     polygonTruthMapObjects.push(polygonOutline);
   }
 
+// MONAHINGA_PAGE2_DRAW_PRIVATE_PARCELS_2026_05_06
+  let privateParcelMapObjects = [];
+
+  function parcelLabelFromProps(props){
+    if (!props) return 'Private parcel context';
+    const owner = props.MONAHINGA_OWNER_NORMALIZED || props.OWNER || props.Owner || props.owner || props.OWNER_NAME || props.owner_name || props.PARCEL_OWNER || props.OWN_NAME || props.NAME || props.Name || props.name || '';
+    const parcelId = props.MONAHINGA_PARCEL_ID_NORMALIZED || props.PARCEL_ID || props.parcel_id || props.PIN || props.pin || props.APN || props.apn || props.OBJECTID || props.FID || props.ACCOUNT || props.MAPBLKLOT || props.TAXPIN || '';
+
+    if (owner && parcelId) return 'Owner: ' + String(owner) + ' · Parcel ID: ' + String(parcelId);
+    if (owner) return 'Owner: ' + String(owner);
+    if (parcelId) return 'Parcel ID: ' + String(parcelId);
+    return 'Private parcel context';
+  }
+
+// MONAHINGA_EXACT_VISUAL_PARCEL_CLIP_2026_05_06
+  function parcelClipPathId(){
+    return 'monahinga-parcel-clip-' + String((payload && payload.run_id) || 'active').replace(/[^a-zA-Z0-9_-]/g, '');
+  }
+
+  function removeParcelSvgClip(){
+    try {
+      const oldClip = document.getElementById(parcelClipPathId());
+      if (oldClip && oldClip.parentNode) oldClip.parentNode.removeChild(oldClip);
+      const oldDefs = document.getElementById(parcelClipPathId() + '-defs');
+      if (oldDefs && oldDefs.parentNode && oldDefs.childNodes.length === 0) oldDefs.parentNode.removeChild(oldDefs);
+      document.querySelectorAll('.monahinga-private-parcel-path').forEach((el) => {
+        el.style.clipPath = '';
+        el.removeAttribute('clip-path');
+      });
+    } catch (_err) {}
+  }
+
+  function ensureParcelSvgClip(payload, bbox){
+    if (!commandMap || !payload || !Array.isArray(payload.selection_polygon) || payload.selection_polygon.length < 3) {
+      return null;
+    }
+
+    const svg = commandMap.getPanes().overlayPane.querySelector('svg');
+    if (!svg) return null;
+
+    const clipId = parcelClipPathId();
+    let defs = document.getElementById(clipId + '-defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      defs.setAttribute('id', clipId + '-defs');
+      svg.insertBefore(defs, svg.firstChild);
+    }
+
+    let clip = document.getElementById(clipId);
+    if (!clip) {
+      clip = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+      clip.setAttribute('id', clipId);
+      defs.appendChild(clip);
+    }
+
+    while (clip.firstChild) clip.removeChild(clip.firstChild);
+
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    const points = payload.selection_polygon
+      .map((pt) => normalizedPointToLatLng(pt, bbox))
+      .filter(Boolean)
+      .map((ll) => {
+        const p = commandMap.latLngToLayerPoint(ll);
+        return String(p.x) + ',' + String(p.y);
+      })
+      .join(' ');
+
+    if (!points) return null;
+
+    poly.setAttribute('points', points);
+    clip.appendChild(poly);
+
+    return clipId;
+  }
+
+  function applyParcelClipToPaths(payload, bbox){
+    const clipId = ensureParcelSvgClip(payload, bbox);
+    if (!clipId) return;
+
+    document.querySelectorAll('.monahinga-private-parcel-path').forEach((el) => {
+      el.setAttribute('clip-path', 'url(#' + clipId + ')');
+      el.style.clipPath = 'url(#' + clipId + ')';
+    });
+  }
+
+  function wireParcelClipRefresh(payload, bbox){
+    if (!commandMap || commandMap._monahingaParcelClipRefreshWired) return;
+    commandMap._monahingaParcelClipRefreshWired = true;
+
+    const refresh = function () {
+      window.setTimeout(function () {
+        applyParcelClipToPaths(payload, bbox);
+      }, 0);
+    };
+
+    commandMap.on('zoomend moveend viewreset', refresh);
+  }
+
+  
+  // MONAHINGA_ORIENTATION_DECLUTTER_PASS_2026_05_06
+  function applyCommandHudDeclutter(){
+    try{
+      const guide = document.querySelector('.command-map-guide-legend');
+      if(guide){
+        guide.classList.add('compact-mode');
+      }
+
+      const labels = document.querySelectorAll(
+        '.leaflet-tooltip, .command-map-label'
+      );
+
+      labels.forEach((node)=>{
+        const t = (node.innerText || '').trim().toLowerCase();
+
+        if(
+          t.includes('primary sit') ||
+          t.includes('base camp') ||
+          t.includes('access')
+        ){
+          node.classList.add('command-map-declutter-hidden');
+        }
+      });
+
+    }catch(err){
+      console.warn('HUD declutter failed', err);
+    }
+  }
+
+
+  
+  // MONAHINGA_PARCEL_SOURCE_TRUTH_LABELS_V1_2026_05_06
+  function parcelSourceTruth(payload){
+    const geojson = payload && payload.parcel_geojson ? payload.parcel_geojson : null;
+    if (!geojson || typeof geojson !== 'object') {
+      return { kind:'none', label:'No private parcel layer loaded', message:'No private parcel GeoJSON is present.' };
+    }
+
+    const props = geojson.properties || {};
+    const source = String(props.monahinga_parcel_source || '').toLowerCase();
+
+    const features = Array.isArray(geojson.features) ? geojson.features : [];
+    const featureCount = features.length;
+    const sourceLabel = props.monahinga_parcel_source_label ? String(props.monahinga_parcel_source_label) : '';
+
+    if (source === 'imported_geojson') {
+      return {
+        kind:'imported',
+        label:'PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE',
+        message:(sourceLabel ? sourceLabel + ' · ' : '') + featureCount + ' feature(s). This is imported ownership context, not permission. Verify county records, access, and landowner permission.'
+      };
+    }
+
+    if (source === 'demo') {
+      return {
+        kind:'demo',
+        label:'PRIVATE PARCELS: DEMO VISUAL ONLY',
+        message:(sourceLabel ? sourceLabel + ' · ' : '') + featureCount + ' placeholder feature(s). These are not real ownership boundaries.'
+      };
+    }
+
+    const firstProps = features[0] && features[0].properties ? features[0].properties : {};
+    const featureSource = String(firstProps.MONAHINGA_PARCEL_SOURCE || '').toLowerCase();
+
+    if (featureSource.includes('demo')) {
+      return {
+        kind:'demo',
+        label:'PRIVATE PARCELS: DEMO VISUAL ONLY',
+        message:'These are placeholder parcel shapes proving the overlay pipeline. They are not real ownership data.'
+      };
+    }
+
+    if (features.length > 0) {
+      return {
+        kind:'imported',
+        label:'PRIVATE PARCELS: GEOJSON FEATURES',
+        message:'Parcel features are present. Verify source, ownership, access, and permission before field use.'
+      };
+    }
+
+    return { kind:'none', label:'No private parcel layer loaded', message:'No private parcel GeoJSON features are present.' };
+  }
+
+  function renderParcelSourceTruthBadge(payload){
+    try{
+      const truthRaw = parcelSourceTruth(payload);
+      const truth = truthRaw && typeof truthRaw === 'object'
+        ? truthRaw
+        : { kind:'none', label:'PRIVATE PARCELS: NO GEOJSON LOADED', message:'No private parcel GeoJSON is present in this run.' };
+
+      let kind = String(truth.kind || 'none').toLowerCase();
+      if (kind !== 'demo' && kind !== 'imported') kind = 'none';
+
+      let label = String(truth.label || '').trim();
+      let message = String(truth.message || '').trim();
+
+      if (kind === 'none') {
+        label = 'PRIVATE PARCELS: NO GEOJSON LOADED';
+        message = 'No private parcel source is present in this run. Do not infer ownership from placeholder visuals.';
+      } else if (kind === 'demo') {
+        label = 'PRIVATE PARCELS: DEMO VISUAL ONLY';
+        message = message || 'These are placeholder parcel visuals only. They are not real ownership boundaries.';
+      } else if (kind === 'imported') {
+        label = label.includes('IMPORTED') ? label : 'PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE';
+        message = message || 'Imported parcel GeoJSON is active as ownership context only. Verify county records, access, and permission.';
+      }
+
+      const hud = document.getElementById('parcel_source_truth_hud');
+      if (hud) {
+        hud.className = 'parcel-source-truth-hud ' + kind;
+        hud.innerHTML =
+          '<strong>' + label + '</strong>' +
+          '<span>' + message + '</span>';
+      }
+
+      const existing = document.getElementById('parcel_source_truth_badge');
+      if (existing) existing.remove();
+
+      const guide = document.querySelector('.command-map-guide-legend');
+      if (guide && kind !== 'none') {
+        const box = document.createElement('div');
+        box.id = 'parcel_source_truth_badge';
+        box.className = 'parcel-source-badge ' + kind;
+        box.innerHTML =
+          '<strong>' + label + '</strong><br>' +
+          message;
+        guide.appendChild(box);
+      }
+    }catch(err){
+      console.warn('Parcel source truth badge failed', err);
+    }
+  }
+
+
+  function drawPrivateParcelsOnCommandMap(payload){
+    if (!commandMap || !payload || !payload.parcel_geojson) return;
+
+    const geojson = payload.parcel_geojson;
+    if (!geojson || typeof geojson !== 'object') return;
+
+    try {
+      const layer = L.geoJSON(geojson, {
+        style: function () {
+          return {
+            color:'#ffd27a',
+            weight:2,
+            opacity:0.96,
+            fillColor:'#ff9900',
+            fillOpacity:0.24,
+            className:'monahinga-private-parcel-path'
+          };
+        },
+        onEachFeature: function (feature, layer) {
+          const props = feature && feature.properties ? feature.properties : {};
+          const label = parcelLabelFromProps(props);
+          const truth = parcelSourceTruth(payload);
+          layer.bindPopup(
+            '<strong>Private parcel context</strong><br>' +
+            '<em>' + truth.label + '</em><br>' +
+            label + '<br>' +
+            'Verify ownership, access, permission, and county records.'
+          );
+        }
+      }).addTo(commandMap);
+
+      mapObjects.push(layer);
+      privateParcelMapObjects.push(layer);
+
+      try { layer.bringToFront(); } catch (_err) {}
+
+      applyParcelClipToPaths(payload, Array.isArray(payload.bbox) ? payload.bbox : bbox);
+      wireParcelClipRefresh(payload, Array.isArray(payload.bbox) ? payload.bbox : bbox);
+
+      const badge = document.querySelector('.command-map-badge');
+      if (badge && !badge.dataset.privateParcelsAdded) {
+        badge.dataset.privateParcelsAdded = 'yes';
+        badge.textContent = badge.textContent + ' / PARCELS';
+      }
+    } catch (err) {
+      console.warn('Private parcels failed to draw on command map', err);
+    }
+  }
+
+// MONAHINGA_COORDINATE_FRAME_DIAGNOSTIC_2026_05_06
+  function drawCoordinateFrameDiagnostics2D(bbox, bounds){
+    if (!commandMap || !Array.isArray(bbox) || bbox.length < 4) return;
+
+    const minLon = Number(bbox[0]);
+    const minLat = Number(bbox[1]);
+    const maxLon = Number(bbox[2]);
+    const maxLat = Number(bbox[3]);
+
+    if (![minLon, minLat, maxLon, maxLat].every(Number.isFinite)) return;
+
+    const corners = [
+      { label:'NW', lat:maxLat, lon:minLon },
+      { label:'NE', lat:maxLat, lon:maxLon },
+      { label:'SW', lat:minLat, lon:minLon },
+      { label:'SE', lat:minLat, lon:maxLon }
+    ];
+
+    corners.forEach((corner) => {
+      const icon = L.divIcon({
+        className:'',
+        html:'<div class="coord-frame-label-2d">' + corner.label + '</div>',
+        iconSize:null
+      });
+
+      const marker = L.marker([corner.lat, corner.lon], {
+        icon:icon,
+        interactive:false,
+        keyboard:false
+      }).addTo(commandMap);
+
+      mapObjects.push(marker);
+    });
+
+    const guide = document.querySelector('.command-map-guide-legend');
+    if (guide && !document.getElementById('coord_frame_readout')) {
+      const box = document.createElement('div');
+      box.id = 'coord_frame_readout';
+      box.className = 'coord-frame-readout';
+      box.innerHTML =
+        '<strong>Frame check:</strong> 2D is north-up. Compare NW/NE/SW/SE corner tags with the 3D terrain corner tags. If 3D corners are swapped or mirrored, fix normToWorld axis mapping next.';
+      guide.appendChild(box);
+    }
+  }
+
   function renderCommandMapObjects(payload, bbox, bounds){
     if (!commandMap) return;
     clearObjects();
@@ -4607,9 +5162,14 @@ if (viewerSpecies) {
     }).addTo(commandMap);
     mapObjects.push(bboxRect);
 
+    drawCoordinateFrameDiagnostics2D(bbox, bounds);
+
     drawVisualPolygonTruthMask(payload, bbox, bounds);
 
     drawPadusSignalOnCommandMap(payload, bbox);
+    drawPrivateParcelsOnCommandMap(payload);
+    renderParcelSourceTruthBadge(payload);
+    applyCommandHudDeclutter();
 
     const primary = (payload.sites || []).find((s) => Number(s.rank) === 1) || (payload.sites || [])[0] || null;
     const center = bboxCenter(bbox);
@@ -5225,3 +5785,15 @@ if (viewerSpecies) {
 
 </body>
 </html>''')
+
+# MONAHINGA_ORIENTATION_DECLUTTER_PASS_2026_05_06
+
+
+# MONAHINGA_COORDINATE_FRAME_DIAGNOSTIC_2026_05_06
+
+
+# MONAHINGA_3D_NS_FRAME_CORRECTION_2026_05_06
+
+
+# MONAHINGA_PARCEL_SOURCE_TRUTH_LABELS_V1_2026_05_06
+
