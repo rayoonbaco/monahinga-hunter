@@ -2419,6 +2419,273 @@ aside strong,
   background:rgba(24,25,18,.84);
 }
 
+
+/* MONAHINGA_PASS6_VISIBLE_FIELD_BRIEF_MODAL_2026_05_07
+   Field-ready visible brief panel. Repairs invisible clipboard-only behavior.
+   No scoring, DEM, PAD-US, polygon, parcel payload, or orientation changes.
+*/
+.field-brief-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(0,0,0,.66);
+  backdrop-filter:blur(6px);
+}
+.field-brief-modal-backdrop.open{ display:flex; }
+.field-brief-modal{
+  width:min(920px, 96vw);
+  max-height:88vh;
+  overflow:hidden;
+  border-radius:20px;
+  border:1px solid rgba(126,207,255,.45);
+  background:linear-gradient(180deg, rgba(7,15,22,.98), rgba(4,8,12,.98));
+  box-shadow:0 30px 90px rgba(0,0,0,.65);
+  color:#eef9ff;
+}
+.field-brief-modal-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:16px 18px 10px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.field-brief-modal-title{
+  font-size:18px;
+  font-weight:950;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:#dff6ff;
+}
+.field-brief-modal-subtitle{
+  margin-top:4px;
+  font-size:12px;
+  color:#aac0ca;
+  line-height:1.35;
+}
+.field-brief-modal-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.field-brief-modal button{
+  border-radius:12px;
+  border:1px solid rgba(126,207,255,.42);
+  background:rgba(8,31,50,.88);
+  color:#eaf8ff;
+  padding:8px 11px;
+  font-weight:850;
+  cursor:pointer;
+}
+.field-brief-modal button:hover{
+  filter:brightness(1.12);
+}
+.field-brief-modal-body{
+  padding:14px 18px 18px;
+}
+#field_brief_visible_text{
+  width:100%;
+  height:48vh;
+  min-height:320px;
+  resize:vertical;
+  border-radius:14px;
+  border:1px solid rgba(126,207,255,.28);
+  background:rgba(2,5,8,.94);
+  color:#f5fbff;
+  padding:14px;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:12px;
+  line-height:1.45;
+  box-sizing:border-box;
+  white-space:pre;
+}
+.field-brief-status{
+  margin-top:9px;
+  min-height:18px;
+  color:#bdecc9;
+  font-size:12px;
+  font-weight:800;
+}
+
+
+/* MONAHINGA_REPAIR_CLEAN_FIELD_BRIEF_BUTTON_HARD_RESET_2026_05_07
+   Hard reset for field brief UX. Quarantines old contaminated click handlers
+   and creates a new clean payload-first brief modal.
+*/
+.clean-field-brief-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:7000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(0,0,0,.68);
+  backdrop-filter:blur(6px);
+}
+.clean-field-brief-backdrop.open{ display:flex; }
+.clean-field-brief-modal{
+  width:min(900px,96vw);
+  max-height:88vh;
+  overflow:hidden;
+  border-radius:20px;
+  border:1px solid rgba(126,207,255,.48);
+  background:linear-gradient(180deg,rgba(7,15,22,.98),rgba(3,7,11,.98));
+  color:#eef9ff;
+  box-shadow:0 30px 90px rgba(0,0,0,.65);
+}
+.clean-field-brief-header{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  padding:15px 18px 10px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.clean-field-brief-title{
+  font-size:18px;
+  font-weight:950;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.clean-field-brief-subtitle{
+  margin-top:4px;
+  color:#aac0ca;
+  font-size:12px;
+  line-height:1.35;
+}
+.clean-field-brief-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.clean-field-brief-actions button{
+  border-radius:12px;
+  border:1px solid rgba(126,207,255,.42);
+  background:rgba(8,31,50,.88);
+  color:#eaf8ff;
+  padding:8px 11px;
+  font-weight:850;
+  cursor:pointer;
+}
+.clean-field-brief-body{ padding:14px 18px 18px; }
+#clean_field_brief_text{
+  width:100%;
+  height:48vh;
+  min-height:320px;
+  resize:vertical;
+  box-sizing:border-box;
+  border-radius:14px;
+  border:1px solid rgba(126,207,255,.28);
+  background:rgba(2,5,8,.94);
+  color:#f5fbff;
+  padding:14px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12px;
+  line-height:1.45;
+  white-space:pre;
+}
+.clean-field-brief-status{
+  margin-top:9px;
+  min-height:18px;
+  color:#bdecc9;
+  font-size:12px;
+  font-weight:800;
+}
+
+
+/* MONAHINGA_PASS7_FIELD_BRIEF_FROM_SUMMARY_BUTTON_2026_05_07
+   Stronger field brief export: uses existing summary button text path when possible,
+   then parcel truth. No scoring, DEM, PAD-US, polygon, parcel-payload, or orientation changes.
+*/
+.summary-field-brief-status{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:7200;
+  max-width:420px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(126,207,255,.44);
+  background:rgba(5,14,22,.94);
+  color:#eaf8ff;
+  box-shadow:0 18px 44px rgba(0,0,0,.44);
+  font-size:12px;
+  font-weight:850;
+  display:none;
+}
+.summary-field-brief-status.open{ display:block; }
+
+
+/* MONAHINGA_VISUAL_PRIVATE_PARCEL_INSPECTOR_2026_05_07
+   Visual private parcel inspector for Page 2. Real when imported GeoJSON is loaded.
+   Display-only: no DEM, scoring, PAD-US, polygon transport, parcel payload, or 2D/3D orientation changes.
+*/
+.private-parcel-inspector{
+  margin-top:9px;
+  padding:10px 11px;
+  border-radius:14px;
+  border:1px solid rgba(255,210,122,.44);
+  background:linear-gradient(180deg, rgba(36,24,8,.92), rgba(9,13,12,.90));
+  color:#f8efd2;
+  font-size:11px;
+  line-height:1.34;
+  box-shadow:0 12px 28px rgba(0,0,0,.24);
+}
+.private-parcel-inspector.imported{
+  border-color:rgba(126,240,151,.55);
+  background:linear-gradient(180deg, rgba(8,43,21,.92), rgba(4,18,11,.90));
+}
+.private-parcel-inspector.demo{
+  border-color:rgba(255,184,77,.68);
+  background:linear-gradient(180deg, rgba(73,42,8,.94), rgba(28,17,7,.90));
+}
+.private-parcel-inspector strong{
+  display:block;
+  color:#ffe29a;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+.private-parcel-inspector .parcel-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  border-top:1px solid rgba(255,255,255,.10);
+  padding-top:5px;
+  margin-top:5px;
+}
+.private-parcel-inspector .parcel-row span:first-child{
+  color:#bdd3bf;
+  font-weight:850;
+}
+.private-parcel-inspector .parcel-row span:last-child{
+  color:#fff7dc;
+  text-align:right;
+  font-weight:760;
+}
+.private-parcel-inspector .parcel-warning{
+  margin-top:7px;
+  color:#ffd98a;
+  font-weight:850;
+}
+.private-parcel-inspector .parcel-action{
+  margin-top:7px;
+  color:#e8f5ec;
+}
+.private-parcel-tooltip{
+  color:#211407;
+  font-weight:850;
+  font-size:11px;
+}
+
 </style>
 
 <!-- MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04: Leaflet assets for real 2D command map -->
@@ -5465,6 +5732,405 @@ if (viewerSpecies) {
   }
 
 
+  
+// MONAHINGA_VISUAL_PRIVATE_PARCEL_INSPECTOR_2026_05_07
+  let monahingaSelectedParcelLayer = null;
+
+  function parcelInspectorSafe(value){
+    return String(value === null || value === undefined ? '' : value).replace(/\s+/g, ' ').trim();
+  }
+
+  function parcelInspectorProp(props, keys){
+    props = props || {};
+    for (const key of keys) {
+      if (Object.prototype.hasOwnProperty.call(props, key)) {
+        const value = parcelInspectorSafe(props[key]);
+        if (value) return value;
+      }
+    }
+    return '';
+  }
+
+  function parcelInspectorOwner(props){
+    return parcelInspectorProp(props, [
+      'MONAHINGA_OWNER_NORMALIZED',
+      'OWNER','Owner','owner','OWNER_NAME','owner_name','PARCEL_OWNER','OWN_NAME','NAME','Name'
+    ]);
+  }
+
+  function parcelInspectorParcelId(props){
+    return parcelInspectorProp(props, [
+      'MONAHINGA_PARCEL_ID_NORMALIZED',
+      'PARCEL_ID','parcel_id','PIN','pin','APN','apn','OBJECTID','FID','ACCOUNT','MAPBLKLOT','TAXPIN'
+    ]);
+  }
+
+  function parcelInspectorAcres(props){
+    const raw = parcelInspectorProp(props, ['ACRES','Acres','acres','GIS_ACRES','Shape_Area','AREA_ACRES']);
+    if (!raw) return '';
+    const n = Number(raw);
+    if (Number.isFinite(n)) return n.toFixed(n >= 10 ? 1 : 2) + ' ac';
+    return raw;
+  }
+
+  function parcelInspectorSourceKind(payload){
+    try{
+      const truth = parcelSourceTruth(payload);
+      return truth && truth.kind ? String(truth.kind).toLowerCase() : 'none';
+    }catch(_err){
+      return 'none';
+    }
+  }
+
+  function parcelInspectorFeatureCount(payload){
+    const geojson = payload && payload.parcel_geojson ? payload.parcel_geojson : null;
+    if (!geojson) return 0;
+    if (geojson.type === 'FeatureCollection' && Array.isArray(geojson.features)) return geojson.features.length;
+    if (geojson.type === 'Feature') return 1;
+    return 0;
+  }
+
+  function ensurePrivateParcelInspectorPanel(payload){
+    const guide = document.querySelector('.command-map-guide-legend');
+    if (!guide) return null;
+
+    let panel = document.getElementById('private_parcel_visual_inspector');
+    if (panel) return panel;
+
+    panel = document.createElement('div');
+    panel.id = 'private_parcel_visual_inspector';
+    panel.className = 'private-parcel-inspector';
+    guide.appendChild(panel);
+    return panel;
+  }
+
+  
+// MONAHINGA_VISUAL_PARCEL_CONFLICT_READOUT_2026_05_07
+  function parcelConflictPointFromSite(site){
+    if (!site) return null;
+    const lat = Number(site.lat);
+    const lon = Number(site.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return { lat: lat, lon: lon, label: String(site.title || site.name || 'Selected sit') };
+  }
+
+  function parcelConflictPoint(label, point){
+    if (!point) return null;
+    const lat = Number(point.lat);
+    const lon = Number(point.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return { lat: lat, lon: lon, label: label };
+  }
+
+  function parcelConflictSelectedSit(){
+    try{
+      const site = (typeof getSelectedSiteForExport === 'function')
+        ? getSelectedSiteForExport()
+        : ((typeof currentApproachSite === 'function') ? currentApproachSite() : null);
+      return parcelConflictPointFromSite(site);
+    }catch(_err){
+      return null;
+    }
+  }
+
+  function parcelConflictBaseCamp(){
+    try{
+      if (typeof getAnchorPoint === 'function') return parcelConflictPoint('Base camp', getAnchorPoint('baseCamp'));
+    }catch(_err){}
+    return null;
+  }
+
+  function parcelConflictAccess(){
+    try{
+      if (typeof getAnchorPoint === 'function') return parcelConflictPoint('Access entry', getAnchorPoint('accessEntry'));
+    }catch(_err){}
+    return null;
+  }
+
+  function parcelConflictInsideRing(pointLonLat, ring){
+    if (!Array.isArray(ring) || ring.length < 4) return false;
+    const x = Number(pointLonLat[0]);
+    const y = Number(pointLonLat[1]);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+    let inside = false;
+
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = Number(ring[i][0]);
+      const yi = Number(ring[i][1]);
+      const xj = Number(ring[j][0]);
+      const yj = Number(ring[j][1]);
+      if (![xi, yi, xj, yj].every(Number.isFinite)) continue;
+
+      const hit = ((yi > y) !== (yj > y)) &&
+        (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-12) + xi);
+
+      if (hit) inside = !inside;
+    }
+    return inside;
+  }
+
+  function parcelConflictInsidePolygon(pointLonLat, polygonCoords){
+    if (!Array.isArray(polygonCoords) || !polygonCoords.length) return false;
+    if (!parcelConflictInsideRing(pointLonLat, polygonCoords[0])) return false;
+    for (let i = 1; i < polygonCoords.length; i += 1) {
+      if (parcelConflictInsideRing(pointLonLat, polygonCoords[i])) return false;
+    }
+    return true;
+  }
+
+  function parcelConflictPointInGeometry(point, geometry){
+    if (!point || !geometry || !geometry.type) return false;
+    const lonLat = [Number(point.lon), Number(point.lat)];
+    if (!lonLat.every(Number.isFinite)) return false;
+
+    if (geometry.type === 'Polygon') return parcelConflictInsidePolygon(lonLat, geometry.coordinates);
+    if (geometry.type === 'MultiPolygon' && Array.isArray(geometry.coordinates)) {
+      return geometry.coordinates.some((poly) => parcelConflictInsidePolygon(lonLat, poly));
+    }
+    return false;
+  }
+
+  function parcelConflictOrientation(a, b, c){
+    const value = ((b[1] - a[1]) * (c[0] - b[0])) - ((b[0] - a[0]) * (c[1] - b[1]));
+    if (Math.abs(value) < 1e-12) return 0;
+    return value > 0 ? 1 : 2;
+  }
+
+  function parcelConflictOnSegment(a, b, c){
+    return b[0] <= Math.max(a[0], c[0]) + 1e-12 &&
+      b[0] + 1e-12 >= Math.min(a[0], c[0]) &&
+      b[1] <= Math.max(a[1], c[1]) + 1e-12 &&
+      b[1] + 1e-12 >= Math.min(a[1], c[1]);
+  }
+
+  function parcelConflictSegmentsIntersect(a, b, c, d){
+    const o1 = parcelConflictOrientation(a, b, c);
+    const o2 = parcelConflictOrientation(a, b, d);
+    const o3 = parcelConflictOrientation(c, d, a);
+    const o4 = parcelConflictOrientation(c, d, b);
+    if (o1 !== o2 && o3 !== o4) return true;
+    if (o1 === 0 && parcelConflictOnSegment(a, c, b)) return true;
+    if (o2 === 0 && parcelConflictOnSegment(a, d, b)) return true;
+    if (o3 === 0 && parcelConflictOnSegment(c, a, d)) return true;
+    if (o4 === 0 && parcelConflictOnSegment(c, b, d)) return true;
+    return false;
+  }
+
+  function parcelConflictLineRing(startLonLat, endLonLat, ring){
+    if (!Array.isArray(ring) || ring.length < 2) return false;
+    for (let i = 0; i < ring.length - 1; i += 1) {
+      const a = [Number(ring[i][0]), Number(ring[i][1])];
+      const b = [Number(ring[i + 1][0]), Number(ring[i + 1][1])];
+      if (![a[0], a[1], b[0], b[1]].every(Number.isFinite)) continue;
+      if (parcelConflictSegmentsIntersect(startLonLat, endLonLat, a, b)) return true;
+    }
+    return false;
+  }
+
+  function parcelConflictLinePolygon(startPoint, endPoint, polygonCoords){
+    if (!startPoint || !endPoint) return false;
+    const startLonLat = [Number(startPoint.lon), Number(startPoint.lat)];
+    const endLonLat = [Number(endPoint.lon), Number(endPoint.lat)];
+    if (!startLonLat.every(Number.isFinite) || !endLonLat.every(Number.isFinite)) return false;
+
+    if (parcelConflictInsidePolygon(startLonLat, polygonCoords)) return true;
+    if (parcelConflictInsidePolygon(endLonLat, polygonCoords)) return true;
+
+    return Array.isArray(polygonCoords) && polygonCoords.some((ring) =>
+      parcelConflictLineRing(startLonLat, endLonLat, ring)
+    );
+  }
+
+  function parcelConflictLineGeometry(startPoint, endPoint, geometry){
+    if (!startPoint || !endPoint || !geometry || !geometry.type) return false;
+    if (geometry.type === 'Polygon') return parcelConflictLinePolygon(startPoint, endPoint, geometry.coordinates);
+    if (geometry.type === 'MultiPolygon' && Array.isArray(geometry.coordinates)) {
+      return geometry.coordinates.some((poly) => parcelConflictLinePolygon(startPoint, endPoint, poly));
+    }
+    return false;
+  }
+
+  function parcelConflictRows(feature){
+    const geometry = feature && feature.geometry ? feature.geometry : null;
+    const sit = parcelConflictSelectedSit();
+    const base = parcelConflictBaseCamp();
+    const access = parcelConflictAccess();
+
+    const sitInside = sit ? parcelConflictPointInGeometry(sit, geometry) : null;
+    const baseInside = base ? parcelConflictPointInGeometry(base, geometry) : null;
+    const accessInside = access ? parcelConflictPointInGeometry(access, geometry) : null;
+    const approachCross = (access || base) && sit
+      ? parcelConflictLineGeometry(access || base, sit, geometry)
+      : null;
+
+    function yesNo(value){
+      if (value === true) return 'CAUTION';
+      if (value === false) return 'Clear on selected parcel';
+      return 'Unknown';
+    }
+
+    return [
+      { label: 'Selected sit', value: yesNo(sitInside), hot: sitInside === true },
+      { label: 'Base camp', value: yesNo(baseInside), hot: baseInside === true },
+      { label: 'Access entry', value: yesNo(accessInside), hot: accessInside === true },
+      { label: 'Approach line', value: yesNo(approachCross), hot: approachCross === true }
+    ];
+  }
+
+  function parcelConflictHtml(feature){
+    const rows = parcelConflictRows(feature);
+    const hotCount = rows.filter((row) => row.hot).length;
+
+    let html =
+      '<div class="parcel-row"><span>Conflict read</span><span>' +
+      (hotCount ? hotCount + ' caution flag(s)' : 'No selected-parcel overlap detected') +
+      '</span></div>';
+
+    rows.forEach((row) => {
+      html += '<div class="parcel-row"><span>' + row.label + '</span><span>' + row.value + '</span></div>';
+    });
+
+    html += hotCount
+      ? '<div class="parcel-warning">Caution means this point/line appears to touch the selected parcel context. Verify permission before entering.</div>'
+      : '<div class="parcel-action">This only checks the selected parcel you clicked. Still verify the full route and surrounding parcels.</div>';
+
+    return html;
+  }
+
+  function enhanceSelectedParcelInspectorWithConflicts(feature){
+    const panel = document.getElementById('private_parcel_visual_inspector');
+    if (!panel || !feature) return;
+    if (panel.dataset.conflictEnhanced === 'yes') {
+      const old = panel.querySelector('.parcel-conflict-section');
+      if (old) old.remove();
+    }
+    const section = document.createElement('div');
+    section.className = 'parcel-conflict-section';
+    section.innerHTML = parcelConflictHtml(feature);
+    panel.appendChild(section);
+    panel.dataset.conflictEnhanced = 'yes';
+  }
+
+  function renderPrivateParcelVisualInspector(payload, feature){
+    const panel = ensurePrivateParcelInspectorPanel(payload);
+    if (!panel) return;
+
+    const kind = parcelInspectorSourceKind(payload);
+    const count = parcelInspectorFeatureCount(payload);
+    panel.className = 'private-parcel-inspector ' + (kind === 'imported' || kind === 'demo' ? kind : 'none');
+
+    if (!feature) {
+      if (kind === 'imported') {
+        panel.innerHTML =
+          '<strong>Private Parcel Inspector</strong>' +
+          '<div class="parcel-row"><span>Source</span><span>IMPORTED GEOJSON ACTIVE</span></div>' +
+          '<div class="parcel-row"><span>Features</span><span>' + count + '</span></div>' +
+          '<div class="parcel-action">Click a private parcel polygon on the command map to inspect owner/parcel-ID fields.</div>' +
+          '<div class="parcel-warning">Ownership context only. Verify county records, access, permission, season dates, and local regulations.</div>';
+        return;
+      }
+
+      if (kind === 'demo') {
+        panel.innerHTML =
+          '<strong>Private Parcel Inspector</strong>' +
+          '<div class="parcel-row"><span>Source</span><span>DEMO VISUAL ONLY</span></div>' +
+          '<div class="parcel-row"><span>Features</span><span>' + count + '</span></div>' +
+          '<div class="parcel-warning">Demo parcel shapes are placeholders. Do not use them as ownership boundaries.</div>';
+        return;
+      }
+
+      panel.innerHTML =
+        '<strong>Private Parcel Inspector</strong>' +
+        '<div class="parcel-row"><span>Source</span><span>No imported parcel GeoJSON</span></div>' +
+        '<div class="parcel-action">Load real parcel GeoJSON on Page 1 to inspect private-property context visually here.</div>';
+      return;
+    }
+
+    const props = feature && feature.properties ? feature.properties : {};
+    const owner = parcelInspectorOwner(props) || 'Unknown owner field';
+    const parcelId = parcelInspectorParcelId(props) || 'Unknown parcel ID';
+    const acres = parcelInspectorAcres(props) || 'Not provided';
+    const source = kind === 'imported' ? 'IMPORTED GEOJSON ACTIVE' : (kind === 'demo' ? 'DEMO VISUAL ONLY' : 'GeoJSON');
+
+    panel.innerHTML =
+      '<strong>Selected Parcel</strong>' +
+      '<div class="parcel-row"><span>Source</span><span>' + source + '</span></div>' +
+      '<div class="parcel-row"><span>Owner</span><span>' + owner + '</span></div>' +
+      '<div class="parcel-row"><span>Parcel ID</span><span>' + parcelId + '</span></div>' +
+      '<div class="parcel-row"><span>Acres</span><span>' + acres + '</span></div>' +
+      '<div class="parcel-warning">Visual ownership context only. Verify county records and permission before entering.</div>';
+  }
+
+  function wirePrivateParcelInspectorFeature(feature, layer, payload){
+    if (!layer || !feature) return;
+
+    const props = feature.properties || {};
+    const owner = parcelInspectorOwner(props) || 'Unknown owner';
+    const parcelId = parcelInspectorParcelId(props) || 'Unknown parcel ID';
+
+    try {
+      layer.bindTooltip(
+        '<div class="private-parcel-tooltip">' + owner + '<br>' + parcelId + '</div>',
+        { sticky:true, direction:'top', opacity:0.92 }
+      );
+    } catch (_err) {}
+
+    layer.on('click', function(){
+      try {
+        if (monahingaSelectedParcelLayer && monahingaSelectedParcelLayer.setStyle) {
+          monahingaSelectedParcelLayer.setStyle({
+            color:'#ffd27a',
+            weight:2,
+            opacity:0.96,
+            fillColor:'#ff9900',
+            fillOpacity:0.24
+          });
+        }
+      } catch (_err) {}
+
+      monahingaSelectedParcelLayer = layer;
+
+      try {
+        if (layer.setStyle) {
+          layer.setStyle({
+            color:'#7ef097',
+            weight:4,
+            opacity:1,
+            fillColor:'#1aff78',
+            fillOpacity:0.34
+          });
+        }
+        if (layer.bringToFront) layer.bringToFront();
+      } catch (_err) {}
+
+      renderPrivateParcelVisualInspector(payload, feature);
+      enhanceSelectedParcelInspectorWithConflicts(feature);
+    });
+
+    layer.on('mouseover', function(){
+      try {
+        if (layer !== monahingaSelectedParcelLayer && layer.setStyle) {
+          layer.setStyle({ weight:3, fillOpacity:0.31 });
+        }
+      } catch (_err) {}
+    });
+
+    layer.on('mouseout', function(){
+      try {
+        if (layer !== monahingaSelectedParcelLayer && layer.setStyle) {
+          layer.setStyle({
+            color:'#ffd27a',
+            weight:2,
+            opacity:0.96,
+            fillColor:'#ff9900',
+            fillOpacity:0.24
+          });
+        }
+      } catch (_err) {}
+    });
+  }
+
+
   function drawPrivateParcelsOnCommandMap(payload){
     if (!commandMap || !payload || !payload.parcel_geojson) return;
 
@@ -5493,6 +6159,7 @@ if (viewerSpecies) {
             label + '<br>' +
             'Verify ownership, access, permission, and county records.'
           );
+          wirePrivateParcelInspectorFeature(feature, layer, payload);
         }
       }).addTo(commandMap);
 
@@ -5578,6 +6245,7 @@ if (viewerSpecies) {
     drawPadusSignalOnCommandMap(payload, bbox);
     drawPrivateParcelsOnCommandMap(payload);
     renderParcelSourceTruthBadge(payload);
+    renderPrivateParcelVisualInspector(payload);
     /* Pass 2 private-land warning panel disabled by repair patch: unstable checking loop. */
     applyCommandHudDeclutter();
 
@@ -6522,6 +7190,1420 @@ document.addEventListener('DOMContentLoaded', function(){
   } else {
     window.monahingaEnsureParcelTruthButton();
   }
+
+</script>
+
+<script>
+/* MONAHINGA_PASS5_COPY_FIELD_BRIEF_BUTTON_2026_05_07 */
+
+// MONAHINGA_PASS5_COPY_FIELD_BRIEF_BUTTON_2026_05_07
+  window.monahingaBuildFieldBriefText = function(){
+    function clean(value){
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function textOf(selector){
+      const el = document.querySelector(selector);
+      return el ? clean(el.textContent) : '';
+    }
+
+    function firstText(selectors){
+      for (const selector of selectors) {
+        const value = textOf(selector);
+        if (value) return value;
+      }
+      return '';
+    }
+
+    function collectByLabel(label){
+      const bodyText = clean(document.body ? document.body.textContent : '');
+      const idx = bodyText.indexOf(label);
+      if (idx < 0) return '';
+      return bodyText.slice(idx, idx + 220);
+    }
+
+    const lines = [];
+    lines.push('MONAHINGA FIELD BRIEF');
+    lines.push('=====================');
+    lines.push('');
+
+    const primarySit = firstText([
+      '.selected-site-name',
+      '.selected-sit-name',
+      '#selected_sit_name',
+      '#selected_site_name'
+    ]) || collectByLabel('Primary Sit') || 'Primary sit: see command surface';
+
+    const coordinates = collectByLabel('SELECTED SIT COORDINATES') ||
+      collectByLabel('Sit GPS') ||
+      collectByLabel('Lat ');
+
+    const why = firstText(['.why-card', '#why_card', '.why']) || collectByLabel('WHY');
+    const when = firstText(['.when-card', '#when_card', '.when']) || collectByLabel('WHEN');
+
+    const parcelTruth = firstText([
+      '#parcel_source_truth_hud',
+      '#parcel_source_truth_badge',
+      '#parcel_context_caution_compact'
+    ]) || collectByLabel('PRIVATE PARCELS');
+
+    const guideParcel = firstText(['.command-map-guide-legend']) || '';
+    const wind = collectByLabel('WIND') || collectByLabel('Wind');
+    const readiness = collectByLabel('READINESS') || collectByLabel('Readiness');
+    const proceed = collectByLabel('PROCEED AS PLANNED') || collectByLabel('SHIFT ENTRY DOWNWIND') || '';
+
+    lines.push('Selected sit: ' + primarySit);
+    if (coordinates) lines.push('Selected coordinates: ' + coordinates);
+    if (when) lines.push('When: ' + when);
+    if (why) lines.push('Why: ' + why);
+    if (wind) lines.push('Wind/readiness: ' + clean(wind + ' ' + readiness));
+    if (proceed) lines.push('Field action: ' + proceed);
+    lines.push('');
+
+    lines.push('Parcel/source truth');
+    lines.push('-------------------');
+    if (parcelTruth) {
+      lines.push(parcelTruth);
+    } else if (guideParcel.includes('PRIVATE PARCELS')) {
+      lines.push(guideParcel.slice(guideParcel.indexOf('PRIVATE PARCELS'), guideParcel.indexOf('PRIVATE PARCELS') + 700));
+    } else {
+      lines.push('No parcel source truth label found in the command surface.');
+    }
+
+    lines.push('');
+    lines.push('Required field verification');
+    lines.push('---------------------------');
+    lines.push('- Verify ownership and parcel boundaries with county records or trusted local source.');
+    lines.push('- Verify access permission before entering any parcel or approach corridor.');
+    lines.push('- Verify season dates, local regulations, safety, weather, and field conditions.');
+    lines.push('- Treat parcel context as warning-only; core scoring is unchanged.');
+    lines.push('- Do not use demo parcel visuals as real ownership data.');
+
+    return lines.join('\n') + '\n';
+  };
+
+  window.monahingaCopyOrDownloadFieldBrief = async function(){
+    const text = window.monahingaBuildFieldBriefText();
+
+    try{
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById('copy_field_brief_btn');
+        if (btn) {
+          const oldText = btn.textContent;
+          btn.textContent = 'Copied Field Brief';
+          setTimeout(function(){ btn.textContent = oldText; }, 1600);
+        }
+        return;
+      }
+    }catch(err){
+      console.warn('Clipboard copy failed; falling back to download', err);
+    }
+
+    const blob = new Blob([text], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'monahinga_field_brief.txt';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){
+      URL.revokeObjectURL(url);
+      if (a && a.parentNode) a.parentNode.removeChild(a);
+    }, 600);
+  };
+
+  window.monahingaEnsureFieldBriefButton = function(){
+    try{
+      const buttons = Array.from(document.querySelectorAll('button, a'));
+      const parcelButton = document.getElementById('download_parcel_truth_summary_btn');
+      const summaryButton = buttons.find((btn) =>
+        String(btn.textContent || '').trim().toLowerCase().includes('download summary')
+      );
+
+      const anchor = parcelButton || summaryButton;
+      if (!anchor) return;
+      if (document.getElementById('copy_field_brief_btn')) return;
+
+      const btn = document.createElement('button');
+      btn.id = 'copy_field_brief_btn';
+      btn.type = 'button';
+      btn.className = anchor.className || 'btn';
+      btn.textContent = 'Copy Field Brief';
+      btn.title = 'Copy a field-ready plain-English brief with sit, GPS, parcel truth, and verification checklist.';
+      btn.style.marginLeft = '8px';
+      btn.style.borderColor = 'rgba(126,207,255,.58)';
+      btn.style.background = 'rgba(8,31,50,.88)';
+      btn.style.color = '#eaf8ff';
+
+      btn.addEventListener('click', function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        window.monahingaCopyOrDownloadFieldBrief();
+      }, true);
+
+      anchor.insertAdjacentElement('afterend', btn);
+    }catch(err){
+      console.warn('Could not add Copy Field Brief button', err);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.monahingaEnsureFieldBriefButton);
+  } else {
+    window.monahingaEnsureFieldBriefButton();
+  }
+
+</script>
+
+<script>
+/* MONAHINGA_PASS6_VISIBLE_FIELD_BRIEF_MODAL_2026_05_07 */
+
+// MONAHINGA_PASS6_VISIBLE_FIELD_BRIEF_MODAL_2026_05_07
+  window.monahingaBuildSpecialFieldBriefText = function(){
+    function clean(value){
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function getText(selector){
+      const el = document.querySelector(selector);
+      return el ? clean(el.textContent) : '';
+    }
+
+    function collectAfter(label, span){
+      const bodyText = clean(document.body ? document.body.textContent : '');
+      const idx = bodyText.indexOf(label);
+      if (idx < 0) return '';
+      return bodyText.slice(idx, idx + (span || 260));
+    }
+
+    function currentSitName(){
+      const explicit = getText('#selected_site_name') || getText('#selected_sit_name') || getText('.selected-site-name');
+      if (explicit) return explicit;
+      const footer = collectAfter('PRIMARY SIT', 150);
+      return footer || 'Primary sit shown on command surface';
+    }
+
+    function parcelTruthText(){
+      const hud = document.querySelector('#parcel_source_truth_hud') ||
+        document.querySelector('#parcel_source_truth_badge') ||
+        document.querySelector('#parcel_context_caution_compact');
+      if (hud) return clean(hud.textContent);
+      const guide = document.querySelector('.command-map-guide-legend');
+      if (guide) {
+        const txt = clean(guide.textContent);
+        const idx = txt.indexOf('PRIVATE PARCELS');
+        if (idx >= 0) return txt.slice(idx, idx + 900);
+      }
+      return 'No parcel source truth label found. Verify ownership and access independently.';
+    }
+
+    const when = collectAfter('WHEN', 180) || 'When: see command surface';
+    const why = collectAfter('WHY', 420) || 'Why: see command surface';
+    const wind = collectAfter('WIND', 180);
+    const readiness = collectAfter('READINESS', 180);
+    const selectedCoords = collectAfter('SELECTED SIT COORDINATES', 170) || collectAfter('Lat ', 140);
+    const action = collectAfter('PROCEED AS PLANNED', 180) || collectAfter('SHIFT ENTRY DOWNWIND', 190) || 'Field action: verify wind, access, legality, and pressure before committing.';
+    const base = collectAfter('Base Camp', 160);
+    const access = collectAfter('Access', 160);
+
+    const lines = [];
+    lines.push('MONAHINGA FIELD BRIEF');
+    lines.push('=====================');
+    lines.push('');
+    lines.push('FIELD DECISION');
+    lines.push('--------------');
+    lines.push('Selected sit: ' + currentSitName());
+    if (selectedCoords) lines.push('Coordinates: ' + selectedCoords);
+    lines.push('Timing: ' + when);
+    lines.push('Action read: ' + action);
+    lines.push('');
+    lines.push('WHY THIS SIT');
+    lines.push('------------');
+    lines.push(why);
+    lines.push('');
+    lines.push('WIND / READINESS');
+    lines.push('----------------');
+    lines.push(clean((wind || 'Wind: see command surface') + ' ' + (readiness || '')));
+    lines.push('');
+    lines.push('ACCESS / BASE');
+    lines.push('-------------');
+    if (base) lines.push('Base context: ' + base);
+    if (access) lines.push('Access context: ' + access);
+    if (!base && !access) lines.push('Base/access context: use command map markers and verify in field.');
+    lines.push('');
+    lines.push('PRIVATE PARCEL / LAND CONTEXT');
+    lines.push('-----------------------------');
+    lines.push(parcelTruthText());
+    lines.push('');
+    lines.push('HUNTER CHECKLIST BEFORE MOVING');
+    lines.push('------------------------------');
+    lines.push('[ ] Confirm wind still matches the approach and sit.');
+    lines.push('[ ] Confirm no houses, roads, lots, parks, suburbs, or non-hunting ground are being used.');
+    lines.push('[ ] Confirm ownership and access permission with county records or trusted local source.');
+    lines.push('[ ] Confirm season dates, legal method, safety, and local regulations.');
+    lines.push('[ ] Confirm approach does not cross private parcel context without permission.');
+    lines.push('[ ] Treat parcel context as warning-only; core sit scoring is unchanged.');
+    lines.push('');
+    lines.push('PLAIN ENGLISH CALL');
+    lines.push('------------------');
+    lines.push('Use this brief as a field packet, not legal proof. If parcel truth, access, or wind is uncertain, slow down and verify before entering.');
+
+    return lines.join('\n') + '\n';
+  };
+
+  window.monahingaEnsureFieldBriefModal = function(){
+    if (document.getElementById('field_brief_modal_backdrop')) return;
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'field_brief_modal_backdrop';
+    backdrop.className = 'field-brief-modal-backdrop';
+    backdrop.innerHTML =
+      '<div class="field-brief-modal" role="dialog" aria-modal="true" aria-label="Monahinga field brief">' +
+        '<div class="field-brief-modal-header">' +
+          '<div>' +
+            '<div class="field-brief-modal-title">Monahinga Field Brief</div>' +
+            '<div class="field-brief-modal-subtitle">Visible field packet for Chris/Tom: sit, timing, wind, access, parcel truth, and pre-entry checklist.</div>' +
+          '</div>' +
+          '<div class="field-brief-modal-actions">' +
+            '<button type="button" id="field_brief_copy_btn">Copy Text</button>' +
+            '<button type="button" id="field_brief_download_btn">Download TXT</button>' +
+            '<button type="button" id="field_brief_close_btn">Close</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="field-brief-modal-body">' +
+          '<textarea id="field_brief_visible_text" spellcheck="false"></textarea>' +
+          '<div id="field_brief_status" class="field-brief-status"></div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(backdrop);
+
+    document.getElementById('field_brief_close_btn').addEventListener('click', function(){
+      backdrop.classList.remove('open');
+    });
+
+    backdrop.addEventListener('click', function(event){
+      if (event.target === backdrop) backdrop.classList.remove('open');
+    });
+
+    document.getElementById('field_brief_copy_btn').addEventListener('click', async function(){
+      const textEl = document.getElementById('field_brief_visible_text');
+      const status = document.getElementById('field_brief_status');
+      textEl.focus();
+      textEl.select();
+      try{
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(textEl.value);
+          status.textContent = 'Copied field brief to clipboard.';
+        } else {
+          document.execCommand('copy');
+          status.textContent = 'Selected and copied if browser allowed it. If not, press Ctrl+C.';
+        }
+      }catch(err){
+        status.textContent = 'Browser blocked auto-copy. Text is selected — press Ctrl+C.';
+      }
+    });
+
+    document.getElementById('field_brief_download_btn').addEventListener('click', function(){
+      const text = document.getElementById('field_brief_visible_text').value;
+      const blob = new Blob([text], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'monahinga_field_brief.txt';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        URL.revokeObjectURL(url);
+        if (a && a.parentNode) a.parentNode.removeChild(a);
+      }, 600);
+      document.getElementById('field_brief_status').textContent = 'Downloaded monahinga_field_brief.txt.';
+    });
+  };
+
+  window.monahingaOpenVisibleFieldBrief = function(){
+    window.monahingaEnsureFieldBriefModal();
+    const backdrop = document.getElementById('field_brief_modal_backdrop');
+    const textEl = document.getElementById('field_brief_visible_text');
+    const status = document.getElementById('field_brief_status');
+
+    textEl.value = window.monahingaBuildSpecialFieldBriefText();
+    status.textContent = 'Field brief generated. Review it, then copy or download.';
+    backdrop.classList.add('open');
+    setTimeout(function(){
+      textEl.focus();
+      textEl.select();
+    }, 120);
+  };
+
+  window.monahingaRepairFieldBriefButtonToModal = function(){
+    try{
+      let btn = document.getElementById('copy_field_brief_btn');
+
+      if (!btn) {
+        const parcelButton = document.getElementById('download_parcel_truth_summary_btn');
+        const buttons = Array.from(document.querySelectorAll('button, a'));
+        const summaryButton = buttons.find((candidate) =>
+          String(candidate.textContent || '').trim().toLowerCase().includes('download summary')
+        );
+        const anchor = parcelButton || summaryButton;
+        if (!anchor) return;
+
+        btn = document.createElement('button');
+        btn.id = 'copy_field_brief_btn';
+        btn.type = 'button';
+        btn.className = anchor.className || 'btn';
+        btn.style.marginLeft = '8px';
+        btn.style.borderColor = 'rgba(126,207,255,.58)';
+        btn.style.background = 'rgba(8,31,50,.88)';
+        btn.style.color = '#eaf8ff';
+        anchor.insertAdjacentElement('afterend', btn);
+      }
+
+      btn.textContent = 'Open Field Brief';
+      btn.title = 'Open a visible field packet with sit, timing, wind, parcel truth, and checklist.';
+      btn.onclick = function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        window.monahingaOpenVisibleFieldBrief();
+        return false;
+      };
+    }catch(err){
+      console.warn('Could not repair field brief button to visible modal', err);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.monahingaRepairFieldBriefButtonToModal);
+  } else {
+    window.monahingaRepairFieldBriefButtonToModal();
+  }
+
+</script>
+
+<script>
+/* MONAHINGA_REPAIR_FIELD_BRIEF_CLEAN_VISIBLE_TEXT_2026_05_07 */
+
+// MONAHINGA_REPAIR_FIELD_BRIEF_CLEAN_VISIBLE_TEXT_2026_05_07
+  window.monahingaCleanVisibleTextOnly = function(root){
+    try{
+      const clone = (root || document.body).cloneNode(true);
+      clone.querySelectorAll('script, style, noscript, template, svg').forEach((node) => node.remove());
+      return String(clone.textContent || '').replace(/\s+/g, ' ').trim();
+    }catch(err){
+      return String((document.body && document.body.innerText) || '').replace(/\s+/g, ' ').trim();
+    }
+  };
+
+  window.monahingaBriefSlice = function(label, stopLabels, maxLen){
+    const text = window.monahingaCleanVisibleTextOnly(document.body);
+    const start = text.indexOf(label);
+    if (start < 0) return '';
+
+    let end = text.length;
+    (stopLabels || []).forEach(function(stop){
+      const idx = text.indexOf(stop, start + label.length);
+      if (idx > start && idx < end) end = idx;
+    });
+
+    return text.slice(start, Math.min(end, start + (maxLen || 500))).trim();
+  };
+
+  window.monahingaBriefCardText = function(selectors, fallbackLabel, stops, maxLen){
+    for (const selector of selectors || []) {
+      const el = document.querySelector(selector);
+      if (el) {
+        const txt = window.monahingaCleanVisibleTextOnly(el);
+        if (txt) return txt;
+      }
+    }
+    if (fallbackLabel) return window.monahingaBriefSlice(fallbackLabel, stops || [], maxLen || 500);
+    return '';
+  };
+
+  window.monahingaBuildSpecialFieldBriefText = function(){
+    function clean(value){
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function getFooterValue(label){
+      const text = window.monahingaCleanVisibleTextOnly(document.body);
+      const idx = text.indexOf(label);
+      if (idx < 0) return '';
+      return text.slice(idx, idx + 180).trim();
+    }
+
+    const selectedFooter = getFooterValue('PRIMARY SIT') || getFooterValue('Primary Sit') || 'Primary sit shown on command surface';
+    const coords = getFooterValue('SELECTED SIT COORDINATES') || getFooterValue('Lat ');
+    const why = window.monahingaBriefCardText([], 'WHY', ['WHEN', 'COMMAND MAP', '2D Command Map'], 420) || 'Why read shown on command surface.';
+    const when = window.monahingaBriefCardText([], 'WHEN', ['COMMAND MAP', '2D Command Map'], 220) || 'Timing shown on command surface.';
+    const wind = window.monahingaBriefSlice('WIND', ['PREFERRED WIND', 'READINESS', 'SELECTED BOX STATUS'], 200);
+    const readiness = window.monahingaBriefSlice('READINESS', ['SELECTED BOX STATUS', 'TERRAIN LAYERS'], 220);
+    const action = window.monahingaBriefSlice('PROCEED AS PLANNED', ['PRIVATE PARCELS', 'CURSOR TERRAIN READ', 'PRIMARY SIT'], 180) ||
+      window.monahingaBriefSlice('SHIFT ENTRY DOWNWIND', ['PRIVATE PARCELS', 'CURSOR TERRAIN READ', 'PRIMARY SIT'], 190) ||
+      'Field action: verify wind, access, legality, and pressure before committing.';
+
+    let parcelTruth = '';
+    const parcelHud = document.querySelector('#parcel_source_truth_hud') ||
+      document.querySelector('#parcel_source_truth_badge') ||
+      document.querySelector('#parcel_context_caution_compact');
+    if (parcelHud) parcelTruth = window.monahingaCleanVisibleTextOnly(parcelHud);
+    if (!parcelTruth) {
+      const guide = document.querySelector('.command-map-guide-legend');
+      if (guide) {
+        const guideText = window.monahingaCleanVisibleTextOnly(guide);
+        const idx = guideText.indexOf('PRIVATE PARCELS');
+        if (idx >= 0) parcelTruth = guideText.slice(idx, idx + 850);
+      }
+    }
+    if (!parcelTruth) parcelTruth = 'No parcel source truth label found. Verify ownership and access independently.';
+
+    const lines = [];
+    lines.push('MONAHINGA FIELD BRIEF');
+    lines.push('=====================');
+    lines.push('');
+    lines.push('FIELD DECISION');
+    lines.push('--------------');
+    lines.push('Selected sit: ' + selectedFooter);
+    if (coords) lines.push('Coordinates: ' + coords);
+    lines.push('Timing: ' + when);
+    lines.push('Action read: ' + clean(action));
+    lines.push('');
+    lines.push('WHY THIS SIT');
+    lines.push('------------');
+    lines.push(clean(why));
+    lines.push('');
+    lines.push('WIND / READINESS');
+    lines.push('----------------');
+    lines.push(clean((wind || 'Wind: see command surface.') + ' ' + (readiness || '')));
+    lines.push('');
+    lines.push('PRIVATE PARCEL / LAND CONTEXT');
+    lines.push('-----------------------------');
+    lines.push(clean(parcelTruth));
+    lines.push('');
+    lines.push('HUNTER CHECKLIST BEFORE MOVING');
+    lines.push('------------------------------');
+    lines.push('[ ] Confirm wind still matches the approach and sit.');
+    lines.push('[ ] Confirm no houses, roads, lots, parks, suburbs, or non-hunting ground are being used.');
+    lines.push('[ ] Confirm ownership and access permission with county records or trusted local source.');
+    lines.push('[ ] Confirm season dates, legal method, safety, weather, and local regulations.');
+    lines.push('[ ] Confirm approach does not cross private parcel context without permission.');
+    lines.push('[ ] Treat parcel context as warning-only; core sit scoring is unchanged.');
+    lines.push('');
+    lines.push('PLAIN ENGLISH CALL');
+    lines.push('------------------');
+    lines.push('Use this brief as a field packet, not legal proof. If parcel truth, access, or wind is uncertain, slow down and verify before entering.');
+
+    return lines.join('\n') + '\n';
+  };
+
+  window.monahingaRepairFieldBriefButtonToModal = function(){
+    try{
+      const btn = document.getElementById('copy_field_brief_btn');
+      if (!btn) return;
+      btn.textContent = 'Open Field Brief';
+      btn.title = 'Open a visible field packet with clean sit, timing, wind, parcel truth, and checklist text.';
+      btn.onclick = function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof window.monahingaOpenVisibleFieldBrief === 'function') {
+          window.monahingaOpenVisibleFieldBrief();
+        }
+        return false;
+      };
+    }catch(err){
+      console.warn('Could not repair field brief clean text button', err);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.monahingaRepairFieldBriefButtonToModal);
+  } else {
+    window.monahingaRepairFieldBriefButtonToModal();
+  }
+
+</script>
+
+<script>
+/* MONAHINGA_REPAIR_FIELD_BRIEF_PAYLOAD_FIRST_2026_05_07 */
+
+// MONAHINGA_REPAIR_FIELD_BRIEF_PAYLOAD_FIRST_2026_05_07
+  window.monahingaSafeText = function(value){
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  };
+
+  window.monahingaSafeVisibleText = function(selector){
+    try{
+      const el = document.querySelector(selector);
+      if (!el) return '';
+      const clone = el.cloneNode(true);
+      clone.querySelectorAll('script, style, noscript, template, svg').forEach(function(node){ node.remove(); });
+      return window.monahingaSafeText(clone.innerText || clone.textContent || '');
+    }catch(_err){
+      return '';
+    }
+  };
+
+  window.monahingaFooterDatum = function(label){
+    try{
+      const cards = Array.from(document.querySelectorAll('.site-card, .site-footer-card, .terrain-footer-card, .readout-card, [class*="footer"], [class*="card"]'));
+      for (const card of cards) {
+        const text = window.monahingaSafeText(card.innerText || card.textContent || '');
+        if (text.toLowerCase().includes(String(label).toLowerCase())) return text;
+      }
+    }catch(_err){}
+    return '';
+  };
+
+  window.monahingaBriefSiteFromPayload = function(){
+    try{
+      const site = (typeof getSelectedSiteForExport === 'function') ? getSelectedSiteForExport() : null;
+      if (site) {
+        const title = site.title || site.name || 'Primary sit';
+        const lat = Number(site.lat);
+        const lon = Number(site.lon);
+        const bits = [String(title)];
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          bits.push('Lat ' + lat.toFixed(6) + ' / Lon ' + lon.toFixed(6));
+        }
+        if (site.elevation !== undefined) bits.push('Elev ' + String(site.elevation));
+        return bits.join(' — ');
+      }
+    }catch(_err){}
+
+    const footer = window.monahingaFooterDatum('Primary Sit') || window.monahingaFooterDatum('Selected Sit');
+    if (footer) return footer;
+    return 'Primary sit shown on command surface';
+  };
+
+  window.monahingaBriefWhy = function(){
+    try{
+      const whyCard = document.querySelector('.why-card, #why_card, [data-card="why"]');
+      if (whyCard) {
+        const txt = window.monahingaSafeText(whyCard.innerText || whyCard.textContent || '');
+        if (txt) return txt;
+      }
+    }catch(_err){}
+
+    try{
+      const whyPanel = Array.from(document.querySelectorAll('div, section, article'))
+        .find(function(el){
+          const txt = window.monahingaSafeText(el.innerText || el.textContent || '');
+          return txt.startsWith('WHY') && txt.length < 800;
+        });
+      if (whyPanel) return window.monahingaSafeText(whyPanel.innerText || whyPanel.textContent || '');
+    }catch(_err){}
+
+    return 'Why read shown on command surface.';
+  };
+
+  window.monahingaBriefWhen = function(){
+    try{
+      const whenCard = document.querySelector('.when-card, #when_card, [data-card="when"]');
+      if (whenCard) {
+        const txt = window.monahingaSafeText(whenCard.innerText || whenCard.textContent || '');
+        if (txt) return txt;
+      }
+    }catch(_err){}
+
+    try{
+      const whenPanel = Array.from(document.querySelectorAll('div, section, article'))
+        .find(function(el){
+          const txt = window.monahingaSafeText(el.innerText || el.textContent || '');
+          return txt.startsWith('WHEN') && txt.length < 260;
+        });
+      if (whenPanel) return window.monahingaSafeText(whenPanel.innerText || whenPanel.textContent || '');
+    }catch(_err){}
+
+    return 'Timing shown on command surface.';
+  };
+
+  window.monahingaBriefWindReadiness = function(){
+    const windCard = window.monahingaFooterDatum('WIND') || window.monahingaFooterDatum('Wind');
+    const readinessCard = window.monahingaFooterDatum('READINESS') || window.monahingaFooterDatum('Readiness');
+    const action = window.monahingaSafeVisibleText('.wind-decision') ||
+      window.monahingaSafeVisibleText('.approach-decision') ||
+      window.monahingaSafeVisibleText('.field-callout') ||
+      '';
+
+    return window.monahingaSafeText([windCard, readinessCard, action].filter(Boolean).join(' | ')) ||
+      'Verify live wind and field readiness before committing.';
+  };
+
+  window.monahingaBriefParcelTruth = function(){
+    const selectors = [
+      '#parcel_source_truth_hud',
+      '#parcel_source_truth_badge',
+      '#parcel_context_caution_compact'
+    ];
+
+    for (const selector of selectors) {
+      const txt = window.monahingaSafeVisibleText(selector);
+      if (txt) return txt;
+    }
+
+    try{
+      const truth = (typeof parcelSourceTruth === 'function') ? parcelSourceTruth(payload) : null;
+      if (truth) {
+        return window.monahingaSafeText(String(truth.label || '') + ' — ' + String(truth.message || ''));
+      }
+    }catch(_err){}
+
+    return 'No parcel source truth label found. Verify ownership and access independently.';
+  };
+
+  window.monahingaBuildSpecialFieldBriefText = function(){
+    const lines = [];
+
+    lines.push('MONAHINGA FIELD BRIEF');
+    lines.push('=====================');
+    lines.push('');
+
+    lines.push('FIELD DECISION');
+    lines.push('--------------');
+    lines.push('Selected sit: ' + window.monahingaBriefSiteFromPayload());
+    lines.push('Timing: ' + window.monahingaBriefWhen());
+    lines.push('');
+
+    lines.push('WHY THIS SIT');
+    lines.push('------------');
+    lines.push(window.monahingaBriefWhy());
+    lines.push('');
+
+    lines.push('WIND / READINESS');
+    lines.push('----------------');
+    lines.push(window.monahingaBriefWindReadiness());
+    lines.push('');
+
+    lines.push('PRIVATE PARCEL / LAND CONTEXT');
+    lines.push('-----------------------------');
+    lines.push(window.monahingaBriefParcelTruth());
+    lines.push('');
+
+    lines.push('HUNTER CHECKLIST BEFORE MOVING');
+    lines.push('------------------------------');
+    lines.push('[ ] Confirm wind still matches the approach and sit.');
+    lines.push('[ ] Confirm no houses, roads, lots, parks, suburbs, or non-hunting ground are being used.');
+    lines.push('[ ] Confirm ownership and access permission with county records or trusted local source.');
+    lines.push('[ ] Confirm season dates, legal method, safety, weather, and local regulations.');
+    lines.push('[ ] Confirm approach does not cross private parcel context without permission.');
+    lines.push('[ ] Treat parcel context as warning-only; core sit scoring is unchanged.');
+    lines.push('');
+
+    lines.push('PLAIN ENGLISH CALL');
+    lines.push('------------------');
+    lines.push('Use this as a field packet, not legal proof. If parcel truth, access, wind, or safety is uncertain, slow down and verify before entering.');
+
+    return lines.join('\n') + '\n';
+  };
+
+  window.monahingaRepairFieldBriefButtonToModal = function(){
+    try{
+      const btn = document.getElementById('copy_field_brief_btn');
+      if (!btn) return;
+      btn.textContent = 'Open Field Brief';
+      btn.title = 'Open a clean field packet built from payload-safe data, not raw page source.';
+      btn.onclick = function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof window.monahingaOpenVisibleFieldBrief === 'function') {
+          window.monahingaOpenVisibleFieldBrief();
+        }
+        return false;
+      };
+    }catch(err){
+      console.warn('Could not repair field brief button to payload-first builder', err);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.monahingaRepairFieldBriefButtonToModal);
+  } else {
+    window.monahingaRepairFieldBriefButtonToModal();
+  }
+
+</script>
+
+<script>
+/* MONAHINGA_REPAIR_CLEAN_FIELD_BRIEF_BUTTON_HARD_RESET_2026_05_07 */
+
+// MONAHINGA_REPAIR_CLEAN_FIELD_BRIEF_BUTTON_HARD_RESET_2026_05_07
+(function(){
+  function safe(value){
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function siteInfo(){
+    try{
+      const site = (typeof getSelectedSiteForExport === 'function')
+        ? getSelectedSiteForExport()
+        : ((typeof currentApproachSite === 'function') ? currentApproachSite() : null);
+
+      if (site) {
+        const title = site.title || site.name || 'Primary sit';
+        const lat = Number(site.lat);
+        const lon = Number(site.lon);
+        const parts = [String(title)];
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          parts.push('Lat ' + lat.toFixed(6) + ' / Lon ' + lon.toFixed(6));
+        }
+        if (site.elevation !== undefined && site.elevation !== null) {
+          parts.push('Elevation ' + String(site.elevation));
+        }
+        return parts.join(' — ');
+      }
+    }catch(_err){}
+    return 'Primary sit shown on command surface';
+  }
+
+  function parcelTruth(){
+    try{
+      if (typeof parcelSourceTruth === 'function') {
+        const truth = parcelSourceTruth(payload);
+        if (truth) return safe((truth.label || '') + ' — ' + (truth.message || ''));
+      }
+    }catch(_err){}
+
+    try{
+      const hud = document.getElementById('parcel_source_truth_hud') || document.getElementById('parcel_source_truth_badge');
+      if (hud) return safe(hud.innerText || hud.textContent || '');
+    }catch(_err){}
+
+    return 'Parcel source truth unavailable. Verify ownership, access, and permission independently.';
+  }
+
+  function windRead(){
+    try{
+      const wind = payload && payload.wind ? payload.wind : null;
+      if (wind && typeof wind === 'object') {
+        return safe('Wind source: payload. ' + JSON.stringify(wind));
+      }
+    }catch(_err){}
+    return 'Verify live wind on site before committing.';
+  }
+
+  function whenRead(){
+    try{
+      const candidates = [
+        payload && payload.when,
+        payload && payload.timing,
+        payload && payload.recommendation && payload.recommendation.when
+      ].filter(Boolean);
+      if (candidates.length) return safe(candidates[0]);
+    }catch(_err){}
+    return 'Use command surface timing read; re-check before first movement.';
+  }
+
+  function whyRead(){
+    try{
+      const candidates = [
+        payload && payload.why,
+        payload && payload.reason,
+        payload && payload.recommendation && payload.recommendation.why
+      ].filter(Boolean);
+      if (candidates.length) return safe(candidates[0]);
+    }catch(_err){}
+    return 'Terrain, cover, wind, access, and pressure context support the selected sit. Verify in the field.';
+  }
+
+  function buildCleanBrief(){
+    const lines = [];
+    lines.push('MONAHINGA CLEAN FIELD BRIEF');
+    lines.push('===========================');
+    lines.push('');
+    lines.push('FIELD DECISION');
+    lines.push('--------------');
+    lines.push('Selected sit: ' + siteInfo());
+    lines.push('Timing: ' + whenRead());
+    lines.push('');
+    lines.push('WHY THIS SIT');
+    lines.push('------------');
+    lines.push(whyRead());
+    lines.push('');
+    lines.push('WIND / READINESS');
+    lines.push('----------------');
+    lines.push(windRead());
+    lines.push('');
+    lines.push('PRIVATE PARCEL / LAND CONTEXT');
+    lines.push('-----------------------------');
+    lines.push(parcelTruth());
+    lines.push('');
+    lines.push('HUNTER CHECKLIST BEFORE MOVING');
+    lines.push('------------------------------');
+    lines.push('[ ] Confirm wind still matches the approach and sit.');
+    lines.push('[ ] Confirm no houses, roads, lots, parks, suburbs, or non-hunting ground are being used.');
+    lines.push('[ ] Confirm ownership and access permission with county records or a trusted local source.');
+    lines.push('[ ] Confirm season dates, legal method, safety, weather, and local regulations.');
+    lines.push('[ ] Confirm approach does not cross private parcel context without permission.');
+    lines.push('[ ] Treat parcel context as warning-only; core sit scoring is unchanged.');
+    lines.push('');
+    lines.push('PLAIN ENGLISH CALL');
+    lines.push('------------------');
+    lines.push('Use this as a field packet, not legal proof. If parcel truth, access, wind, or safety is uncertain, slow down and verify before entering.');
+    return lines.join('\n') + '\n';
+  }
+
+  function ensureCleanModal(){
+    if (document.getElementById('clean_field_brief_backdrop')) return;
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'clean_field_brief_backdrop';
+    backdrop.className = 'clean-field-brief-backdrop';
+    backdrop.innerHTML =
+      '<div class="clean-field-brief-modal" role="dialog" aria-modal="true" aria-label="Clean Monahinga field brief">' +
+        '<div class="clean-field-brief-header">' +
+          '<div>' +
+            '<div class="clean-field-brief-title">Clean Field Brief</div>' +
+            '<div class="clean-field-brief-subtitle">Payload-first hunter packet. No broad page scraping. No JavaScript source snippets.</div>' +
+          '</div>' +
+          '<div class="clean-field-brief-actions">' +
+            '<button type="button" id="clean_field_brief_copy_btn">Copy Text</button>' +
+            '<button type="button" id="clean_field_brief_download_btn">Download TXT</button>' +
+            '<button type="button" id="clean_field_brief_close_btn">Close</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="clean-field-brief-body">' +
+          '<textarea id="clean_field_brief_text" spellcheck="false"></textarea>' +
+          '<div id="clean_field_brief_status" class="clean-field-brief-status"></div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(backdrop);
+
+    document.getElementById('clean_field_brief_close_btn').addEventListener('click', function(){
+      backdrop.classList.remove('open');
+    });
+
+    backdrop.addEventListener('click', function(event){
+      if (event.target === backdrop) backdrop.classList.remove('open');
+    });
+
+    document.getElementById('clean_field_brief_copy_btn').addEventListener('click', async function(){
+      const textEl = document.getElementById('clean_field_brief_text');
+      const status = document.getElementById('clean_field_brief_status');
+      textEl.focus();
+      textEl.select();
+      try{
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(textEl.value);
+          status.textContent = 'Copied clean field brief to clipboard.';
+        } else {
+          document.execCommand('copy');
+          status.textContent = 'Selected text. Press Ctrl+C if your browser blocked auto-copy.';
+        }
+      }catch(_err){
+        status.textContent = 'Browser blocked auto-copy. Text is selected — press Ctrl+C.';
+      }
+    });
+
+    document.getElementById('clean_field_brief_download_btn').addEventListener('click', function(){
+      const text = document.getElementById('clean_field_brief_text').value;
+      const blob = new Blob([text], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'monahinga_clean_field_brief.txt';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        URL.revokeObjectURL(url);
+        if (a && a.parentNode) a.parentNode.removeChild(a);
+      }, 600);
+      document.getElementById('clean_field_brief_status').textContent = 'Downloaded monahinga_clean_field_brief.txt.';
+    });
+  }
+
+  function openCleanBrief(){
+    ensureCleanModal();
+    const backdrop = document.getElementById('clean_field_brief_backdrop');
+    const textEl = document.getElementById('clean_field_brief_text');
+    const status = document.getElementById('clean_field_brief_status');
+    textEl.value = buildCleanBrief();
+    status.textContent = 'Clean field brief generated. Review, copy, or download.';
+    backdrop.classList.add('open');
+    setTimeout(function(){ textEl.focus(); textEl.select(); }, 120);
+  }
+
+  function installCleanButton(){
+    // Quarantine old contaminated button completely by removing it and its attached listeners.
+    const old = document.getElementById('copy_field_brief_btn');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+
+    if (document.getElementById('open_clean_field_brief_btn')) return;
+
+    const anchor = document.getElementById('download_parcel_truth_summary_btn') ||
+      Array.from(document.querySelectorAll('button, a')).find(function(btn){
+        return safe(btn.textContent).toLowerCase().includes('download summary');
+      });
+
+    if (!anchor) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'open_clean_field_brief_btn';
+    btn.type = 'button';
+    btn.className = anchor.className || 'btn';
+    btn.textContent = 'Open Clean Brief';
+    btn.title = 'Open a clean payload-first field brief with no page-source scraping.';
+    btn.style.marginLeft = '8px';
+    btn.style.borderColor = 'rgba(126,207,255,.58)';
+    btn.style.background = 'rgba(8,31,50,.88)';
+    btn.style.color = '#eaf8ff';
+
+    btn.addEventListener('click', function(event){
+      event.preventDefault();
+      event.stopPropagation();
+      openCleanBrief();
+    }, true);
+
+    anchor.insertAdjacentElement('afterend', btn);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', installCleanButton);
+  } else {
+    installCleanButton();
+  }
+
+  window.monahingaOpenCleanFieldBrief = openCleanBrief;
+})();
+
+</script>
+
+<script>
+/* MONAHINGA_PASS7_FIELD_BRIEF_FROM_SUMMARY_BUTTON_2026_05_07 */
+
+// MONAHINGA_PASS7_FIELD_BRIEF_FROM_SUMMARY_BUTTON_2026_05_07
+(function(){
+  function safe(value){
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function fileDownload(name, text){
+    const blob = new Blob([text], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){
+      URL.revokeObjectURL(url);
+      if (a && a.parentNode) a.parentNode.removeChild(a);
+    }, 600);
+  }
+
+  function showStatus(message){
+    let el = document.getElementById('summary_field_brief_status');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'summary_field_brief_status';
+      el.className = 'summary-field-brief-status';
+      document.body.appendChild(el);
+    }
+    el.textContent = message;
+    el.classList.add('open');
+    setTimeout(function(){ el.classList.remove('open'); }, 2600);
+  }
+
+  function textOf(selector){
+    const el = document.querySelector(selector);
+    if (!el) return '';
+    const clone = el.cloneNode(true);
+    clone.querySelectorAll('script, style, noscript, template, svg').forEach(function(node){ node.remove(); });
+    return safe(clone.innerText || clone.textContent || '');
+  }
+
+  function parcelTruth(){
+    try{
+      if (typeof parcelSourceTruth === 'function') {
+        const truth = parcelSourceTruth(payload);
+        if (truth) return safe((truth.label || '') + ' — ' + (truth.message || ''));
+      }
+    }catch(_err){}
+
+    return textOf('#parcel_source_truth_hud') ||
+      textOf('#parcel_source_truth_badge') ||
+      'Parcel source truth unavailable. Verify ownership, access, and permission independently.';
+  }
+
+  function selectedSite(){
+    try{
+      const site = (typeof getSelectedSiteForExport === 'function')
+        ? getSelectedSiteForExport()
+        : ((typeof currentApproachSite === 'function') ? currentApproachSite() : null);
+
+      if (site) {
+        const title = site.title || site.name || 'Primary sit';
+        const lat = Number(site.lat);
+        const lon = Number(site.lon);
+        const parts = [String(title)];
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          parts.push('Lat ' + lat.toFixed(6) + ' / Lon ' + lon.toFixed(6));
+        }
+        if (site.elevation !== undefined && site.elevation !== null) parts.push('Elev ' + String(site.elevation));
+        return parts.join(' — ');
+      }
+    }catch(_err){}
+    return 'Primary sit shown on command surface';
+  }
+
+  function exportSummaryText(){
+    try{
+      if (typeof buildSummaryText === 'function') return String(buildSummaryText() || '');
+      if (typeof createSummaryText === 'function') return String(createSummaryText() || '');
+      if (typeof getSummaryText === 'function') return String(getSummaryText() || '');
+      if (typeof window.buildSummaryText === 'function') return String(window.buildSummaryText() || '');
+      if (typeof window.createSummaryText === 'function') return String(window.createSummaryText() || '');
+      if (typeof window.getSummaryText === 'function') return String(window.getSummaryText() || '');
+    }catch(_err){}
+    return '';
+  }
+
+  function parseSummary(summaryText){
+    const out = {};
+    const text = String(summaryText || '');
+    text.split(/\r?\n/).forEach(function(line){
+      const idx = line.indexOf(':');
+      if (idx <= 0) return;
+      const key = safe(line.slice(0, idx)).toLowerCase();
+      const val = safe(line.slice(idx + 1));
+      if (key && val) out[key] = val;
+    });
+    return out;
+  }
+
+  function line(label, value){
+    return label + ': ' + safe(value || 'Field verify');
+  }
+
+  function buildBetterBrief(){
+    const summary = exportSummaryText();
+    const parsed = parseSummary(summary);
+
+    const selected = parsed['selected sit'] || selectedSite();
+    const gps = parsed['sit gps'] || '';
+    const when = parsed['when'] || textOf('.when-card') || textOf('#when_card') || 'Use command surface timing read; re-check before first movement.';
+    const why = parsed['why'] || textOf('.why-card') || textOf('#why_card') || 'Terrain, cover, wind, access, and pressure context support the selected sit. Verify in the field.';
+    const stack = parsed['priority stack'] || '';
+    const risk = parsed['risk'] || '';
+    const wind = parsed['wind'] || 'Verify live wind on site before committing.';
+    const legal = parsed['legal'] || 'Confirm legality in field.';
+    const access = parsed['access'] || 'Field verify access.';
+    const cover = parsed['cover'] || '';
+    const base = parsed['base camp relation'] || '';
+    const game = parsed['likely game context'] || '';
+    const movement = parsed['movement read'] || '';
+
+    const lines = [];
+    lines.push('MONAHINGA HUNTER FIELD BRIEF');
+    lines.push('============================');
+    lines.push('');
+
+    lines.push('FIELD DECISION');
+    lines.push('--------------');
+    lines.push(line('Selected sit', selected));
+    if (gps) lines.push(line('GPS', gps));
+    lines.push(line('When', when));
+    if (base) lines.push(line('Base relation', base));
+    lines.push('');
+
+    lines.push('WHY THIS SIT');
+    lines.push('------------');
+    lines.push(why);
+    if (stack) lines.push(line('Priority stack', stack));
+    if (movement) lines.push(line('Movement read', movement));
+    if (game) lines.push(line('Likely game context', game));
+    lines.push('');
+
+    lines.push('RISK / WIND / ACCESS');
+    lines.push('--------------------');
+    lines.push(line('Wind', wind));
+    if (risk) lines.push(line('Risk', risk));
+    lines.push(line('Legal', legal));
+    lines.push(line('Access', access));
+    if (cover) lines.push(line('Cover', cover));
+    lines.push('');
+
+    lines.push('PRIVATE PARCEL / LAND CONTEXT');
+    lines.push('-----------------------------');
+    lines.push(parcelTruth());
+    lines.push('');
+
+    lines.push('HUNTER CHECKLIST BEFORE MOVING');
+    lines.push('------------------------------');
+    lines.push('[ ] Confirm wind still matches the approach and sit.');
+    lines.push('[ ] Confirm access route does not cross private parcel context without permission.');
+    lines.push('[ ] Confirm no houses, roads, lots, parks, suburbs, or non-hunting ground are being used.');
+    lines.push('[ ] Confirm ownership and access permission with county records or a trusted local source.');
+    lines.push('[ ] Confirm season dates, legal method, safety, weather, and local regulations.');
+    lines.push('[ ] Treat parcel context as warning-only; core sit scoring is unchanged.');
+    lines.push('');
+
+    lines.push('PLAIN ENGLISH CALL');
+    lines.push('------------------');
+    lines.push('This is the field packet: hunt the selected sit only after wind, permission, safety, and legal access all check out. If any one of those is uncertain, slow down and verify before entering.');
+
+    return lines.join('\n') + '\n';
+  }
+
+  function openBetterBrief(){
+    const text = buildBetterBrief();
+
+    if (typeof window.monahingaOpenCleanFieldBrief === 'function') {
+      window.monahingaOpenCleanFieldBrief();
+      setTimeout(function(){
+        const textarea = document.getElementById('clean_field_brief_text') || document.getElementById('field_brief_visible_text');
+        const status = document.getElementById('clean_field_brief_status') || document.getElementById('field_brief_status');
+        if (textarea) {
+          textarea.value = text;
+          textarea.focus();
+          textarea.select();
+        }
+        if (status) status.textContent = 'Better field brief generated from summary-safe data. Review, copy, or download.';
+      }, 150);
+      return;
+    }
+
+    fileDownload('monahinga_better_field_brief.txt', text);
+  }
+
+  function installButton(){
+    const oldClean = document.getElementById('open_clean_field_brief_btn');
+    if (oldClean) {
+      oldClean.textContent = 'Open Better Brief';
+      oldClean.title = 'Open field brief built from summary-safe values plus parcel truth.';
+      oldClean.onclick = function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        openBetterBrief();
+        return false;
+      };
+      showStatus('Better Field Brief button is active.');
+      return;
+    }
+
+    const anchor = document.getElementById('download_parcel_truth_summary_btn') ||
+      Array.from(document.querySelectorAll('button, a')).find(function(btn){
+        return safe(btn.textContent).toLowerCase().includes('download summary');
+      });
+
+    if (!anchor || document.getElementById('open_better_field_brief_btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'open_better_field_brief_btn';
+    btn.type = 'button';
+    btn.className = anchor.className || 'btn';
+    btn.textContent = 'Open Better Brief';
+    btn.title = 'Open field brief built from summary-safe values plus parcel truth.';
+    btn.style.marginLeft = '8px';
+    btn.style.borderColor = 'rgba(126,207,255,.58)';
+    btn.style.background = 'rgba(8,31,50,.88)';
+    btn.style.color = '#eaf8ff';
+    btn.addEventListener('click', function(event){
+      event.preventDefault();
+      event.stopPropagation();
+      openBetterBrief();
+    }, true);
+    anchor.insertAdjacentElement('afterend', btn);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', installButton);
+  } else {
+    installButton();
+  }
+
+  window.monahingaBuildBetterFieldBrief = buildBetterBrief;
+})();
+
+</script>
+
+<script>
+/* MONAHINGA_REPAIR_DEDICATED_BETTER_BRIEF_DOWNLOAD_2026_05_07 */
+
+// MONAHINGA_REPAIR_DEDICATED_BETTER_BRIEF_DOWNLOAD_2026_05_07
+(function(){
+  function safe(value){
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function fileDownload(name, text){
+    const blob = new Blob([text], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){
+      URL.revokeObjectURL(url);
+      if (a && a.parentNode) a.parentNode.removeChild(a);
+    }, 600);
+  }
+
+  function parcelTruth(){
+    try{
+      if (typeof parcelSourceTruth === 'function') {
+        const truth = parcelSourceTruth(payload);
+        if (truth) return safe((truth.label || '') + ' — ' + (truth.message || ''));
+      }
+    }catch(_err){}
+    const hud = document.getElementById('parcel_source_truth_hud') || document.getElementById('parcel_source_truth_badge');
+    return hud ? safe(hud.innerText || hud.textContent || '') : 'Parcel source truth unavailable. Verify ownership, access, and permission independently.';
+  }
+
+  function selectedSite(){
+    try{
+      const site = (typeof getSelectedSiteForExport === 'function')
+        ? getSelectedSiteForExport()
+        : ((typeof currentApproachSite === 'function') ? currentApproachSite() : null);
+      if (site) {
+        const title = site.title || site.name || 'Primary sit';
+        const lat = Number(site.lat);
+        const lon = Number(site.lon);
+        const bits = [String(title)];
+        if (Number.isFinite(lat) && Number.isFinite(lon)) bits.push('Lat ' + lat.toFixed(6) + ' / Lon ' + lon.toFixed(6));
+        if (site.elevation !== undefined && site.elevation !== null) bits.push('Elevation ' + String(site.elevation));
+        return bits.join(' — ');
+      }
+    }catch(_err){}
+    return 'Primary sit shown on command surface';
+  }
+
+  function trySummaryText(){
+    const fns = [
+      'buildSummaryText',
+      'createSummaryText',
+      'getSummaryText',
+      'downloadSummaryText',
+      'monahingaBuildSummaryText'
+    ];
+    for (const name of fns) {
+      try{
+        if (typeof window[name] === 'function') {
+          const out = window[name]();
+          if (out) return String(out);
+        }
+      }catch(_err){}
+      try{
+        if (typeof eval(name) === 'function') {
+          const out = eval(name)();
+          if (out) return String(out);
+        }
+      }catch(_err){}
+    }
+    return '';
+  }
+
+  function parseSummary(text){
+    const out = {};
+    String(text || '').split(/\r?\n/).forEach(function(line){
+      const idx = line.indexOf(':');
+      if (idx <= 0) return;
+      const key = safe(line.slice(0, idx)).toLowerCase();
+      const val = safe(line.slice(idx + 1));
+      if (key && val) out[key] = val;
+    });
+    return out;
+  }
+
+  function buildBetterBrief(){
+    const summary = trySummaryText();
+    const parsed = parseSummary(summary);
+
+    const lines = [];
+    lines.push('MONAHINGA BETTER FIELD BRIEF');
+    lines.push('============================');
+    lines.push('');
+
+    lines.push('FIELD DECISION');
+    lines.push('--------------');
+    lines.push('Selected sit: ' + (parsed['selected sit'] || selectedSite()));
+    if (parsed['sit gps']) lines.push('GPS: ' + parsed['sit gps']);
+    lines.push('When: ' + (parsed['when'] || 'Use command surface timing read; re-check before first movement.'));
+    if (parsed['base camp relation']) lines.push('Base relation: ' + parsed['base camp relation']);
+    lines.push('');
+
+    lines.push('WHY THIS SIT');
+    lines.push('------------');
+    lines.push(parsed['why'] || 'Terrain, cover, wind, access, and pressure context support the selected sit. Verify in the field.');
+    if (parsed['priority stack']) lines.push('Priority stack: ' + parsed['priority stack']);
+    if (parsed['movement read']) lines.push('Movement read: ' + parsed['movement read']);
+    if (parsed['likely game context']) lines.push('Likely game context: ' + parsed['likely game context']);
+    lines.push('');
+
+    lines.push('RISK / WIND / ACCESS');
+    lines.push('--------------------');
+    lines.push('Wind: ' + (parsed['wind'] || 'Verify live wind on site before committing.'));
+    if (parsed['risk']) lines.push('Risk: ' + parsed['risk']);
+    lines.push('Legal: ' + (parsed['legal'] || 'Confirm legality in field.'));
+    lines.push('Access: ' + (parsed['access'] || 'Field verify access.'));
+    if (parsed['cover']) lines.push('Cover: ' + parsed['cover']);
+    lines.push('');
+
+    lines.push('PRIVATE PARCEL / LAND CONTEXT');
+    lines.push('-----------------------------');
+    lines.push(parcelTruth());
+    lines.push('');
+
+    lines.push('HUNTER CHECKLIST BEFORE MOVING');
+    lines.push('------------------------------');
+    lines.push('[ ] Confirm wind still matches the approach and sit.');
+    lines.push('[ ] Confirm access route does not cross private parcel context without permission.');
+    lines.push('[ ] Confirm no houses, roads, lots, parks, suburbs, or non-hunting ground are being used.');
+    lines.push('[ ] Confirm ownership and access permission with county records or a trusted local source.');
+    lines.push('[ ] Confirm season dates, legal method, safety, weather, and local regulations.');
+    lines.push('[ ] Treat parcel context as warning-only; core sit scoring is unchanged.');
+    lines.push('');
+
+    lines.push('PLAIN ENGLISH CALL');
+    lines.push('------------------');
+    lines.push('Hunt the selected sit only after wind, permission, safety, and legal access all check out. If any one of those is uncertain, slow down and verify before entering.');
+
+    return lines.join('\n') + '\n';
+  }
+
+  function installButton(){
+    const oldBetter = document.getElementById('download_better_field_brief_btn');
+    if (oldBetter) return;
+
+    const anchor = document.getElementById('download_parcel_truth_summary_btn') ||
+      document.getElementById('open_clean_field_brief_btn') ||
+      Array.from(document.querySelectorAll('button, a')).find(function(btn){
+        return safe(btn.textContent).toLowerCase().includes('download summary');
+      });
+
+    if (!anchor) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'download_better_field_brief_btn';
+    btn.type = 'button';
+    btn.className = anchor.className || 'btn';
+    btn.textContent = 'Download Better Brief';
+    btn.title = 'Download a better field brief as monahinga_better_field_brief.txt.';
+    btn.style.marginLeft = '8px';
+    btn.style.borderColor = 'rgba(126,207,255,.58)';
+    btn.style.background = 'rgba(8,31,50,.88)';
+    btn.style.color = '#eaf8ff';
+
+    btn.addEventListener('click', function(event){
+      event.preventDefault();
+      event.stopPropagation();
+      fileDownload('monahinga_better_field_brief.txt', buildBetterBrief());
+    }, true);
+
+    anchor.insertAdjacentElement('afterend', btn);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', installButton);
+  } else {
+    installButton();
+  }
+
+  window.monahingaBuildDedicatedBetterBrief = buildBetterBrief;
+})();
 
 </script>
 </body>
