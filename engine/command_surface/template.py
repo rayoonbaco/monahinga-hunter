@@ -2332,6 +2332,93 @@ aside strong,
   }
 }
 
+
+/* MONAHINGA_PASS2_PRIVATE_LAND_WARNING_PANEL_2026_05_07
+   Warning-only private parcel context panel. Does not change scoring, DEM, PAD-US,
+   parcel payload, polygon transport, or 2D/3D orientation.
+*/
+.private-land-warning-panel{
+  margin-top:10px;
+  padding:10px 11px;
+  border-radius:13px;
+  border:1px solid rgba(255,211,122,.42);
+  background:linear-gradient(180deg, rgba(54,36,8,.90), rgba(13,15,13,.88));
+  color:#f6efd8;
+  font-size:11px;
+  line-height:1.32;
+  box-shadow:0 12px 28px rgba(0,0,0,.24);
+}
+.private-land-warning-panel strong{
+  display:block;
+  color:#ffe29a;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-bottom:5px;
+}
+.private-land-warning-panel .private-land-warning-status{
+  font-weight:850;
+  color:#fff6ce;
+  margin-bottom:5px;
+}
+.private-land-warning-panel ul{
+  margin:6px 0 0 15px;
+  padding:0;
+}
+.private-land-warning-panel li{
+  margin:3px 0;
+}
+.private-land-warning-panel.clear{
+  border-color:rgba(126,240,151,.40);
+  background:linear-gradient(180deg, rgba(8,44,22,.88), rgba(5,20,12,.86));
+}
+.private-land-warning-panel.caution{
+  border-color:rgba(255,211,122,.55);
+}
+.private-land-warning-panel.high{
+  border-color:rgba(255,151,112,.72);
+  background:linear-gradient(180deg, rgba(76,25,12,.92), rgba(31,14,9,.88));
+}
+
+
+/* MONAHINGA_PASS2B_COMPACT_PARCEL_CAUTION_2026_05_07
+   Compact warning-only parcel caution line. No loops, no scoring changes,
+   no geometry detection, no DEM/PAD-US/polygon/orientation changes.
+*/
+.parcel-context-caution-compact{
+  margin-top:8px;
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,211,122,.45);
+  background:rgba(42,28,8,.88);
+  color:#f8efd2;
+  font-size:10.5px;
+  line-height:1.28;
+  box-shadow:0 10px 20px rgba(0,0,0,.20);
+}
+.parcel-context-caution-compact strong{
+  display:block;
+  margin-bottom:3px;
+  color:#ffe29a;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.045em;
+  text-transform:uppercase;
+}
+.parcel-context-caution-compact.imported{
+  border-color:rgba(126,240,151,.50);
+  background:rgba(8,43,21,.88);
+}
+.parcel-context-caution-compact.demo{
+  border-color:rgba(255,184,77,.62);
+  background:rgba(62,35,7,.88);
+}
+.parcel-context-caution-compact.none{
+  border-color:rgba(255,211,122,.34);
+  background:rgba(24,25,18,.84);
+}
+
 </style>
 
 <!-- MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04: Leaflet assets for real 2D command map -->
@@ -3105,6 +3192,7 @@ function getAnchorPoint(kind) {
     if (baseCampSummary && baseCamp) baseCampSummary.textContent = Number(baseCamp.lat).toFixed(5) + ', ' + Number(baseCamp.lon).toFixed(5);
     if (accessEntrySummary && accessEntry) accessEntrySummary.textContent = Number(accessEntry.lat).toFixed(5) + ', ' + Number(accessEntry.lon).toFixed(5);
     update2DFieldMap();
+    /* Pass 2 private-land warning panel disabled by repair patch: unstable checking loop. */
   }
   function escapeSummaryText(value) {
     return String(value == null ? '' : value).replace(/\r?\n/g, ' ').trim();
@@ -3288,7 +3376,7 @@ function getAnchorPoint(kind) {
       window.alert('Summary download failed.');
     }
   }
-  function updateSelectedSiteCard(site) { if (!site) return; state.invisibleApproachRank = Number(site.rank || state.invisibleApproachRank || 1); if (selectedSiteTitle) selectedSiteTitle.textContent = site.title || 'Selected sit'; if (selectedSiteCoords) selectedSiteCoords.textContent = formatSiteCoords(site); if (copyCoordsBtn) copyCoordsBtn.dataset.copyText = site.lat.toFixed(6) + ', ' + site.lon.toFixed(6); updateExecutiveSummaryForSite(site); update2DFieldMap(site); updateFocusOverlay(site); if (typeof rebuildInvisibleApproachOverlay === 'function') rebuildInvisibleApproachOverlay(site); }
+  function updateSelectedSiteCard(site) { if (!site) return; state.invisibleApproachRank = Number(site.rank || state.invisibleApproachRank || 1); if (selectedSiteTitle) selectedSiteTitle.textContent = site.title || 'Selected sit'; if (selectedSiteCoords) selectedSiteCoords.textContent = formatSiteCoords(site); if (copyCoordsBtn) copyCoordsBtn.dataset.copyText = site.lat.toFixed(6) + ', ' + site.lon.toFixed(6); updateExecutiveSummaryForSite(site); update2DFieldMap(site); /* Pass 2 private-land warning panel disabled by repair patch: unstable checking loop. */ updateFocusOverlay(site); if (typeof rebuildInvisibleApproachOverlay === 'function') rebuildInvisibleApproachOverlay(site); }
   async function copySelectedCoords() { const text = (copyCoordsBtn && copyCoordsBtn.dataset.copyText) || ''; if (!text) return; try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); copyCoordsBtn.textContent = 'Copied'; setTimeout(() => { copyCoordsBtn.textContent = 'Copy coordinates'; }, 1200); } } catch (err) {} }
   function addTrustTag(tags, seen, source, matchers, label) { if (!source) return; for (const matcher of matchers) { if (source.includes(matcher)) { const key = label.toLowerCase(); if (!seen.has(key)) { seen.add(key); tags.push(label); } return; } } }
   function buildTrustTags() {
@@ -4925,6 +5013,7 @@ if (viewerSpecies) {
   // MONAHINGA_ORIENTATION_DECLUTTER_PASS_2026_05_06
   function applyCommandHudDeclutter(){
     try{
+      renderCompactParcelCaution(payload, { kind: kind, label: label, message: message });
       const guide = document.querySelector('.command-map-guide-legend');
       if(guide){
         guide.classList.add('compact-mode');
@@ -4954,6 +5043,8 @@ if (viewerSpecies) {
 
   
   // MONAHINGA_PARCEL_SOURCE_TRUTH_LABELS_V1_2026_05_06
+  
+// MONAHINGA_PASS1_IMPORTED_PARCEL_TRUTH_CONFIRMATION_2026_05_07
   function parcelSourceTruth(payload){
     const geojson = payload && payload.parcel_geojson ? payload.parcel_geojson : null;
     if (!geojson || typeof geojson !== 'object') {
@@ -4964,14 +5055,36 @@ if (viewerSpecies) {
     const source = String(props.monahinga_parcel_source || '').toLowerCase();
 
     const features = Array.isArray(geojson.features) ? geojson.features : [];
-    const featureCount = features.length;
+    const featureCount = Number(props.monahinga_feature_count || features.length || 0);
     const sourceLabel = props.monahinga_parcel_source_label ? String(props.monahinga_parcel_source_label) : '';
+
+    function arrayish(value) {
+      if (Array.isArray(value)) return value.map(String).filter(Boolean);
+      if (value === null || value === undefined || value === '') return [];
+      return String(value).split(',').map((item) => item.trim()).filter(Boolean);
+    }
+
+    const ownerFields = arrayish(props.monahinga_detected_owner_fields);
+    const idFields = arrayish(props.monahinga_detected_parcel_id_fields);
+    const ownerValueCount = Number(props.monahinga_owner_value_count || 0);
+    const idValueCount = Number(props.monahinga_parcel_id_value_count || 0);
+
+    const ownerText = ownerFields.length
+      ? ownerFields.join(' / ') + ' (' + ownerValueCount + ' feature(s) with owner value)'
+      : 'none detected';
+
+    const idText = idFields.length
+      ? idFields.join(' / ') + ' (' + idValueCount + ' feature(s) with parcel ID value)'
+      : 'none detected';
 
     if (source === 'imported_geojson') {
       return {
         kind:'imported',
         label:'PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE',
-        message:(sourceLabel ? sourceLabel + ' · ' : '') + featureCount + ' feature(s). This is imported ownership context, not permission. Verify county records, access, and landowner permission.'
+        message:(sourceLabel ? sourceLabel + ' · ' : '') +
+          featureCount + ' feature(s). Owner fields: ' + ownerText +
+          '. Parcel ID fields: ' + idText +
+          '. Imported ownership context only. Verify county records, access, permission, and regulations.'
       };
     }
 
@@ -4997,13 +5110,53 @@ if (viewerSpecies) {
     if (features.length > 0) {
       return {
         kind:'imported',
-        label:'PRIVATE PARCELS: GEOJSON FEATURES',
-        message:'Parcel features are present. Verify source, ownership, access, and permission before field use.'
+        label:'PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE',
+        message:features.length + ' GeoJSON feature(s) are present. Owner fields: ' + ownerText +
+          '. Parcel ID fields: ' + idText +
+          '. Verify source, ownership, access, and permission before field use.'
       };
     }
 
     return { kind:'none', label:'No private parcel layer loaded', message:'No private parcel GeoJSON features are present.' };
   }
+
+
+// MONAHINGA_PASS2B_COMPACT_PARCEL_CAUTION_2026_05_07
+  function renderCompactParcelCaution(payload, truth){
+    try{
+      const guide = document.querySelector('.command-map-guide-legend');
+      if (!guide) return;
+
+      const existing = document.getElementById('parcel_context_caution_compact');
+      if (existing) existing.remove();
+
+      const safeTruth = truth && typeof truth === 'object' ? truth : parcelSourceTruth(payload);
+      const kind = String((safeTruth && safeTruth.kind) || 'none').toLowerCase();
+
+      const box = document.createElement('div');
+      box.id = 'parcel_context_caution_compact';
+      box.className = 'parcel-context-caution-compact ' + (kind === 'imported' || kind === 'demo' ? kind : 'none');
+
+      if (kind === 'imported') {
+        box.innerHTML =
+          '<strong>Parcel caution</strong>' +
+          'Imported parcel context is active. Before entering, verify selected sit, base camp, and approach against county records, permission, access rules, season dates, and local regulations. Warning-only; core scoring unchanged.';
+      } else if (kind === 'demo') {
+        box.innerHTML =
+          '<strong>Parcel caution</strong>' +
+          'Demo parcel visuals are active. They are not real ownership boundaries and must not be used for permission or access decisions.';
+      } else {
+        box.innerHTML =
+          '<strong>Parcel caution</strong>' +
+          'No imported parcel context is loaded. Verify ownership, access, permission, season dates, and local regulations independently.';
+      }
+
+      guide.appendChild(box);
+    }catch(err){
+      console.warn('Compact parcel caution failed', err);
+    }
+  }
+
 
   function renderParcelSourceTruthBadge(payload){
     try{
@@ -5053,6 +5206,262 @@ if (viewerSpecies) {
     }catch(err){
       console.warn('Parcel source truth badge failed', err);
     }
+  }
+
+
+  
+// MONAHINGA_PASS2_PRIVATE_LAND_WARNING_PANEL_2026_05_07
+  function privateLandPanelEnsure(){
+    const marker = 'MONAHINGA_PASS2_PRIVATE_LAND_WARNING_PANEL_2026_05_07';
+    let panel = document.getElementById('private_land_warning_panel');
+    if (panel) return panel;
+
+    const guide = document.querySelector('.command-map-guide-legend') || document.querySelector('.command-map-guide');
+    if (!guide) return null;
+
+    panel = document.createElement('div');
+    panel.id = 'private_land_warning_panel';
+    panel.className = 'private-land-warning-panel';
+    panel.innerHTML =
+      '<strong>Private land warning</strong>' +
+      '<div class="private-land-warning-status">Checking parcel context…</div>' +
+      '<div>Ownership context only. Verify county records, access, permission, and regulations.</div>';
+    guide.appendChild(panel);
+    return panel;
+  }
+
+  function privateLandGeojsonFeatures(payload){
+    const geojson = payload && payload.parcel_geojson ? payload.parcel_geojson : null;
+    if (!geojson || typeof geojson !== 'object') return [];
+    if (geojson.type === 'FeatureCollection' && Array.isArray(geojson.features)) return geojson.features;
+    if (geojson.type === 'Feature') return [geojson];
+    return [];
+  }
+
+  function privateLandSourceKind(payload){
+    try {
+      const truth = parcelSourceTruth(payload);
+      return truth && truth.kind ? String(truth.kind).toLowerCase() : 'none';
+    } catch (_err) {
+      return 'none';
+    }
+  }
+
+  function privateLandPointFromSite(site){
+    if (!site) return null;
+    const lat = Number(site.lat);
+    const lon = Number(site.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return { lat:lat, lon:lon, label:String(site.title || 'Selected sit') };
+  }
+
+  function privateLandPointInsideRing(pointLonLat, ring){
+    if (!Array.isArray(ring) || ring.length < 4) return false;
+
+    const x = Number(pointLonLat[0]);
+    const y = Number(pointLonLat[1]);
+    let inside = false;
+
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = Number(ring[i][0]);
+      const yi = Number(ring[i][1]);
+      const xj = Number(ring[j][0]);
+      const yj = Number(ring[j][1]);
+
+      if (![xi, yi, xj, yj].every(Number.isFinite)) continue;
+
+      const intersects = ((yi > y) !== (yj > y)) &&
+        (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-12) + xi);
+
+      if (intersects) inside = !inside;
+    }
+
+    return inside;
+  }
+
+  function privateLandPointInsidePolygon(pointLonLat, polygonCoords){
+    if (!Array.isArray(polygonCoords) || !polygonCoords.length) return false;
+    if (!privateLandPointInsideRing(pointLonLat, polygonCoords[0])) return false;
+
+    for (let i = 1; i < polygonCoords.length; i += 1) {
+      if (privateLandPointInsideRing(pointLonLat, polygonCoords[i])) return false;
+    }
+
+    return true;
+  }
+
+  function privateLandPointInsideGeometry(point, geometry){
+    if (!point || !geometry || !geometry.type) return false;
+
+    const pointLonLat = [Number(point.lon), Number(point.lat)];
+    if (!pointLonLat.every(Number.isFinite)) return false;
+
+    if (geometry.type === 'Polygon') {
+      return privateLandPointInsidePolygon(pointLonLat, geometry.coordinates);
+    }
+
+    if (geometry.type === 'MultiPolygon' && Array.isArray(geometry.coordinates)) {
+      return geometry.coordinates.some((poly) => privateLandPointInsidePolygon(pointLonLat, poly));
+    }
+
+    return false;
+  }
+
+  function privateLandOrientation(a, b, c){
+    const value = ((b[1] - a[1]) * (c[0] - b[0])) - ((b[0] - a[0]) * (c[1] - b[1]));
+    if (Math.abs(value) < 1e-12) return 0;
+    return value > 0 ? 1 : 2;
+  }
+
+  function privateLandOnSegment(a, b, c){
+    return b[0] <= Math.max(a[0], c[0]) + 1e-12 &&
+      b[0] + 1e-12 >= Math.min(a[0], c[0]) &&
+      b[1] <= Math.max(a[1], c[1]) + 1e-12 &&
+      b[1] + 1e-12 >= Math.min(a[1], c[1]);
+  }
+
+  function privateLandSegmentsIntersect(a, b, c, d){
+    const o1 = privateLandOrientation(a, b, c);
+    const o2 = privateLandOrientation(a, b, d);
+    const o3 = privateLandOrientation(c, d, a);
+    const o4 = privateLandOrientation(c, d, b);
+
+    if (o1 !== o2 && o3 !== o4) return true;
+    if (o1 === 0 && privateLandOnSegment(a, c, b)) return true;
+    if (o2 === 0 && privateLandOnSegment(a, d, b)) return true;
+    if (o3 === 0 && privateLandOnSegment(c, a, d)) return true;
+    if (o4 === 0 && privateLandOnSegment(c, b, d)) return true;
+    return false;
+  }
+
+  function privateLandLineIntersectsRing(startLonLat, endLonLat, ring){
+    if (!Array.isArray(ring) || ring.length < 2) return false;
+
+    for (let i = 0; i < ring.length - 1; i += 1) {
+      const a = [Number(ring[i][0]), Number(ring[i][1])];
+      const b = [Number(ring[i + 1][0]), Number(ring[i + 1][1])];
+      if (![a[0], a[1], b[0], b[1]].every(Number.isFinite)) continue;
+      if (privateLandSegmentsIntersect(startLonLat, endLonLat, a, b)) return true;
+    }
+
+    return false;
+  }
+
+  function privateLandLineIntersectsPolygon(startPoint, endPoint, polygonCoords){
+    const startLonLat = [Number(startPoint.lon), Number(startPoint.lat)];
+    const endLonLat = [Number(endPoint.lon), Number(endPoint.lat)];
+
+    if (!startLonLat.every(Number.isFinite) || !endLonLat.every(Number.isFinite)) return false;
+
+    if (privateLandPointInsidePolygon(startLonLat, polygonCoords)) return true;
+    if (privateLandPointInsidePolygon(endLonLat, polygonCoords)) return true;
+
+    return Array.isArray(polygonCoords) && polygonCoords.some((ring) =>
+      privateLandLineIntersectsRing(startLonLat, endLonLat, ring)
+    );
+  }
+
+  function privateLandLineIntersectsGeometry(startPoint, endPoint, geometry){
+    if (!startPoint || !endPoint || !geometry || !geometry.type) return false;
+
+    if (geometry.type === 'Polygon') {
+      return privateLandLineIntersectsPolygon(startPoint, endPoint, geometry.coordinates);
+    }
+
+    if (geometry.type === 'MultiPolygon' && Array.isArray(geometry.coordinates)) {
+      return geometry.coordinates.some((poly) => privateLandLineIntersectsPolygon(startPoint, endPoint, poly));
+    }
+
+    return false;
+  }
+
+  function privateLandFeatureLabel(feature){
+    const props = feature && feature.properties ? feature.properties : {};
+    const owner = props.MONAHINGA_OWNER_NORMALIZED || props.OWNER || props.Owner || props.owner || props.OWNER_NAME || props.owner_name || props.PARCEL_OWNER || props.OWN_NAME || props.NAME || props.Name || '';
+    const parcelId = props.MONAHINGA_PARCEL_ID_NORMALIZED || props.PARCEL_ID || props.parcel_id || props.PIN || props.pin || props.APN || props.apn || props.OBJECTID || props.FID || props.ACCOUNT || props.MAPBLKLOT || props.TAXPIN || '';
+
+    if (owner && parcelId) return String(owner) + ' / ' + String(parcelId);
+    if (owner) return String(owner);
+    if (parcelId) return 'Parcel ' + String(parcelId);
+    return 'parcel context';
+  }
+
+  function privateLandMatchesForPoint(point, features){
+    if (!point) return [];
+    return features.filter((feature) => privateLandPointInsideGeometry(point, feature && feature.geometry));
+  }
+
+  function privateLandMatchesForLine(startPoint, endPoint, features){
+    if (!startPoint || !endPoint) return [];
+    return features.filter((feature) => privateLandLineIntersectsGeometry(startPoint, endPoint, feature && feature.geometry));
+  }
+
+  function updatePrivateLandWarningPanel(){
+    const panel = privateLandPanelEnsure();
+    if (!panel) return;
+
+    const sourceKind = privateLandSourceKind(payload);
+    const features = privateLandGeojsonFeatures(payload);
+
+    if (sourceKind === 'demo') {
+      panel.className = 'private-land-warning-panel caution';
+      panel.innerHTML =
+        '<strong>Private land warning</strong>' +
+        '<div class="private-land-warning-status">DEMO VISUAL ONLY — no real ownership warning generated.</div>' +
+        '<div>Load imported parcel GeoJSON before using sit, base camp, or approach warnings.</div>';
+      return;
+    }
+
+    if (sourceKind !== 'imported' || !features.length) {
+      panel.className = 'private-land-warning-panel caution';
+      panel.innerHTML =
+        '<strong>Private land warning</strong>' +
+        '<div class="private-land-warning-status">No imported parcel context loaded.</div>' +
+        '<div>Parcel-aware warnings require imported GeoJSON. Verify access and permission independently.</div>';
+      return;
+    }
+
+    const site = (typeof currentApproachSite === 'function')
+      ? currentApproachSite()
+      : ((typeof getSelectedSiteForExport === 'function') ? getSelectedSiteForExport() : null);
+
+    const sitPoint = privateLandPointFromSite(site);
+    const basePoint = (typeof getAnchorPoint === 'function') ? getAnchorPoint('baseCamp') : null;
+    const entryPoint = (typeof getAnchorPoint === 'function') ? getAnchorPoint('accessEntry') : null;
+
+    const sitMatches = privateLandMatchesForPoint(sitPoint, features);
+    const baseMatches = privateLandMatchesForPoint(basePoint, features);
+    const approachMatches = privateLandMatchesForLine(entryPoint || basePoint, sitPoint, features);
+
+    const warnings = [];
+
+    if (sitMatches.length) {
+      warnings.push('Selected sit overlaps imported parcel context: ' + privateLandFeatureLabel(sitMatches[0]));
+    }
+
+    if (baseMatches.length) {
+      warnings.push('Base camp overlaps imported parcel context: ' + privateLandFeatureLabel(baseMatches[0]));
+    }
+
+    if (approachMatches.length) {
+      warnings.push('Invisible approach may cross imported parcel context: ' + privateLandFeatureLabel(approachMatches[0]));
+    }
+
+    if (!warnings.length) {
+      panel.className = 'private-land-warning-panel clear';
+      panel.innerHTML =
+        '<strong>Private land warning</strong>' +
+        '<div class="private-land-warning-status">No overlap detected against imported parcel context.</div>' +
+        '<div>Still verify ownership, access, permission, season dates, and local regulations before entering.</div>';
+      return;
+    }
+
+    panel.className = warnings.length >= 2 ? 'private-land-warning-panel high' : 'private-land-warning-panel caution';
+    panel.innerHTML =
+      '<strong>Private land warning</strong>' +
+      '<div class="private-land-warning-status">' + warnings.length + ' caution flag(s) from imported parcel context.</div>' +
+      '<ul>' + warnings.map((item) => '<li>' + item + '</li>').join('') + '</ul>' +
+      '<div style="margin-top:7px;">Warning-only. Core scoring is unchanged. Verify county records, access, permission, and regulations.</div>';
   }
 
 
@@ -5169,6 +5578,7 @@ if (viewerSpecies) {
     drawPadusSignalOnCommandMap(payload, bbox);
     drawPrivateParcelsOnCommandMap(payload);
     renderParcelSourceTruthBadge(payload);
+    /* Pass 2 private-land warning panel disabled by repair patch: unstable checking loop. */
     applyCommandHudDeclutter();
 
     const primary = (payload.sites || []).find((s) => Number(s.rank) === 1) || (payload.sites || [])[0] || null;
@@ -5783,6 +6193,268 @@ if (viewerSpecies) {
 })();
 </script>
 
+
+<script>
+/* MONAHINGA_REPAIR_DISABLE_PASS2_PRIVATE_LAND_PANEL_2026_05_07
+   Defensive stabilization only. Keeps Pass 1 parcel source truth active while disabling
+   the unstable Pass 2 private-land warning panel until it is rebuilt more safely.
+*/
+window.updatePrivateLandWarningPanel = function(){
+  try {
+    var panel = document.getElementById('private_land_warning_panel');
+    if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  } catch (_err) {}
+};
+document.addEventListener('DOMContentLoaded', function(){
+  try {
+    var panel = document.getElementById('private_land_warning_panel');
+    if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  } catch (_err) {}
+});
+</script>
+
+
+<script>
+/* MONAHINGA_PASS3_SUMMARY_PARCEL_TRUTH_UPGRADE_2026_05_07 */
+
+// MONAHINGA_PASS3_SUMMARY_PARCEL_TRUTH_UPGRADE_2026_05_07
+  function monahingaParcelTruthSummaryLines(){
+    try{
+      const truth = parcelSourceTruth(payload);
+      const lines = [];
+      const kind = String((truth && truth.kind) || 'none').toLowerCase();
+
+      lines.push('');
+      lines.push('PRIVATE PARCEL SOURCE TRUTH');
+      lines.push('---------------------------');
+
+      if (kind === 'imported') {
+        lines.push('Status: IMPORTED GEOJSON ACTIVE');
+        lines.push('Details: ' + String((truth && truth.message) || 'Imported parcel context is active.'));
+        lines.push('Caution: Ownership context only. Verify county records, access, permission, season dates, and local regulations before field use.');
+      } else if (kind === 'demo') {
+        lines.push('Status: DEMO VISUAL ONLY');
+        lines.push('Details: ' + String((truth && truth.message) || 'Demo parcel visuals are active.'));
+        lines.push('Caution: Demo parcel shapes are placeholders and are not real ownership boundaries.');
+      } else {
+        lines.push('Status: NO IMPORTED PARCEL GEOJSON LOADED');
+        lines.push('Caution: No private parcel context is loaded. Verify ownership, access, permission, season dates, and local regulations independently.');
+      }
+
+      const geojson = payload && payload.parcel_geojson ? payload.parcel_geojson : null;
+      const props = geojson && geojson.properties ? geojson.properties : {};
+      const features = geojson && Array.isArray(geojson.features) ? geojson.features : [];
+
+      if (geojson) {
+        lines.push('Feature count: ' + String(props.monahinga_feature_count || features.length || 0));
+
+        const ownerFields = Array.isArray(props.monahinga_detected_owner_fields)
+          ? props.monahinga_detected_owner_fields.join(' / ')
+          : String(props.monahinga_detected_owner_fields || '').trim();
+
+        const idFields = Array.isArray(props.monahinga_detected_parcel_id_fields)
+          ? props.monahinga_detected_parcel_id_fields.join(' / ')
+          : String(props.monahinga_detected_parcel_id_fields || '').trim();
+
+        if (ownerFields) lines.push('Detected owner fields: ' + ownerFields);
+        if (idFields) lines.push('Detected parcel ID fields: ' + idFields);
+
+        if (props.monahinga_owner_value_count !== undefined) {
+          lines.push('Features with owner value: ' + String(props.monahinga_owner_value_count));
+        }
+        if (props.monahinga_parcel_id_value_count !== undefined) {
+          lines.push('Features with parcel ID value: ' + String(props.monahinga_parcel_id_value_count));
+        }
+      }
+
+      lines.push('Scoring note: Parcel context is warning-only in this build. Core sit/scoring logic is unchanged.');
+      return lines;
+    }catch(err){
+      return [
+        '',
+        'PRIVATE PARCEL SOURCE TRUTH',
+        '---------------------------',
+        'Status: Parcel source truth summary unavailable.',
+        'Caution: Verify ownership, access, permission, season dates, and local regulations independently.'
+      ];
+    }
+  }
+
+  function monahingaUpgradeDownloadedSummary(){
+    try{
+      const buttons = Array.from(document.querySelectorAll('button, a'));
+      const summaryButton = buttons.find((btn) => String(btn.textContent || '').trim().toLowerCase().includes('download summary'));
+      if (!summaryButton) return;
+
+      if (summaryButton.dataset.monahingaParcelTruthSummary === 'yes') return;
+      summaryButton.dataset.monahingaParcelTruthSummary = 'yes';
+
+      summaryButton.addEventListener('click', function(){
+        try{
+          setTimeout(function(){
+            const lines = monahingaParcelTruthSummaryLines();
+            const text = lines.join('\n') + '\n';
+
+            const blob = new Blob([text], {type:'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'monahinga_parcel_source_truth_summary.txt';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function(){
+              URL.revokeObjectURL(url);
+              if (a && a.parentNode) a.parentNode.removeChild(a);
+            }, 600);
+          }, 350);
+        }catch(err){
+          console.warn('Parcel truth summary download add-on failed', err);
+        }
+      }, true);
+    }catch(err){
+      console.warn('Could not upgrade downloaded summary with parcel truth add-on', err);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', monahingaUpgradeDownloadedSummary);
+  } else {
+    monahingaUpgradeDownloadedSummary();
+  }
+
+
+</script>
+
+<script>
+/* MONAHINGA_REPAIR_PASS3_SUMMARY_TRUTH_EXPORT_2026_05_07 */
+
+// MONAHINGA_REPAIR_PASS3_SUMMARY_TRUTH_EXPORT_2026_05_07
+  window.monahingaParcelTruthSummaryLines = function(){
+    try{
+      const lines = [];
+      lines.push('');
+      lines.push('PRIVATE PARCEL SOURCE TRUTH');
+      lines.push('---------------------------');
+
+      function cleanText(value){
+        return String(value || '').replace(/\s+/g, ' ').trim();
+      }
+
+      function firstExisting(selectors){
+        for (const selector of selectors) {
+          const el = document.querySelector(selector);
+          if (el) return el;
+        }
+        return null;
+      }
+
+      const hud = firstExisting([
+        '#parcel_source_truth_hud',
+        '#parcel_source_truth_badge',
+        '#parcel_context_caution_compact'
+      ]);
+
+      const visibleTruth = hud ? cleanText(hud.textContent) : '';
+      const pageText = cleanText(document.body ? document.body.textContent : '');
+
+      let status = 'NO IMPORTED PARCEL GEOJSON LOADED';
+      if ((visibleTruth + ' ' + pageText).includes('IMPORTED GEOJSON ACTIVE')) {
+        status = 'IMPORTED GEOJSON ACTIVE';
+      } else if ((visibleTruth + ' ' + pageText).includes('DEMO VISUAL ONLY')) {
+        status = 'DEMO VISUAL ONLY';
+      }
+
+      lines.push('Status: ' + status);
+
+      if (visibleTruth) {
+        lines.push('Visible Page 2 truth label: ' + visibleTruth);
+      } else {
+        lines.push('Visible Page 2 truth label: not found in command surface DOM.');
+      }
+
+      const guideText = cleanText((document.querySelector('.command-map-guide-legend') || {}).textContent || '');
+      if (guideText && guideText.includes('PRIVATE PARCELS')) {
+        const privateIndex = guideText.indexOf('PRIVATE PARCELS');
+        lines.push('Command map guide parcel text: ' + guideText.slice(privateIndex, privateIndex + 900));
+      }
+
+      const rawHtml = document.documentElement ? document.documentElement.innerHTML : '';
+      const featureMatch = rawHtml.match(/([0-9]+)\s+feature\(s\)/i);
+      if (featureMatch) lines.push('Feature count detected from page: ' + featureMatch[1]);
+
+      const ownerMatch = rawHtml.match(/Owner fields?:\s*([^<\\.]+)/i);
+      if (ownerMatch) lines.push('Owner fields detected from page: ' + cleanText(ownerMatch[1]));
+
+      const parcelMatch = rawHtml.match(/Parcel ID fields?:\s*([^<\\.]+)/i);
+      if (parcelMatch) lines.push('Parcel ID fields detected from page: ' + cleanText(parcelMatch[1]));
+
+      if (status === 'IMPORTED GEOJSON ACTIVE') {
+        lines.push('Caution: Imported parcel context is active as ownership context only. Verify county records, access, permission, season dates, and local regulations before field use.');
+      } else if (status === 'DEMO VISUAL ONLY') {
+        lines.push('Caution: Demo parcel shapes are placeholders and are not real ownership boundaries.');
+      } else {
+        lines.push('Caution: No imported parcel context was detected in the command surface. Verify ownership, access, permission, season dates, and local regulations independently.');
+      }
+
+      lines.push('Scoring note: Parcel context is warning-only in this build. Core sit/scoring logic is unchanged.');
+      return lines;
+    }catch(err){
+      return [
+        '',
+        'PRIVATE PARCEL SOURCE TRUTH',
+        '---------------------------',
+        'Status: Parcel source truth export repair failed.',
+        'Caution: Verify ownership, access, permission, season dates, and local regulations independently.',
+        'Scoring note: Parcel context is warning-only in this build. Core sit/scoring logic is unchanged.'
+      ];
+    }
+  };
+
+  window.monahingaDownloadParcelTruthSummary = function(){
+    try{
+      const lines = window.monahingaParcelTruthSummaryLines();
+      const text = lines.join('\n') + '\n';
+      const blob = new Blob([text], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'monahinga_parcel_source_truth_summary.txt';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        URL.revokeObjectURL(url);
+        if (a && a.parentNode) a.parentNode.removeChild(a);
+      }, 600);
+    }catch(err){
+      console.warn('Parcel truth summary repaired download failed', err);
+    }
+  };
+
+  window.monahingaRepairSummaryButton = function(){
+    try{
+      const buttons = Array.from(document.querySelectorAll('button, a'));
+      const summaryButton = buttons.find((btn) => String(btn.textContent || '').trim().toLowerCase().includes('download summary'));
+      if (!summaryButton) return;
+      if (summaryButton.dataset.monahingaParcelTruthSummaryRepair === 'yes') return;
+      summaryButton.dataset.monahingaParcelTruthSummaryRepair = 'yes';
+
+      summaryButton.addEventListener('click', function(){
+        setTimeout(function(){
+          window.monahingaDownloadParcelTruthSummary();
+        }, 500);
+      }, true);
+    }catch(err){
+      console.warn('Could not repair parcel truth summary button', err);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.monahingaRepairSummaryButton);
+  } else {
+    window.monahingaRepairSummaryButton();
+  }
+
+</script>
 </body>
 </html>''')
 
