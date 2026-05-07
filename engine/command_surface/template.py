@@ -6455,6 +6455,75 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
 </script>
+
+<script>
+/* MONAHINGA_PASS4_DEDICATED_PARCEL_TRUTH_BUTTON_2026_05_07 */
+
+// MONAHINGA_PASS4_DEDICATED_PARCEL_TRUTH_BUTTON_2026_05_07
+  window.monahingaEnsureParcelTruthButton = function(){
+    try{
+      const buttons = Array.from(document.querySelectorAll('button, a'));
+      const summaryButton = buttons.find((btn) =>
+        String(btn.textContent || '').trim().toLowerCase().includes('download summary')
+      );
+
+      if (!summaryButton) return;
+      if (document.getElementById('download_parcel_truth_summary_btn')) return;
+
+      const btn = document.createElement('button');
+      btn.id = 'download_parcel_truth_summary_btn';
+      btn.type = 'button';
+      btn.className = summaryButton.className || 'btn';
+      btn.textContent = 'Download Parcel Truth';
+      btn.title = 'Download private parcel source truth, owner/parcel-ID field detection, and caution language.';
+      btn.style.marginLeft = '8px';
+      btn.style.borderColor = 'rgba(126,240,151,.55)';
+      btn.style.background = 'rgba(8,43,21,.88)';
+      btn.style.color = '#ecfff1';
+
+      btn.addEventListener('click', function(event){
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (typeof window.monahingaDownloadParcelTruthSummary === 'function') {
+          window.monahingaDownloadParcelTruthSummary();
+          return;
+        }
+
+        const text = [
+          'PRIVATE PARCEL SOURCE TRUTH',
+          '---------------------------',
+          'Status: Parcel truth export function was not available.',
+          'Caution: Verify ownership, access, permission, season dates, and local regulations independently.',
+          'Scoring note: Parcel context is warning-only in this build. Core sit/scoring logic is unchanged.'
+        ].join('\n') + '\n';
+
+        const blob = new Blob([text], {type:'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'monahinga_parcel_source_truth_summary.txt';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){
+          URL.revokeObjectURL(url);
+          if (a && a.parentNode) a.parentNode.removeChild(a);
+        }, 600);
+      }, true);
+
+      summaryButton.insertAdjacentElement('afterend', btn);
+    }catch(err){
+      console.warn('Could not add dedicated parcel truth download button', err);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.monahingaEnsureParcelTruthButton);
+  } else {
+    window.monahingaEnsureParcelTruthButton();
+  }
+
+</script>
 </body>
 </html>''')
 
