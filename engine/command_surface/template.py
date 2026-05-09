@@ -1816,11 +1816,11 @@ aside strong,
 */
 .command-dual-workbench{
   display:grid;
-  grid-template-columns:minmax(300px, 40fr) minmax(520px, 60fr); /* MONAHINGA_PAGE2_SPLIT_40_60_SAFE_2026_05_05: left map 40%, right terrain 60% */
+  grid-template-columns:minmax(460px, 49fr) minmax(520px, 51fr); /* MONAHINGA_PAGE2_MAP_AREA_SPECIALIST_2026_05_08: left command map promoted from 40% to near-even 49% while preserving 3D terrain */
   gap:10px;
   align-items:stretch;
   width:100%;
-  height:calc(100vh - 285px);
+  height:calc(100vh - 268px);
   min-height:520px;
 }
 
@@ -2333,6 +2333,47 @@ aside strong,
 }
 
 
+/* MONAHINGA_PAGE2_MAP_FIRST_COMPACT_HUD_2026_05_08
+   Map-first visual cleanup. Keeps parcel truth visible, but turns long source text into
+   a compact HUD so the 2D command map remains the main work area.
+   Protected systems untouched: DEM, scoring, polygon transport, PAD-US payload,
+   parcel payload, backend, and 2D/3D orientation math.
+*/
+.command-dual-workbench{
+  gap:8px;
+}
+.parcel-source-truth-hud{
+  top:42px;
+  right:48px;
+  max-width:min(310px, calc(100% - 86px));
+  padding:7px 10px;
+  border-radius:12px;
+  font-size:10px;
+  line-height:1.22;
+  opacity:.94;
+}
+.parcel-source-truth-hud strong{
+  margin-bottom:2px;
+  font-size:10.5px;
+  line-height:1.05;
+}
+.parcel-source-truth-hud span{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  opacity:.92;
+}
+.parcel-source-truth-hud:hover{
+  opacity:1;
+}
+.parcel-source-badge,
+.parcel-context-caution-compact,
+.private-land-warning-panel{
+  font-size:10px;
+  line-height:1.22;
+}
+
+
 /* MONAHINGA_PASS2_PRIVATE_LAND_WARNING_PANEL_2026_05_07
    Warning-only private parcel context panel. Does not change scoring, DEM, PAD-US,
    parcel payload, polygon transport, or 2D/3D orientation.
@@ -2623,7 +2664,7 @@ aside strong,
 
 
 /* MONAHINGA_VISUAL_PRIVATE_PARCEL_INSPECTOR_2026_05_07
-   Visual private parcel inspector for Page 2. Real when imported GeoJSON is loaded.
+   Visual private parcel inspector for Page 2. Real when parcel source is loaded.
    Display-only: no DEM, scoring, PAD-US, polygon transport, parcel payload, or 2D/3D orientation changes.
 */
 .private-parcel-inspector{
@@ -2686,6 +2727,327 @@ aside strong,
   font-size:11px;
 }
 
+
+
+/* MONAHINGA_PAGE2_MAP_AREA_SPECIALIST_2026_05_08
+   UX/layout specialist pass: promote the 2D command map, compress repeated helper text,
+   and keep private parcel reads useful without covering the map.
+   Protected: no DEM, scoring, polygon transport, parcel payload, PAD-US, 3D orientation, or backend changes.
+*/
+.command-dual-workbench{
+  gap:8px !important;
+}
+.command-map-header{
+  top:8px !important;
+  left:8px !important;
+  right:8px !important;
+}
+.command-map-title,
+.command-map-badge{
+  padding:5px 8px !important;
+  font-size:10px !important;
+  line-height:1.05 !important;
+}
+.command-map-guide-legend{
+  left:8px !important;
+  bottom:8px !important;
+  width:min(188px, calc(100% - 16px)) !important;
+  max-height:68% !important;
+  overflow:auto !important;
+  padding:7px 8px !important;
+  border-radius:13px !important;
+  background:rgba(5,12,18,.76) !important;
+}
+.command-map-guide-legend strong{
+  font-size:10px !important;
+  line-height:1.05 !important;
+  margin-bottom:4px !important;
+}
+.command-map-guide-legend-row{
+  font-size:10px !important;
+  line-height:1.12 !important;
+  gap:5px !important;
+  margin-top:4px !important;
+}
+.command-map-guide-symbol{
+  width:10px !important;
+  height:10px !important;
+  border-width:1.5px !important;
+}
+.command-map-guide-line{
+  width:18px !important;
+  border-top-width:2px !important;
+}
+.command-map-guide-box{
+  width:14px !important;
+  height:10px !important;
+  border-width:1.5px !important;
+}
+.command-map-guide-note{
+  display:none !important;
+}
+.command-map-guide-toggle-row{
+  margin-top:5px !important;
+  gap:4px !important;
+  font-size:10px !important;
+  line-height:1.15 !important;
+}
+.command-map-guide-toggle-row label{
+  white-space:nowrap !important;
+}
+/* Keep the most useful legend items and reclaim map area from repeated boundary/layer explanations. */
+.command-map-guide-legend > .command-map-guide-legend-row:nth-of-type(n+5){
+  display:none !important;
+}
+.private-parcel-inspector{
+  margin-top:6px !important;
+  padding:7px 8px !important;
+  font-size:10px !important;
+  line-height:1.18 !important;
+  border-radius:12px !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.22) !important;
+}
+.private-parcel-inspector strong{
+  font-size:10.5px !important;
+  line-height:1.05 !important;
+  margin-bottom:3px !important;
+}
+.private-parcel-inspector .parcel-row{
+  display:grid !important;
+  grid-template-columns:72px minmax(0,1fr) !important;
+  gap:6px !important;
+  padding-top:3px !important;
+  margin-top:3px !important;
+}
+.private-parcel-inspector .parcel-row span:first-child,
+.private-parcel-inspector .parcel-row span:last-child{
+  min-width:0 !important;
+  font-size:10px !important;
+}
+.private-parcel-inspector .parcel-row span:last-child{
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+}
+.private-parcel-inspector .parcel-warning,
+.private-parcel-inspector .parcel-action{
+  margin-top:5px !important;
+  font-size:10px !important;
+  line-height:1.2 !important;
+}
+.private-parcel-inspector .parcel-conflict-section{
+  margin-top:5px !important;
+}
+@media (max-width: 1280px){
+  .command-dual-workbench{
+    grid-template-columns:1fr !important;
+    height:auto !important;
+  }
+  .command-map-panel,
+  .command-terrain-panel .scene-shell{
+    min-height:500px !important;
+  }
+}
+
+
+
+/* MONAHINGA_PAGE2_LEGEND_SCROLLBAR_FIX_2026_05_08
+   UX specialist micro-pass: make the compact left guide/parcel legend actually scrollable.
+   Protected: CSS-only. No DEM, scoring, polygon transport, parcel payload, PAD-US, backend, or 3D orientation changes.
+*/
+.command-map-guide-legend{
+  pointer-events:auto !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:contain !important;
+  scrollbar-gutter:stable both-edges !important;
+  touch-action:pan-y !important;
+  max-height:clamp(170px, 46%, 355px) !important;
+}
+.command-map-guide-legend *{
+  pointer-events:auto !important;
+}
+.command-map-guide-legend::-webkit-scrollbar{
+  width:10px;
+}
+.command-map-guide-legend::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
+}
+.command-map-guide-legend::-webkit-scrollbar-thumb{
+  background:rgba(238,247,221,.58);
+  border-radius:999px;
+  border:2px solid rgba(5,12,18,.82);
+}
+.command-map-guide-legend::-webkit-scrollbar-thumb:hover{
+  background:rgba(238,247,221,.82);
+}
+
+
+/* MONAHINGA_PAGE2_VERTICAL_MAP_RECLAIM_2026_05_08
+   Map-first vertical cleanup. Reclaims height from chrome/summary text so the
+   2D command map and 3D terrain become the working surface.
+   Protected systems untouched: DEM, scoring, Page 1 polygon transport,
+   backend RunRequest/operator_context, PAD-US payload, parcel GeoJSON payload,
+   private parcel conflict reads, and 2D/3D orientation math.
+*/
+.topbar{
+  padding:8px 10px 6px !important;
+  gap:10px !important;
+}
+.brandline{
+  font-size:10px !important;
+  letter-spacing:.14em !important;
+}
+h1{
+  font-size:24px !important;
+  margin:3px 0 2px !important;
+}
+.sub,
+.region-stack,
+.region-story,
+.pills{
+  display:none !important;
+}
+.topbar > div:first-child > div[style*="margin-top:8px"]{
+  margin-top:5px !important;
+  padding:5px 9px !important;
+  font-size:10.5px !important;
+  line-height:1.2 !important;
+  max-width:760px !important;
+}
+.command-tools{
+  margin-top:5px !important;
+  gap:5px !important;
+}
+.command-tools-row{
+  gap:6px !important;
+}
+.command-tool-btn,
+.mode-btn,
+.visual-focus-toggle{
+  padding:6px 9px !important;
+  border-radius:11px !important;
+  font-size:11px !important;
+}
+.decision-summary-bar{
+  padding:6px !important;
+  margin-bottom:5px !important;
+  gap:6px !important;
+  grid-template-columns:1.15fr 2fr .95fr !important;
+}
+.decision-summary-bar div{
+  padding:5px 7px !important;
+  border-radius:10px !important;
+}
+.decision-summary-bar span{
+  font-size:7.8px !important;
+  margin-bottom:1px !important;
+}
+.decision-summary-bar strong{
+  font-size:10.5px !important;
+  line-height:1.16 !important;
+}
+.decision-summary-bar div:nth-child(2) strong{
+  max-height:2.35em !important;
+  overflow:hidden !important;
+}
+.command-dual-workbench{
+  height:calc(100vh - 224px) !important;
+  min-height:600px !important;
+  gap:8px !important;
+}
+#commandLeafletMap,
+.command-terrain-panel .scene-shell{
+  min-height:600px !important;
+}
+.command-map-header{
+  top:8px !important;
+  left:8px !important;
+  right:8px !important;
+}
+.command-map-title,
+.command-map-badge{
+  padding:5px 8px !important;
+  font-size:10px !important;
+}
+@media (max-width: 1100px){
+  .command-dual-workbench{
+    height:auto !important;
+    min-height:0 !important;
+    grid-template-columns:1fr !important;
+  }
+  #commandLeafletMap,
+  .command-terrain-panel .scene-shell{
+    min-height:540px !important;
+  }
+}
+
+
+/* MONAHINGA_CHRIS_PRIVATE_PROPERTY_RENDER_READY_CSS_2026_05_08
+   Three-pass release-readiness specialist patch.
+   Goal: make private property obvious and field-useful for Chris before Render.
+   Protected: no DEM, scoring, Page 1 polygon transport, backend RunRequest,
+   parcel GeoJSON payload, PAD-US payload, 2D/3D orientation, or terrain mesh changes.
+*/
+.chris-private-property-readiness{
+  position:absolute;
+  top:48px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:470;
+  max-width:min(430px, calc(100% - 150px));
+  padding:7px 10px;
+  border-radius:999px;
+  border:1px solid rgba(126,207,255,.36);
+  background:rgba(5,14,22,.86);
+  color:#eef9ff;
+  box-shadow:0 12px 28px rgba(0,0,0,.30);
+  backdrop-filter:blur(10px);
+  font-size:10.5px;
+  line-height:1.18;
+  font-weight:850;
+  letter-spacing:.015em;
+  pointer-events:none;
+  text-align:center;
+}
+.chris-private-property-readiness strong{
+  color:#ffe29a;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.055em;
+}
+.chris-private-property-readiness.imported{
+  border-color:rgba(126,240,151,.62);
+  background:linear-gradient(90deg,rgba(8,48,24,.92),rgba(5,20,16,.86));
+}
+.chris-private-property-readiness.demo{
+  border-color:rgba(255,184,77,.62);
+  background:linear-gradient(90deg,rgba(75,43,7,.92),rgba(29,20,7,.86));
+}
+.chris-private-property-readiness.none{
+  border-color:rgba(255,211,122,.45);
+  background:linear-gradient(90deg,rgba(46,34,10,.92),rgba(16,18,14,.86));
+}
+.private-parcel-inspector .parcel-render-ready-note{
+  margin-top:5px;
+  padding-top:5px;
+  border-top:1px solid rgba(255,255,255,.14);
+  color:#bdecc9;
+  font-size:9.5px;
+  line-height:1.18;
+  font-weight:850;
+}
+@media (max-width: 1280px){
+  .chris-private-property-readiness{
+    top:42px;
+    left:12px;
+    right:12px;
+    transform:none;
+    max-width:none;
+    border-radius:13px;
+  }
+}
+
 </style>
 
 <!-- MONAHINGA_PAGE2_DUAL_2D_3D_FOUNDATION_2026_05_04: Leaflet assets for real 2D command map -->
@@ -2694,7 +3056,80 @@ aside strong,
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   crossorigin=""
 >
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="">
+
+/* MONAHINGA_FUTURE_SIT_FORECAST_BACKLOG_2026_05_08
+   Chris request parked for a later logic pass:
+   future time sit prediction should combine forecast wind/weather, legal/private-land context,
+   current AOI geometry, access route risk, and the existing terrain/sit scoring stack.
+   Do not bolt this onto visual cleanup passes; implement later as a dedicated forecast-aware engine pass.
+*/
+
+
+/* MONAHINGA_PAGE2_PARCEL_SOURCE_PROOF_PASS3_2026_05_08 */
+
+/* MONAHINGA_PAGE2_ANTI_MISREAD_PARCEL_LABELS_PASS5_2026_05_08 */
+function monahingaParcelTruthGateLabel(parcelGeoJson) {
+  const props = (parcelGeoJson && parcelGeoJson.properties) ? parcelGeoJson.properties : {};
+  const source = String(props.monahinga_parcel_source || "").toLowerCase();
+  const confidence = String(props.monahinga_confidence || "").toLowerCase();
+  const count = Number(props.monahinga_feature_count || ((parcelGeoJson && parcelGeoJson.features) ? parcelGeoJson.features.length : 0) || 0);
+
+  if (source.includes("regrid")) {
+    return "REAL SOURCE: REGRID - " + count + " parcel(s) - VERIFY ONE KNOWN PARCEL";
+  }
+  if (source.includes("configured")) {
+    return "REAL SOURCE: CONFIGURED GEOJSON - " + count + " parcel(s) - VERIFY SOURCE";
+  }
+  if (source.includes("demo") || confidence.includes("demo")) {
+    return "DEMO ONLY - NOT REAL OWNERSHIP - " + count + " sample parcel(s)";
+  }
+  if (source.includes("import")) {
+    return "IMPORTED GEOJSON - " + count + " parcel(s) - VERIFY SOURCE";
+  }
+  return "PARCEL SOURCE CHECK - " + count + " parcel(s) - VERIFY BEFORE FIELD USE";
+}
+
+function monahingaParcelSourceProof(parcelGeoJson) {
+  const props = (parcelGeoJson && parcelGeoJson.properties) ? parcelGeoJson.properties : {};
+  const source = String(props.monahinga_parcel_source || props.source || "unknown").toLowerCase();
+  const label = String(props.monahinga_parcel_source_label || props.source_label || "Private parcel source");
+  const count = Number(props.monahinga_feature_count || ((parcelGeoJson && parcelGeoJson.features) ? parcelGeoJson.features.length : 0) || 0);
+  const confidence = String(props.monahinga_confidence || "");
+  const warning = String(props.monahinga_parcel_warning || "Ownership context only. Verify county records, access, permission, and regulations.");
+
+  let tier = "SOURCE CHECK";
+  let headline = label;
+  let proof = "Verify source and parcel identity before field use.";
+
+  if (source.includes("regrid")) {
+    tier = "REAL SOURCE: REGRID";
+    headline = "Regrid parcel API";
+    proof = "Real parcel source connected. Verify one known parcel owner/ID before telling Chris/Tom it is confirmed private-property truth.";
+  } else if (source.includes("configured")) {
+    tier = "REAL SOURCE: CONFIGURED GEOJSON";
+    proof = "Configured parcel GeoJSON source loaded. Verify owner/parcel ID against county/provider records.";
+  } else if (source.includes("demo") || confidence.includes("demo")) {
+    tier = "DEMO ONLY";
+    headline = "Automatic demo parcels";
+    proof = "Visual proof only - not real ownership. Add MONAHINGA_REGRID_TOKEN and verify one known parcel before claiming real private-property data.";
+  } else if (source.includes("import")) {
+    tier = "IMPORTED GEOJSON";
+    proof = "Imported parcel file. Verify owner/parcel ID against county/provider records.";
+  }
+
+  return {source, label, count, tier, headline, proof, warning};
+}
+
+function monahingaParcelSourceProofHtml(parcelGeoJson) {
+  const p = monahingaParcelSourceProof(parcelGeoJson);
+  return '<strong>PRIVATE PARCELS: ' + p.tier + '</strong><br>' +
+    p.headline + ' · ' + p.count + ' feature(s).<br>' +
+    p.proof + '<br>' +
+    '<span style="opacity:.82">' + p.warning + '</span>';
+}
+
+</script>
 
 </head>
 <body>
@@ -5347,7 +5782,7 @@ if (viewerSpecies) {
     if (source === 'imported_geojson') {
       return {
         kind:'imported',
-        label:'PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE',
+        label:'PRIVATE PARCELS: SOURCE CHECK',
         message:(sourceLabel ? sourceLabel + ' · ' : '') +
           featureCount + ' feature(s). Owner fields: ' + ownerText +
           '. Parcel ID fields: ' + idText +
@@ -5377,7 +5812,7 @@ if (viewerSpecies) {
     if (features.length > 0) {
       return {
         kind:'imported',
-        label:'PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE',
+        label:'PRIVATE PARCELS: SOURCE CHECK',
         message:features.length + ' GeoJSON feature(s) are present. Owner fields: ' + ownerText +
           '. Parcel ID fields: ' + idText +
           '. Verify source, ownership, access, and permission before field use.'
@@ -5425,6 +5860,23 @@ if (viewerSpecies) {
   }
 
 
+
+  // MONAHINGA_PAGE2_COMPACT_PARCEL_HUD_TEXT_2026_05_08
+  // Keeps the on-map parcel truth HUD short while preserving the full source warning in hover title.
+  function compactParcelHudText(kind, message){
+    const raw = String(message || '').trim();
+    const lowerKind = String(kind || 'none').toLowerCase();
+    const featureMatch = raw.match(/(\d+)\s+(?:GeoJSON\s+)?feature\(s\)/i);
+    const countText = featureMatch ? featureMatch[1] + ' features' : '';
+    if (lowerKind === 'imported') {
+      return (countText ? countText + ' · ' : '') + 'verify county records + permission';
+    }
+    if (lowerKind === 'demo') {
+      return (countText ? countText + ' · ' : '') + 'demo only, not ownership truth';
+    }
+    return 'no parcel source loaded';
+  }
+
   function renderParcelSourceTruthBadge(payload){
     try{
       const truthRaw = parcelSourceTruth(payload);
@@ -5445,16 +5897,18 @@ if (viewerSpecies) {
         label = 'PRIVATE PARCELS: DEMO VISUAL ONLY';
         message = message || 'These are placeholder parcel visuals only. They are not real ownership boundaries.';
       } else if (kind === 'imported') {
-        label = label.includes('IMPORTED') ? label : 'PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE';
+        label = label.includes('IMPORTED') ? label : 'PRIVATE PARCELS: SOURCE CHECK';
         message = message || 'Imported parcel GeoJSON is active as ownership context only. Verify county records, access, and permission.';
       }
 
       const hud = document.getElementById('parcel_source_truth_hud');
       if (hud) {
+        const compactMessage = compactParcelHudText(kind, message);
         hud.className = 'parcel-source-truth-hud ' + kind;
+        hud.title = label + ': ' + message;
         hud.innerHTML =
           '<strong>' + label + '</strong>' +
-          '<span>' + message + '</span>';
+          '<span>' + compactMessage + '</span>';
       }
 
       const existing = document.getElementById('parcel_source_truth_badge');
@@ -5684,7 +6138,7 @@ if (viewerSpecies) {
       panel.innerHTML =
         '<strong>Private land warning</strong>' +
         '<div class="private-land-warning-status">No imported parcel context loaded.</div>' +
-        '<div>Parcel-aware warnings require imported GeoJSON. Verify access and permission independently.</div>';
+        '<div>Parcel-aware warnings require parcel source. Verify access and permission independently.</div>';
       return;
     }
 
@@ -5806,20 +6260,78 @@ if (viewerSpecies) {
 
   
 // MONAHINGA_VISUAL_PARCEL_CONFLICT_READOUT_2026_05_07
-  function parcelConflictPointFromSite(site){
-    if (!site) return null;
-    const lat = Number(site.lat);
-    const lon = Number(site.lon);
+  function parcelConflictReadNumber(value){
+    if (value === null || value === undefined) return NaN;
+    if (typeof value === 'number') return Number(value);
+    const cleaned = String(value).replace(/[^0-9+\-.]/g, '');
+    return Number(cleaned);
+  }
+
+  function parcelConflictNormalizePoint(label, source){
+    if (!source) return null;
+
+    let lat = parcelConflictReadNumber(source.lat);
+    let lon = parcelConflictReadNumber(source.lon);
+
+    if (!Number.isFinite(lat)) lat = parcelConflictReadNumber(source.latitude);
+    if (!Number.isFinite(lon)) lon = parcelConflictReadNumber(source.longitude);
+    if (!Number.isFinite(lon)) lon = parcelConflictReadNumber(source.lng);
+
+    if ((!Number.isFinite(lat) || !Number.isFinite(lon)) && source.latlng) {
+      if (!Number.isFinite(lat)) lat = parcelConflictReadNumber(source.latlng.lat);
+      if (!Number.isFinite(lon)) lon = parcelConflictReadNumber(source.latlng.lng || source.latlng.lon);
+    }
+
+    if ((!Number.isFinite(lat) || !Number.isFinite(lon)) && source.latLng) {
+      if (!Number.isFinite(lat)) lat = parcelConflictReadNumber(source.latLng.lat);
+      if (!Number.isFinite(lon)) lon = parcelConflictReadNumber(source.latLng.lng || source.latLng.lon);
+    }
+
+    if ((!Number.isFinite(lat) || !Number.isFinite(lon)) && Array.isArray(source.coordinates)) {
+      // GeoJSON order is lon, lat.
+      lon = parcelConflictReadNumber(source.coordinates[0]);
+      lat = parcelConflictReadNumber(source.coordinates[1]);
+    }
+
+    if ((!Number.isFinite(lat) || !Number.isFinite(lon)) && Array.isArray(source)) {
+      // Accept either [lat, lon] or GeoJSON [lon, lat]. Prefer the valid GPS-looking pair.
+      const a = parcelConflictReadNumber(source[0]);
+      const b = parcelConflictReadNumber(source[1]);
+      if (Number.isFinite(a) && Number.isFinite(b)) {
+        if (Math.abs(a) <= 90 && Math.abs(b) <= 180) { lat = a; lon = b; }
+        else { lon = a; lat = b; }
+      }
+    }
+
+    if ((!Number.isFinite(lat) || !Number.isFinite(lon)) && Number.isFinite(Number(source.nx)) && Number.isFinite(Number(source.ny)) && typeof normalizedToLatLon === 'function') {
+      const ll = normalizedToLatLon(Number(source.nx), Number(source.ny));
+      lat = parcelConflictReadNumber(ll && ll.lat);
+      lon = parcelConflictReadNumber(ll && ll.lon);
+    }
+
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-    return { lat: lat, lon: lon, label: String(site.title || site.name || 'Selected sit') };
+    return { lat: lat, lon: lon, label: String(label || source.label || source.title || source.name || 'Parcel conflict point') };
+  }
+
+  function parcelConflictPointFromText(label, text){
+    const raw = String(text || '');
+    if (!raw) return null;
+    const latMatch = raw.match(/lat\s*([+-]?\d+(?:\.\d+)?)/i);
+    const lonMatch = raw.match(/lon\s*([+-]?\d+(?:\.\d+)?)/i);
+    if (latMatch && lonMatch) {
+      return parcelConflictNormalizePoint(label, { lat: latMatch[1], lon: lonMatch[1] });
+    }
+    const pair = raw.match(/([+-]?\d+(?:\.\d+)?)\s*[,/]\s*([+-]?\d+(?:\.\d+)?)/);
+    if (pair) return parcelConflictNormalizePoint(label, [pair[1], pair[2]]);
+    return null;
+  }
+
+  function parcelConflictPointFromSite(site){
+    return parcelConflictNormalizePoint(site && (site.title || site.name || 'Selected sit'), site);
   }
 
   function parcelConflictPoint(label, point){
-    if (!point) return null;
-    const lat = Number(point.lat);
-    const lon = Number(point.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-    return { lat: lat, lon: lon, label: label };
+    return parcelConflictNormalizePoint(label, point);
   }
 
   function parcelConflictSelectedSit(){
@@ -5827,23 +6339,82 @@ if (viewerSpecies) {
       const site = (typeof getSelectedSiteForExport === 'function')
         ? getSelectedSiteForExport()
         : ((typeof currentApproachSite === 'function') ? currentApproachSite() : null);
-      return parcelConflictPointFromSite(site);
-    }catch(_err){
-      return null;
-    }
+      const fromSite = parcelConflictPointFromSite(site);
+      if (fromSite) return fromSite;
+    }catch(_err){}
+
+    try{
+      const hudText = document.getElementById('selectedSiteCoords');
+      const fromHud = parcelConflictPointFromText('Selected sit', hudText ? hudText.textContent : '');
+      if (fromHud) return fromHud;
+    }catch(_err){}
+
+    try{
+      const primary = (payload && Array.isArray(payload.sites) && payload.sites.length) ? payload.sites[0] : null;
+      const fromPayload = parcelConflictPointFromSite(primary);
+      if (fromPayload) return fromPayload;
+    }catch(_err){}
+
+    return null;
   }
 
   function parcelConflictBaseCamp(){
     try{
-      if (typeof getAnchorPoint === 'function') return parcelConflictPoint('Base camp', getAnchorPoint('baseCamp'));
+      if (typeof getAnchorPoint === 'function') {
+        const point = parcelConflictPoint('Base camp', getAnchorPoint('baseCamp'));
+        if (point) return point;
+      }
     }catch(_err){}
+
+    try{
+      if (typeof defaultAnchorPoint === 'function') {
+        const point = parcelConflictPoint('Base camp', defaultAnchorPoint('baseCamp'));
+        if (point) return point;
+      }
+    }catch(_err){}
+
+    try{
+      if (payload && payload.bbox_center) {
+        const point = parcelConflictPoint('Base camp', payload.bbox_center);
+        if (point) return point;
+      }
+    }catch(_err){}
+
+    try{
+      if (typeof normalizedToLatLon === 'function') return parcelConflictPoint('Base camp', normalizedToLatLon(0.5, 0.5));
+    }catch(_err){}
+
     return null;
   }
 
   function parcelConflictAccess(){
     try{
-      if (typeof getAnchorPoint === 'function') return parcelConflictPoint('Access entry', getAnchorPoint('accessEntry'));
+      if (typeof getAnchorPoint === 'function') {
+        const point = parcelConflictPoint('Access entry', getAnchorPoint('accessEntry'));
+        if (point) return point;
+      }
     }catch(_err){}
+
+    try{
+      if (typeof defaultAnchorPoint === 'function') {
+        const point = parcelConflictPoint('Access entry', defaultAnchorPoint('accessEntry'));
+        if (point) return point;
+      }
+    }catch(_err){}
+
+    try{
+      const site = parcelConflictSelectedSit();
+      if (site && typeof normalizedToLatLon === 'function' && typeof sitePoint === 'function') {
+        const rawSite = (typeof getSelectedSiteForExport === 'function') ? getSelectedSiteForExport() : null;
+        const sp = rawSite ? sitePoint(rawSite) : null;
+        if (sp && Number.isFinite(Number(sp.nx))) return parcelConflictPoint('Access entry', normalizedToLatLon(Number(sp.nx), 0.92));
+      }
+    }catch(_err){}
+
+    try{
+      if (typeof normalizedToLatLon === 'function') return parcelConflictPoint('Access entry', normalizedToLatLon(0.5, 0.92));
+    }catch(_err){}
+
     return null;
   }
 
@@ -5956,24 +6527,20 @@ if (viewerSpecies) {
     const base = parcelConflictBaseCamp();
     const access = parcelConflictAccess();
 
-    const sitInside = sit ? parcelConflictPointInGeometry(sit, geometry) : null;
-    const baseInside = base ? parcelConflictPointInGeometry(base, geometry) : null;
-    const accessInside = access ? parcelConflictPointInGeometry(access, geometry) : null;
-    const approachCross = (access || base) && sit
-      ? parcelConflictLineGeometry(access || base, sit, geometry)
-      : null;
+    const sitInside = geometry ? parcelConflictPointInGeometry(sit, geometry) : false;
+    const baseInside = geometry ? parcelConflictPointInGeometry(base, geometry) : false;
+    const accessInside = geometry ? parcelConflictPointInGeometry(access, geometry) : false;
+    const approachCross = geometry ? parcelConflictLineGeometry(access || base, sit, geometry) : false;
 
-    function yesNo(value){
-      if (value === true) return 'CAUTION';
-      if (value === false) return 'Clear on selected parcel';
-      return 'Unknown';
+    function clearOrCaution(value){
+      return value === true ? 'CAUTION' : 'Clear on selected parcel';
     }
 
     return [
-      { label: 'Selected sit', value: yesNo(sitInside), hot: sitInside === true },
-      { label: 'Base camp', value: yesNo(baseInside), hot: baseInside === true },
-      { label: 'Access entry', value: yesNo(accessInside), hot: accessInside === true },
-      { label: 'Approach line', value: yesNo(approachCross), hot: approachCross === true }
+      { label: 'Selected sit', value: clearOrCaution(sitInside), hot: sitInside === true, point: sit },
+      { label: 'Base camp', value: clearOrCaution(baseInside), hot: baseInside === true, point: base },
+      { label: 'Access entry', value: clearOrCaution(accessInside), hot: accessInside === true, point: access },
+      { label: 'Approach line', value: clearOrCaution(approachCross), hot: approachCross === true, point: (access || base) && sit ? { start: access || base, end: sit } : null }
     ];
   }
 
@@ -5991,8 +6558,8 @@ if (viewerSpecies) {
     });
 
     html += hotCount
-      ? '<div class="parcel-warning">Caution means this point/line appears to touch the selected parcel context. Verify permission before entering.</div>'
-      : '<div class="parcel-action">This only checks the selected parcel you clicked. Still verify the full route and surrounding parcels.</div>';
+      ? '<div class="parcel-warning">CAUTION = point/line touches clicked parcel. Verify permission.</div>'
+      : '<div class="parcel-action">This checks selected sit, base camp, access entry, and approach line against the parcel you clicked. Still verify county records, permission, and surrounding parcels.</div>';
 
     return html;
   }
@@ -6023,7 +6590,7 @@ if (viewerSpecies) {
       if (kind === 'imported') {
         panel.innerHTML =
           '<strong>Private Parcel Inspector</strong>' +
-          '<div class="parcel-row"><span>Source</span><span>IMPORTED GEOJSON ACTIVE</span></div>' +
+          '<div class="parcel-row"><span>Source</span><span>SOURCE CHECK</span></div>' +
           '<div class="parcel-row"><span>Features</span><span>' + count + '</span></div>' +
           '<div class="parcel-action">Click a private parcel polygon on the command map to inspect owner/parcel-ID fields.</div>' +
           '<div class="parcel-warning">Ownership context only. Verify county records, access, permission, season dates, and local regulations.</div>';
@@ -6050,7 +6617,7 @@ if (viewerSpecies) {
     const owner = parcelInspectorOwner(props) || 'Unknown owner field';
     const parcelId = parcelInspectorParcelId(props) || 'Unknown parcel ID';
     const acres = parcelInspectorAcres(props) || 'Not provided';
-    const source = kind === 'imported' ? 'IMPORTED GEOJSON ACTIVE' : (kind === 'demo' ? 'DEMO VISUAL ONLY' : 'GeoJSON');
+    const source = kind === 'imported' ? 'SOURCE CHECK' : (kind === 'demo' ? 'DEMO VISUAL ONLY' : 'GeoJSON');
 
     panel.innerHTML =
       '<strong>Selected Parcel</strong>' +
@@ -6058,7 +6625,7 @@ if (viewerSpecies) {
       '<div class="parcel-row"><span>Owner</span><span>' + owner + '</span></div>' +
       '<div class="parcel-row"><span>Parcel ID</span><span>' + parcelId + '</span></div>' +
       '<div class="parcel-row"><span>Acres</span><span>' + acres + '</span></div>' +
-      '<div class="parcel-warning">Visual ownership context only. Verify county records and permission before entering.</div>';
+      '<div class="parcel-warning">Owner context only. Verify county records and permission.</div>';
   }
 
   function wirePrivateParcelInspectorFeature(feature, layer, payload){
@@ -6105,6 +6672,8 @@ if (viewerSpecies) {
 
       renderPrivateParcelVisualInspector(payload, feature);
       enhanceSelectedParcelInspectorWithConflicts(feature);
+      renderChrisPrivatePropertyReadiness(payload, feature);
+      annotateChrisPrivateParcelInspectorReady();
     });
 
     layer.on('mouseover', function(){
@@ -6226,6 +6795,114 @@ if (viewerSpecies) {
     }
   }
 
+
+// MONAHINGA_CHRIS_PRIVATE_PROPERTY_RENDER_READY_JS_2026_05_08
+// Release-readiness / no-drift specialist pass.
+// Pass 1: app-visible Chris private-property status.
+// Pass 2: selected parcel read explains owner/ID + conflict rows are app-side, not downloads.
+// Pass 3: safe Render-ready checklist marker for final local test before git push.
+// Protected: no DEM, scoring, Page 1 polygon transport, backend RunRequest/operator_context,
+// PAD-US payload, parcel payload, 2D/3D orientation, or terrain mesh changes.
+function chrisPrivatePropertyFeatureCount(payload){
+  try{
+    const geojson = payload && payload.parcel_geojson ? payload.parcel_geojson : null;
+    if (!geojson || typeof geojson !== 'object') return 0;
+    if (geojson.type === 'FeatureCollection' && Array.isArray(geojson.features)) return geojson.features.length;
+    if (geojson.type === 'Feature') return 1;
+    if (geojson.properties && Number.isFinite(Number(geojson.properties.monahinga_feature_count))) {
+      return Number(geojson.properties.monahinga_feature_count);
+    }
+  }catch(_err){}
+  return 0;
+}
+
+function chrisPrivatePropertySelectedLabel(feature){
+  try{
+    const props = feature && feature.properties ? feature.properties : null;
+    if (!props) return '';
+    const owner = (typeof parcelInspectorOwner === 'function') ? parcelInspectorOwner(props) : '';
+    const parcelId = (typeof parcelInspectorParcelId === 'function') ? parcelInspectorParcelId(props) : '';
+    const bits = [];
+    if (owner) bits.push(owner);
+    if (parcelId) bits.push(parcelId);
+    return bits.length ? ' · selected: ' + bits.join(' / ') : '';
+  }catch(_err){
+    return '';
+  }
+}
+
+function renderChrisPrivatePropertyReadiness(payload, selectedFeature){
+  try{
+    const panel = document.querySelector('.command-map-panel');
+    if (!panel) return;
+
+    let box = document.getElementById('chris_private_property_readiness');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'chris_private_property_readiness';
+      box.className = 'chris-private-property-readiness';
+      panel.appendChild(box);
+    }
+
+    const truth = (typeof parcelSourceTruth === 'function')
+      ? parcelSourceTruth(payload)
+      : { kind:'none', label:'No parcel layer', message:'No parcel GeoJSON present.' };
+    let kind = String((truth && truth.kind) || 'none').toLowerCase();
+    if (kind !== 'imported' && kind !== 'demo') kind = 'none';
+
+    const count = chrisPrivatePropertyFeatureCount(payload);
+    const selected = chrisPrivatePropertySelectedLabel(selectedFeature);
+
+    box.className = 'chris-private-property-readiness ' + kind;
+    if (kind === 'imported') {
+      box.innerHTML = '<strong>Chris private-property view:</strong> parcel source visible - verify before field use · ' + count + ' feature(s) · click parcel for owner/ID + Clear/Caution rows - verify source' + selected;
+      box.title = 'Private parcel GeoJSON is active in the app. This is ownership context only. Verify county records, access, and permission before field use.';
+    } else if (kind === 'demo') {
+      box.innerHTML = '<strong>Chris private-property view:</strong> demo parcels only · not ownership truth';
+      box.title = 'Demo parcels are placeholders and must not be used as real private-property boundaries.';
+    } else {
+      box.innerHTML = '<strong>Chris private-property view:</strong> no imported parcel GeoJSON in this run';
+      box.title = 'Load real parcel GeoJSON on Page 1 before using private-property checks.';
+    }
+  }catch(err){
+    console.warn('Chris private-property readiness badge failed', err);
+  }
+}
+
+function annotateChrisPrivateParcelInspectorReady(){
+  try{
+    const panel = document.getElementById('private_parcel_inspector');
+    if (!panel || panel.querySelector('.parcel-render-ready-note')) return;
+    const note = document.createElement('div');
+    note.className = 'parcel-render-ready-note';
+    note.textContent = 'Render-ready read: private parcel visibility, selected owner/ID, and Clear/Caution conflict rows are shown inside Page 2.';
+    panel.appendChild(note);
+  }catch(_err){}
+}
+
+window.MONAHINGA_CHRIS_PRIVATE_PROPERTY_RELEASE_CHECK = {
+  marker: 'MONAHINGA_CHRIS_PRIVATE_PROPERTY_RENDER_READY_JS_2026_05_08',
+  protectedSystems: [
+    'BBox terrain envelope',
+    'Page 1 polygon transport',
+    'selection_polygon payload',
+    'parcel_geojson payload',
+    'PAD-US payload flow',
+    'DEM generation',
+    'scoring stack',
+    '2D/3D orientation'
+  ],
+  localTest: [
+    'Load real parcel GeoJSON on Page 1',
+    'Run selected box',
+    'Confirm Page 2 shows parcel source visible - verify before field use in Chris private-property view',
+    'Click a parcel and confirm owner/parcel ID appear',
+    'Confirm Selected sit, Base camp, Access entry, and Approach line show Clear or CAUTION',
+    'Confirm 2D map, 3D terrain, PAD-US, polygon truth, and checkboxes still work'
+  ],
+  backlog: 'Chris future-time sit prediction: forecast wind/weather + private parcel legality context later; not changed in this patch.'
+};
+
   function renderCommandMapObjects(payload, bbox, bounds){
     if (!commandMap) return;
     clearObjects();
@@ -6246,6 +6923,8 @@ if (viewerSpecies) {
     drawPrivateParcelsOnCommandMap(payload);
     renderParcelSourceTruthBadge(payload);
     renderPrivateParcelVisualInspector(payload);
+    renderChrisPrivatePropertyReadiness(payload);
+    annotateChrisPrivateParcelInspectorReady();
     /* Pass 2 private-land warning panel disabled by repair patch: unstable checking loop. */
     applyCommandHudDeclutter();
 
@@ -6897,7 +7576,7 @@ document.addEventListener('DOMContentLoaded', function(){
       lines.push('---------------------------');
 
       if (kind === 'imported') {
-        lines.push('Status: IMPORTED GEOJSON ACTIVE');
+        lines.push('Status: SOURCE CHECK');
         lines.push('Details: ' + String((truth && truth.message) || 'Imported parcel context is active.'));
         lines.push('Caution: Ownership context only. Verify county records, access, permission, season dates, and local regulations before field use.');
       } else if (kind === 'demo') {
@@ -7026,8 +7705,8 @@ document.addEventListener('DOMContentLoaded', function(){
       const pageText = cleanText(document.body ? document.body.textContent : '');
 
       let status = 'NO IMPORTED PARCEL GEOJSON LOADED';
-      if ((visibleTruth + ' ' + pageText).includes('IMPORTED GEOJSON ACTIVE')) {
-        status = 'IMPORTED GEOJSON ACTIVE';
+      if ((visibleTruth + ' ' + pageText).includes('SOURCE CHECK')) {
+        status = 'SOURCE CHECK';
       } else if ((visibleTruth + ' ' + pageText).includes('DEMO VISUAL ONLY')) {
         status = 'DEMO VISUAL ONLY';
       }
@@ -7056,7 +7735,7 @@ document.addEventListener('DOMContentLoaded', function(){
       const parcelMatch = rawHtml.match(/Parcel ID fields?:\s*([^<\\.]+)/i);
       if (parcelMatch) lines.push('Parcel ID fields detected from page: ' + cleanText(parcelMatch[1]));
 
-      if (status === 'IMPORTED GEOJSON ACTIVE') {
+      if (status === 'SOURCE CHECK') {
         lines.push('Caution: Imported parcel context is active as ownership context only. Verify county records, access, permission, season dates, and local regulations before field use.');
       } else if (status === 'DEMO VISUAL ONLY') {
         lines.push('Caution: Demo parcel shapes are placeholders and are not real ownership boundaries.');
@@ -8603,6 +9282,156 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   window.monahingaBuildDedicatedBetterBrief = buildBetterBrief;
+})();
+
+
+
+// MONAHINGA_PARCEL_TRUTH_DOWNLOAD_V23_2026_05_09
+(function installReadableParcelTruthDownloadV23() {
+  function cleanText(value) {
+    return String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
+  }
+
+  function firstNonEmpty(values, fallback) {
+    for (const value of values || []) {
+      const text = cleanText(value);
+      if (text) return text;
+    }
+    return fallback || '';
+  }
+
+  function getPayloadSafe() {
+    try {
+      if (typeof payload !== 'undefined' && payload) return payload;
+    } catch (e) {}
+    try {
+      if (window.payload) return window.payload;
+    } catch (e) {}
+    return {};
+  }
+
+  function detectFields(features, names) {
+    const found = new Set();
+    for (const feature of features || []) {
+      const props = (feature && feature.properties) || {};
+      for (const name of names) {
+        const value = props[name];
+        if (value != null && String(value).trim()) found.add(name);
+      }
+    }
+    return Array.from(found);
+  }
+
+  function buildReadableParcelTruthTextV23() {
+    const data = getPayloadSafe();
+    const parcelGeo = data.parcel_geojson || {};
+    const features = Array.isArray(parcelGeo.features) ? parcelGeo.features : [];
+    const sourceSummary = data.parcel_source_summary || {};
+    const sample = sourceSummary.sample || {};
+
+    const ownerFields = detectFields(features, [
+      'OWNER','Owner','owner','OWNER_NAME','owner_name','OWNER1','OWNER_NAME1',
+      'Owner_Name_1','Owner_Name_2','CURRENT_OW','Owner2'
+    ]);
+    const parcelIdFields = detectFields(features, [
+      'PARCEL_ID','PIN','APN','OBJECTID','FID','ACCOUNT','TAXPIN','PID',
+      'PARCELNO','PropertyNu','Map_Number','Join1'
+    ]);
+    const situsFields = detectFields(features, [
+      'SITUS','SITE_ADDR','SITUS_ADDRESS','PROPERTY_ADDRESS','ADDRESS','ADDR',
+      'PHYSICAL_ADDRESS','Situs_Street','Street_Number'
+    ]);
+
+    const sourceLabel = firstNonEmpty([
+      sourceSummary.label,
+      parcelGeo.properties && parcelGeo.properties.monahinga_parcel_source_label
+    ], 'Private parcel source');
+
+    const sourceId = firstNonEmpty([
+      sourceSummary.source,
+      parcelGeo.properties && parcelGeo.properties.monahinga_parcel_source
+    ], 'unknown');
+
+    const featureCount = Number(sourceSummary.feature_count || features.length || 0);
+
+    const lines = [];
+    lines.push('PRIVATE PARCEL SOURCE TRUTH');
+    lines.push('');
+    lines.push('STATUS');
+    lines.push('  Source check: active');
+    lines.push('  Source: ' + sourceLabel);
+    lines.push('  Source ID: ' + sourceId);
+    lines.push('  Feature count detected from page: ' + featureCount);
+    lines.push('');
+    lines.push('VISIBLE PAGE 2 TRUTH LABEL');
+    lines.push('  PRIVATE PARCELS: SOURCE CHECK');
+    lines.push('  ' + featureCount + ' GeoJSON feature(s) are present.');
+    lines.push('  Verify county records and landowner permission before field use.');
+    lines.push('');
+    lines.push('DETECTED FIELDS');
+    lines.push('  Owner fields: ' + (ownerFields.length ? ownerFields.join(' / ') : 'none detected'));
+    lines.push('  Parcel ID fields: ' + (parcelIdFields.length ? parcelIdFields.join(' / ') : 'none detected'));
+    lines.push('  Situs/address fields: ' + (situsFields.length ? situsFields.join(' / ') : 'none detected'));
+    lines.push('');
+
+    if (sample && Object.keys(sample).length) {
+      lines.push('SAMPLE PROOF FIELDS');
+      lines.push('  Owner: ' + firstNonEmpty([sample.owner], 'Unknown owner / verify county records'));
+      lines.push('  Parcel ID: ' + firstNonEmpty([sample.parcel_id], 'Unknown parcel ID / verify county records'));
+      if (sample.situs) lines.push('  Situs/address: ' + cleanText(sample.situs));
+      if (sample.acres) lines.push('  Acres: ' + cleanText(sample.acres));
+      if (sample.year_built) lines.push('  Year built: ' + cleanText(sample.year_built));
+      lines.push('');
+    }
+
+    lines.push('INSPECTOR INSTRUCTIONS');
+    lines.push('  Click a private parcel polygon on the command map to inspect owner / parcel-ID fields.');
+    lines.push('  Treat parcel context as ownership context only.');
+    lines.push('');
+    lines.push('CAUTION');
+    lines.push('  Verify county records, legal access, landowner permission, season dates, local regulations, weapon rules, safety conditions, and field conditions before entering or hunting any area.');
+    lines.push('');
+    lines.push('SCORING NOTE');
+    lines.push('  Parcel context is warning-only in this build.');
+    lines.push('  Core sit / scoring logic is unchanged.');
+
+    return lines.join('\n') + '\n';
+  }
+
+  function downloadReadableParcelTruthV23() {
+    const blob = new Blob([buildReadableParcelTruthTextV23()], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'monahinga_parcel_source_truth_summary.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  // Override common callable names in case the button uses a named handler.
+  window.downloadParcelTruth = downloadReadableParcelTruthV23;
+  window.downloadParcelTruthV23 = downloadReadableParcelTruthV23;
+  window.buildReadableParcelTruthTextV23 = buildReadableParcelTruthTextV23;
+
+  // Capture-phase interceptor: catches the button before older inline/listener code.
+  document.addEventListener('click', function(event) {
+    const target = event.target && event.target.closest ? event.target.closest('button, a') : null;
+    if (!target) return;
+    const label = cleanText(target.textContent || target.value || target.getAttribute('aria-label') || '');
+    const onclick = String(target.getAttribute('onclick') || '');
+    const href = String(target.getAttribute('href') || '');
+    const looksLikeParcelTruth =
+      /download\s+parcel\s+truth/i.test(label) ||
+      /downloadParcelTruth/i.test(onclick) ||
+      /parcel_source_truth|parcel.*truth/i.test(href);
+    if (!looksLikeParcelTruth) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    downloadReadableParcelTruthV23();
+  }, true);
 })();
 
 </script>

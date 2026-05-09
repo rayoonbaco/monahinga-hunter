@@ -853,6 +853,182 @@ h1 + .card {
   color:#ffd98a;
   margin-left:2px;
 }
+
+.inline-land-layers .parcel-file-label{
+  border:1px solid rgba(255,184,77,.28);
+  background:rgba(255,184,77,.08);
+  border-radius:10px;
+  padding:5px 9px;
+  color:#ffe0ad;
+}
+.inline-land-layers .parcel-file-label input{
+  display:none;
+}
+
+.parcel-help-note{
+  margin-top:8px;
+  font-size:11px;
+  line-height:1.4;
+  color:#cdbd95;
+  opacity:.92;
+}
+
+/* MONAHINGA_PAGE1_PARCEL_SOURCE_STATUS_V2_2026_05_06 */
+.parcel-source-status{
+  flex-basis:100%;
+  margin-top:8px;
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(5,9,12,.72);
+  color:#e4edf0;
+  font-size:11px;
+  line-height:1.35;
+  font-weight:850;
+  letter-spacing:.02em;
+}
+.parcel-source-status strong{
+  color:#ffe29a;
+}
+.parcel-source-status.demo{
+  border-color:rgba(255,184,77,.62);
+  background:rgba(72,42,7,.50);
+}
+.parcel-source-status.imported{
+  border-color:rgba(126,240,151,.55);
+  background:rgba(11,55,28,.44);
+}
+.parcel-source-status.provider{
+  border-color:rgba(131,201,255,.62);
+  background:rgba(9,36,58,.48);
+}
+.parcel-source-status.none{
+  color:#aebbc4;
+}
+.parcel-source-summary{
+  margin-top:7px;
+  padding:7px 8px;
+  border:1px solid rgba(155,255,179,.25);
+  border-radius:9px;
+  background:rgba(17,44,34,.35);
+  color:#dfffe9;
+  font-size:10px;
+  line-height:1.35;
+}
+.parcel-source-summary strong{
+  display:block;
+  color:#9dffb3;
+  margin-bottom:3px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.parcel-source-summary div{
+  display:flex;
+  gap:8px;
+  justify-content:space-between;
+  border-top:1px solid rgba(255,255,255,.08);
+  padding-top:3px;
+  margin-top:3px;
+}
+.parcel-source-summary span{
+  color:#aebbc4;
+  flex:0 0 auto;
+}
+.parcel-source-summary b{
+  color:#effff4;
+  text-align:right;
+  font-weight:850;
+  overflow-wrap:anywhere;
+}
+
+.parcel-source-attempts{
+  margin-top:6px;
+  padding-top:5px;
+  border-top:1px solid rgba(255,255,255,.16);
+  font-size:10px;
+  line-height:1.35;
+  font-weight:750;
+  letter-spacing:0;
+  max-height:86px;
+  overflow:auto;
+  color:#d8e5ea;
+}
+.parcel-source-attempts div{
+  margin-top:2px;
+}
+.parcel-source-attempts .attempt-ok{
+  color:#9dffb3;
+}
+.parcel-source-attempts .attempt-warn{
+  color:#ffe29a;
+}
+.parcel-source-attempts .attempt-fail{
+  color:#ffb0a6;
+}
+
+
+.demo-parcels-btn{
+  border:1px solid rgba(255,184,77,.30);
+  background:rgba(255,184,77,.10);
+  color:#ffe0ad;
+  border-radius:10px;
+  padding:6px 10px;
+  font-size:11px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* MONAHINGA_PAGE1_PARCEL_CONTROLS_CLEANUP_V1_2026_05_08: Chris-facing parcel control cleanup */
+.parcel-primary-fetch-btn{
+  border:1px solid rgba(126,240,151,.55);
+  background:rgba(35,98,48,.88);
+  color:#f3ffe8;
+  border-radius:10px;
+  padding:8px 12px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 0 0 1px rgba(0,0,0,.25) inset;
+}
+.parcel-primary-fetch-btn:hover{
+  background:rgba(51,132,64,.95);
+}
+#load_demo_parcels_btn[hidden]{
+  display:none !important;
+}
+
+.demo-parcels-btn:hover{
+  background:rgba(255,184,77,.18);
+}
+
+
+/* MONAHINGA_PAGE1_PARCEL_CONTROLS_CLEANUP_V2_2026_05_08: one-button Chris-facing parcel controls */
+.parcel-advanced-tools{
+  display:inline-block;
+  margin-left:8px;
+  vertical-align:middle;
+}
+.parcel-advanced-tools summary{
+  cursor:pointer;
+  color:#b8c6be;
+  font-weight:800;
+  font-size:12px;
+  border:1px solid rgba(170,185,172,.28);
+  border-radius:10px;
+  padding:7px 10px;
+  background:rgba(10,16,18,.58);
+}
+.parcel-advanced-tools[open]{
+  display:block;
+  margin:10px 0 0 0;
+}
+.parcel-file-label-advanced{
+  margin-top:8px;
+  display:inline-block;
+}
+#load_demo_parcels_btn{
+  display:none !important;
+}
+
 </style>
 </head>
 <body>
@@ -895,6 +1071,8 @@ h1 + .card {
         <button class="ghost" type="button" onclick="goDefaultView()">Monahinga™ view</button>
         <button class="ghost" type="button" onclick="clearDrawnBox()">Clear Current Selection</button>
         <button class="ghost" type="button" onclick="applyPastedBBox()">Use pasted coordinates</button>
+        <button class="ghost" type="button" onclick="applyKnownParcelBox('spearfish')">Spearfish parcels</button>
+        <button class="ghost" type="button" onclick="applyKnownParcelBox('shinglehouse')">Shinglehouse parcels</button>
         <span class="toolbar-note">Clear the current selection first, then draw a BBox rectangle or polygon. Polygon currently launches using its bounding envelope while exact polygon scoring is built.</span>
       </div>
       <div class="field full" style="margin-bottom:12px;">
@@ -907,10 +1085,31 @@ h1 + .card {
         <strong>Land Layers</strong>
         <label><input id="padus_layer_toggle" type="checkbox"> PAD-US signal</label>
         <button id="padus_refresh_btn" type="button">Refresh PAD-US</button>
-        <label><input id="parcel_layer_toggle" type="checkbox"> Private parcels <span class="layer-pending">(source needed)</span></label>
+        <label><input id="parcel_layer_toggle" type="checkbox"> Private parcels <span class="layer-pending">(GeoJSON)</span></label>
+        <details class="parcel-advanced-tools" data-created-by="MONAHINGA_PAGE1_PARCEL_CONTROLS_CLEANUP_V2_2026_05_08"><summary>Advanced parcel tools</summary><label style="display:block;font-size:11px;font-weight:900;color:#d8e5ea;margin:7px 0 4px;">Manual ArcGIS parcel service URL</label><input id="manual_arcgis_url" type="text" placeholder="Paste county/Regrid/ReportAll ArcGIS MapServer or FeatureServer URL" style="width:100%;box-sizing:border-box;background:#050b10;color:#eaf3f4;border:1px solid #2f4454;border-radius:8px;padding:8px;font-size:12px;margin-bottom:5px;"><div style="font-size:10px;color:#b8c5c9;margin:0 0 8px;line-height:1.35;">Optional. BBox-scoped only. Accepts MapServer, FeatureServer, layer URLs, or /query URLs. Verify ownership/access before field use.</div><label class="parcel-file-label parcel-file-label-advanced">Load GeoJSON <input id="parcel_geojson_file" type="file" accept=".geojson,.json,application/geo+json,application/json"></label></details>
+        <button id="parcel_fetch_btn" class="parcel-primary-fetch-btn" type="button">Fetch private parcels</button>
+        <!-- legacy duplicate Fetch parcels button hidden by MONAHINGA_FREE_PARCEL_LADDER_V2 -->
+<button id="load_demo_parcels_btn" class="demo-parcels-btn" type="button" hidden data-hidden-by="MONAHINGA_PAGE1_PARCEL_CONTROLS_CLEANUP_V1_2026_05_08" style="display:none !important;">Demo parcels</button>
+
+
+<div class="parcel-help-note">
+  Use Fetch private parcels for the selected area. Advanced tools are only for manual GeoJSON fallback.
+</div>
+
+<div id="parcel_source_status" class="parcel-source-status none" data-created-by="MONAHINGA_PAGE1_PARCEL_SOURCE_STATUS_V2_2026_05_06">
+  <strong>PRIVATE PARCELS: NO SOURCE LOADED</strong><br>
+  Demo parcels are visual scaffolding only. Use Fetch parcels after a server parcel source is configured, or Load parcels for manual GeoJSON.
+</div>
+
+<!-- MONAHINGA_PARCEL_HELP_TEXT_2026_05_06 -->
         <span>Scouting context only. Verify access, ownership, permission, and regulations.</span>
       </div>
       <input id="selection_polygon_json" type="hidden" value="">
+      <!-- MONAHINGA_PAGE1_PARCEL_CONTROLS_CLEANUP_V2_2026_05_08: Fetch private parcels is primary; manual GeoJSON is advanced; demo hidden. -->
+      <!-- MONAHINGA_AUTO_PRIVATE_PARCEL_RENDER_BRIDGE_V1_2026_05_08: automatic parcel fetch bridge with advanced manual fallback. -->
+      <!-- MONAHINGA_REGRID_SOURCE_READY_PASS1_2026_05_08: Regrid chosen as first real parcel source. Demo remains not-real until token/API pass. -->
+      <!-- MONAHINGA_FREE_PARCEL_LADDER_V2_2026_05_08: Page 1 uses one fetch button and shows source attempts. -->
+      <input id="parcel_geojson_json" type="hidden" value="">
       <div id="bbox-map"></div>
       <div class="bbox-readout">Current selection bounds: <code id="bbox_readout">not drawn yet</code></div>
       <div class="search-meta" id="polygon_envelope_note" style="margin-top:8px;">Polygon mode is selection-first scaffolding: Page 2 still renders the bounding envelope until exact polygon terrain masking is added. Use Clear Current Selection before changing shapes.</div>
@@ -1128,6 +1327,51 @@ function currentBBoxPreviewQuery() {
   return '/padus-preview?' + params.toString();
 }
 
+// MONAHINGA_AUTO_PRIVATE_PARCEL_FETCH_PAGE1_2026_05_08
+function currentParcelPreviewQuery() {
+  const minLon = Number(document.getElementById('min_lon').value);
+  const minLat = Number(document.getElementById('min_lat').value);
+  const maxLon = Number(document.getElementById('max_lon').value);
+  const maxLat = Number(document.getElementById('max_lat').value);
+  if (![minLon, minLat, maxLon, maxLat].every(Number.isFinite)) {
+    throw new Error('Draw or paste a valid BBox before fetching private parcels.');
+  }
+  const params = new URLSearchParams({
+    min_lon: String(minLon),
+    min_lat: String(minLat),
+    max_lon: String(maxLon),
+    max_lat: String(maxLat)
+  });
+  const manualArcgisInput = document.getElementById('manual_arcgis_url');
+  const manualArcgisUrl = manualArcgisInput ? String(manualArcgisInput.value || '').trim() : '';
+  if (manualArcgisUrl) {
+    params.set('manual_arcgis_url', manualArcgisUrl);
+    try { localStorage.setItem('monahinga_manual_arcgis_url', manualArcgisUrl); } catch(e) {}
+  }
+  return '/parcel-preview?' + params.toString();
+}
+
+async function refreshPrivateParcelSourceLayer() {
+  if (!map.hasLayer(privateParcelLayer)) map.addLayer(privateParcelLayer);
+  setStatus('Fetching automatic private parcels for the current selection...');
+
+  const url = currentParcelPreviewQuery();
+  const res = await fetch(url);
+  const payload = await res.json().catch(function () { return {}; });
+
+  if (!res.ok || !payload.ok) {
+    const detail = payload && payload.detail ? String(payload.detail) : 'Private parcel source fetch failed.';
+    throw new Error(detail);
+  }
+
+  const geojson = payload.geojson || { type:'FeatureCollection', features:[] };
+  const label = payload.source_label || 'Configured private parcel source';
+  loadPrivateParcelGeoJson(geojson, label);
+  updateParcelSourceStatus('provider', Number(payload.feature_count || 0), label);
+  setStatus('Automatic private parcels loaded: ' + String(payload.feature_count || 0) + ' feature(s). Verify ownership, access, permission, and county records.');
+}
+
+
 async function refreshPadusSignalLayer() {
   if (!map.hasLayer(padusSignalLayer)) map.addLayer(padusSignalLayer);
   padusSignalLayer.clearLayers();
@@ -1172,11 +1416,891 @@ async function refreshPadusSignalLayer() {
 
 // MONAHINGA_MANUAL_PADUS_REFRESH_2026_05_06
 // MONAHINGA_PRIVATE_PARCELS_SOURCE_NEEDED_2026_05_06
+// MONAHINGA_LOCAL_PARCEL_GEOJSON_IMPORT_2026_05_06
+let activePrivateParcelGeoJsonLayer = null;
+let activePrivateParcelFeatureCount = 0;
+
+function parcelGeoJsonStoreEl() {
+  return document.getElementById('parcel_geojson_json');
+}
+
+function storeParcelGeoJsonForPayload(geojson) {
+  const el = parcelGeoJsonStoreEl();
+  if (!el) return;
+  try {
+    const serialized = JSON.stringify(geojson || null);
+    // Keep launch payload sane. Large real parcel datasets should later be tiled/server-side.
+    if (serialized.length > 1800000) {
+      el.value = '';
+      setStatus('Parcel file is too large to carry into Page 2. Use a smaller AOI/export.');
+      return;
+    }
+    el.value = serialized;
+  } catch (_err) {
+    el.value = '';
+  }
+}
+
+function clearStoredParcelGeoJson() {
+  const el = parcelGeoJsonStoreEl();
+  if (el) el.value = '';
+}
+
+function parcelGeoJsonForPayload() {
+  const el = parcelGeoJsonStoreEl();
+  if (!el || !el.value) return null;
+  try {
+    const parsed = JSON.parse(el.value);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch (_err) {
+    return null;
+  }
+}
+
+function parcelPropertyLabel(props) {
+  if (!props) return 'Parcel boundary';
+  const keys = [
+    'OWNER', 'Owner', 'owner', 'OWNER_NAME', 'owner_name',
+    'NAME', 'Name', 'name', 'PARCEL_ID', 'parcel_id',
+    'PIN', 'APN', 'MAPBLKLOT', 'ACCOUNT'
+  ];
+  for (const key of keys) {
+    if (props[key]) return String(props[key]);
+  }
+  return 'Parcel boundary';
+}
+
+// MONAHINGA_REAL_PARCEL_NORMALIZATION_V2_2026_05_06
+const MONAHINGA_OWNER_FIELD_CANDIDATES = [
+  'OWNER', 'Owner', 'owner', 'OWNER_NAME', 'owner_name',
+  'PARCEL_OWNER', 'parcel_owner', 'OWN_NAME', 'OWNERNME1',
+  'NAME', 'Name', 'name'
+];
+
+const MONAHINGA_PARCEL_ID_FIELD_CANDIDATES = [
+  'PARCEL_ID', 'parcel_id', 'PIN', 'pin', 'APN', 'apn',
+  'OBJECTID', 'FID', 'ACCOUNT', 'MAPBLKLOT', 'TAXPIN'
+];
+
+function firstParcelValue(props, keys) {
+  props = props || {};
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(props, key)) {
+      const value = props[key];
+      if (value !== null && value !== undefined && String(value).trim() !== '') {
+        return String(value).trim();
+      }
+    }
+  }
+  return '';
+}
+
+function normalizeParcelFeatureProperties(feature, sourceKind) {
+  if (!feature || typeof feature !== 'object') return;
+  feature.properties = feature.properties || {};
+  const props = feature.properties;
+
+  const owner = firstParcelValue(props, MONAHINGA_OWNER_FIELD_CANDIDATES);
+  const parcelId = firstParcelValue(props, MONAHINGA_PARCEL_ID_FIELD_CANDIDATES);
+
+  const normalizedSource = sourceKind === 'demo'
+    ? 'DEMO'
+    : (sourceKind === 'provider' ? 'AUTO_SOURCE' : 'IMPORTED_GEOJSON');
+  props.MONAHINGA_PARCEL_SOURCE = normalizedSource;
+  props.MONAHINGA_OWNER_NORMALIZED = owner || 'Unknown owner / verify county records';
+  props.MONAHINGA_PARCEL_ID_NORMALIZED = parcelId || 'Unknown parcel ID';
+}
+
+function normalizeParcelGeoJsonForMonahinga(geojson, sourceKind, sourceLabel) {
+  if (!geojson || typeof geojson !== 'object') return geojson;
+
+  const normalized = geojson;
+  normalized.properties = normalized.properties || {};
+
+  if (sourceKind === 'demo') {
+    normalized.properties.monahinga_parcel_source = 'demo';
+    normalized.properties.monahinga_parcel_source_label = sourceLabel || 'Demo parcel mosaic';
+    normalized.properties.monahinga_parcel_warning = 'DEMO VISUAL ONLY. Not real ownership data.';
+  } else if (sourceKind === 'provider') {
+    normalized.properties.monahinga_parcel_source = 'auto_source';
+    normalized.properties.monahinga_parcel_source_label = sourceLabel || 'Configured private parcel source';
+    normalized.properties.monahinga_parcel_warning = 'AUTO PARCEL SOURCE. Ownership context only; verify county records, access, permission, and regulations.';
+  } else {
+    normalized.properties.monahinga_parcel_source = 'imported_geojson';
+    normalized.properties.monahinga_parcel_source_label = sourceLabel || 'Imported parcel GeoJSON';
+    normalized.properties.monahinga_parcel_warning = 'IMPORTED GEOJSON. Ownership context only; verify county records and permission.';
+  }
+
+  const features = Array.isArray(normalized.features)
+    ? normalized.features
+    : (normalized.type === 'Feature' ? [normalized] : []);
+
+  features.forEach((feature) => normalizeParcelFeatureProperties(feature, sourceKind));
+  return normalized;
+}
+
+function updateParcelSourceStatus(kind, featureCount, label, message) {
+  const el = document.getElementById('parcel_source_status');
+  if (!el) return;
+
+  const safeCount = Number.isFinite(Number(featureCount)) ? Number(featureCount) : 0;
+  el.className = 'parcel-source-status ' + String(kind || 'none');
+
+  if (kind === 'imported') {
+    el.innerHTML =
+      '<strong>PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE</strong><br>' +
+      String(label || 'Imported parcel GeoJSON') + ' · ' + safeCount + ' feature(s). ' +
+      'This imported file will replace demo parcels in the run payload. Verify ownership, permission, access, and county records.';
+    return;
+  }
+
+  if (kind === 'provider') {
+    el.innerHTML =
+      '<strong>PRIVATE PARCELS: AUTO SOURCE ACTIVE</strong><br>' +
+      String(label || 'Configured private parcel source') + ' · ' + safeCount + ' feature(s). ' +
+      'This BBox-scoped source will replace demo parcels in the run payload. Verify ownership, permission, access, and county records.';
+    return;
+  }
+
+  if (kind === 'demo') {
+    el.innerHTML =
+      '<strong>PRIVATE PARCELS: DEMO VISUAL ONLY</strong><br>' +
+      String(label || 'Demo parcel mosaic') + ' · ' + safeCount + ' placeholder feature(s). ' +
+      'These shapes are not real ownership data.';
+    return;
+  }
+
+  el.innerHTML =
+    '<strong>PRIVATE PARCELS: NO SOURCE LOADED</strong><br>' +
+    String(message || 'Load imported GeoJSON for real parcel context, or use demo parcels only as visual scaffolding.');
+}
+
+function clearPrivateParcelLayer() {
+  privateParcelLayer.clearLayers();
+  activePrivateParcelGeoJsonLayer = null;
+  activePrivateParcelFeatureCount = 0;
+  clearStoredParcelGeoJson();
+  updateParcelSourceStatus('none', 0, '', 'Load imported GeoJSON for real parcel context, or use demo parcels only as visual scaffolding.');
+}
+
+function loadPrivateParcelGeoJson(geojson, label) {
+  clearPrivateParcelLayer();
+
+  if (!geojson || typeof geojson !== 'object') {
+    throw new Error('Parcel file was not valid GeoJSON.');
+  }
+
+  const rawSourceKind = String((geojson.properties && geojson.properties.monahinga_parcel_source) || '').toLowerCase();
+  const sourceKind = rawSourceKind === 'demo'
+    ? 'demo'
+    : (rawSourceKind === 'auto_source' || rawSourceKind === 'provider' ? 'provider' : 'imported_geojson');
+  geojson = normalizeParcelGeoJsonForMonahinga(geojson, sourceKind === 'demo' ? 'demo' : (sourceKind === 'provider' ? 'provider' : 'imported'), label);
+
+  const layer = L.geoJSON(geojson, {
+    style: function () {
+      return {
+        color: '#ffd27a',
+        weight: 2.2,
+        opacity: 0.95,
+        fillColor: '#ff9900',
+        fillOpacity: 0.38
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      const props = feature && feature.properties ? feature.properties : {};
+      const name = parcelPropertyLabel(props);
+      layer.bindPopup(
+        '<strong>Private parcel context</strong><br>' +
+        String(name) + '<br>' +
+        'Verify ownership, permission, access, and local records before entering.'
+      );
+    }
+  });
+
+  activePrivateParcelGeoJsonLayer = layer;
+  storeParcelGeoJsonForPayload(geojson);
+  privateParcelLayer.addLayer(layer);
+
+  try {
+    layer.bringToFront();
+  } catch (_err) {}
+
+  activePrivateParcelFeatureCount = Array.isArray(geojson.features)
+    ? geojson.features.length
+    : 1;
+
+  const parcelToggle = document.getElementById('parcel_layer_toggle');
+  if (parcelToggle) parcelToggle.checked = true;
+  if (!map.hasLayer(privateParcelLayer)) map.addLayer(privateParcelLayer);
+
+  const sourceTruthRaw = String((geojson.properties && geojson.properties.monahinga_parcel_source) || '').toLowerCase();
+  const sourceTruthKind = sourceTruthRaw === 'demo'
+    ? 'demo'
+    : (sourceTruthRaw === 'auto_source' || sourceTruthRaw === 'provider' ? 'provider' : 'imported');
+
+  updateParcelSourceStatus(sourceTruthKind, activePrivateParcelFeatureCount, label || 'GeoJSON');
+
+  if (sourceTruthKind === 'demo') {
+    setStatus(
+      'DEMO VISUAL ONLY parcel mosaic loaded: ' + activePrivateParcelFeatureCount +
+      ' placeholder feature(s). This is not real ownership data.'
+    );
+  } else if (sourceTruthKind === 'provider') {
+    setStatus(
+      'AUTO private parcel source active: ' + String(label || 'Configured source') +
+      ' with ' + activePrivateParcelFeatureCount +
+      ' feature(s). This replaces demo parcels in the run payload. Verify permission and county records.'
+    );
+  } else {
+    setStatus(
+      'IMPORTED GEOJSON parcel source active: ' + String(label || 'GeoJSON') +
+      ' with ' + activePrivateParcelFeatureCount +
+      ' feature(s). This replaces demo parcels in the run payload. Verify permission and county records.'
+    );
+  }
+
+  try {
+    const bounds = layer.getBounds();
+    if (bounds && bounds.isValid && bounds.isValid()) {
+      map.fitBounds(bounds, { padding:[20,20] });
+    }
+  } catch (_err) {}
+}
+
+
+// MONAHINGA_DEMO_PARCELS_2026_05_06
+function buildDemoParcelGeoJson() {
+  const bbox = getCurrentBBox();
+
+  if (!bbox) {
+    setStatus('Draw a box first before loading demo parcels.');
+    return null;
+  }
+
+  const minLon = Number(bbox.minLon);
+  const minLat = Number(bbox.minLat);
+  const maxLon = Number(bbox.maxLon);
+  const maxLat = Number(bbox.maxLat);
+
+  const w = maxLon - minLon;
+  const h = maxLat - minLat;
+
+  const features = [];
+
+  function rectFeature(id, x1, y1, x2, y2) {
+    return {
+      type: 'Feature',
+      properties: {
+        OWNER: 'Demo Parcel ' + id,
+        PARCEL_ID: 'DEMO-' + id
+      },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [minLon + (w * x1), minLat + (h * y1)],
+          [minLon + (w * x2), minLat + (h * y1)],
+          [minLon + (w * x2), minLat + (h * y2)],
+          [minLon + (w * x1), minLat + (h * y2)],
+          [minLon + (w * x1), minLat + (h * y1)]
+        ]]
+      }
+    };
+  }
+
+  features.push(rectFeature(1, 0.08, 0.12, 0.32, 0.36));
+  features.push(rectFeature(2, 0.36, 0.14, 0.58, 0.33));
+  features.push(rectFeature(3, 0.62, 0.18, 0.88, 0.41));
+  features.push(rectFeature(4, 0.12, 0.52, 0.34, 0.78));
+  features.push(rectFeature(5, 0.42, 0.56, 0.72, 0.86));
+
+  return {
+    type: 'FeatureCollection',
+    features: features
+  };
+}
+
+function loadDemoParcels() {
+  try {
+    if (!map) {
+      setStatus('Map not ready for demo parcels.');
+      return;
+    }
+
+    const bounds = map.getBounds();
+
+    const west = bounds.getWest();
+    const east = bounds.getEast();
+    const south = bounds.getSouth();
+    const north = bounds.getNorth();
+
+    const width = east - west;
+    const height = north - south;
+
+    if (![west, east, south, north, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
+      setStatus('Demo parcel generation failed: map bounds are not ready.');
+      return;
+    }
+
+    const xCuts = [0.08, 0.27, 0.44, 0.63, 0.82, 0.94];
+    const yCuts = [0.10, 0.31, 0.53, 0.75, 0.91];
+
+    const features = [];
+    let id = 1;
+
+    function lon(x) { return west + (width * x); }
+    function lat(y) { return south + (height * y); }
+
+    function jitterX(row, col, base) {
+      const delta = (((row + 1) * (col + 3)) % 5 - 2) * 0.008;
+      return Math.max(0.04, Math.min(0.96, base + delta));
+    }
+
+    function jitterY(row, col, base) {
+      const delta = (((row + 2) * (col + 5)) % 5 - 2) * 0.008;
+      return Math.max(0.04, Math.min(0.96, base + delta));
+    }
+
+    function parcelFeature(points, label) {
+      const coords = points.map((p) => [lon(p[0]), lat(p[1])]);
+      coords.push(coords[0]);
+      return {
+        type: 'Feature',
+        properties: {
+          OWNER: label,
+          PARCEL_ID: 'DEMO-PARCEL-' + String(id).padStart(2, '0')
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coords]
+        }
+      };
+    }
+
+    for (let r = 0; r < yCuts.length - 1; r++) {
+      for (let c = 0; c < xCuts.length - 1; c++) {
+        const x1 = jitterX(r, c, xCuts[c]);
+        const x2 = jitterX(r + 1, c, xCuts[c + 1]);
+        const y1 = jitterY(r, c, yCuts[r]);
+        const y2 = jitterY(r, c + 1, yCuts[r + 1]);
+
+        // Leave a few natural-looking gaps so the layer reads like rural parcel context,
+        // not a perfect spreadsheet grid.
+        if ((r === 0 && c === 4) || (r === 3 && c === 0) || (r === 2 && c === 3)) {
+          continue;
+        }
+
+        let points;
+        if ((r + c) % 3 === 0) {
+          points = [
+            [x1, y1],
+            [x2, y1 + 0.015],
+            [x2 - 0.018, y2],
+            [x1 + 0.01, y2 - 0.014]
+          ];
+        } else if ((r + c) % 3 === 1) {
+          points = [
+            [x1 + 0.012, y1],
+            [x2, y1],
+            [x2, y2 - 0.012],
+            [x1, y2],
+            [x1, y1 + 0.018]
+          ];
+        } else {
+          points = [
+            [x1, y1],
+            [x2 - 0.012, y1],
+            [x2, y1 + ((y2 - y1) * 0.52)],
+            [x2 - 0.020, y2],
+            [x1 + 0.014, y2],
+            [x1, y1 + ((y2 - y1) * 0.42)]
+          ];
+        }
+
+        features.push(parcelFeature(points, 'Demo Rural Parcel ' + id));
+        id += 1;
+      }
+    }
+
+    const geojson = normalizeParcelGeoJsonForMonahinga({
+      type: 'FeatureCollection',
+      properties: {
+        monahinga_parcel_source: 'demo',
+        monahinga_parcel_source_label: 'Demo parcel mosaic',
+        monahinga_parcel_warning: 'DEMO VISUAL ONLY. Not real ownership data.'
+      },
+      features: features
+    }, 'demo', 'Demo parcel mosaic');
+
+    loadPrivateParcelGeoJson(geojson, 'Demo parcel mosaic');
+
+    const parcelToggle = document.getElementById('parcel_layer_toggle');
+    if (parcelToggle) {
+      parcelToggle.checked = true;
+    }
+
+    if (!map.hasLayer(privateParcelLayer)) {
+      map.addLayer(privateParcelLayer);
+    }
+
+    try {
+      privateParcelLayer.bringToFront();
+    } catch (_err) {}
+
+    console.log('[MONAHINGA] Demo parcel mosaic rendered:', geojson.features.length);
+
+    setStatus(
+      'Demo parcel mosaic rendered: ' + geojson.features.length +
+      ' parcel-style features. This proves the private-property overlay path.'
+    );
+
+  } catch (err) {
+    console.error('[MONAHINGA] Demo parcel failure', err);
+    setStatus(
+      'Demo parcel render failed: ' +
+      String(err && err.message ? err.message : err)
+    );
+  }
+}
+
+// MONAHINGA_REAL_PARCEL_IMPORT_VALIDATOR_V1_2026_05_06
+
+// MONAHINGA_PASS1_IMPORTED_PARCEL_TRUTH_CONFIRMATION_2026_05_07
+function analyzeParcelGeoJsonForImport(geojson, fileName, byteSize) {
+  const result = {
+    ok: false,
+    featureCount: 0,
+    geometryTypes: {},
+    ownerFields: [],
+    idFields: [],
+    ownerValueCount: 0,
+    idValueCount: 0,
+    warning: '',
+    label: fileName || 'parcel GeoJSON'
+  };
+
+  if (!geojson || typeof geojson !== 'object') {
+    result.warning = 'File was not valid GeoJSON.';
+    return result;
+  }
+
+  let features = [];
+  if (geojson.type === 'FeatureCollection' && Array.isArray(geojson.features)) {
+    features = geojson.features;
+  } else if (geojson.type === 'Feature') {
+    features = [geojson];
+  } else {
+    result.warning = 'GeoJSON must be a FeatureCollection or Feature.';
+    return result;
+  }
+
+  result.featureCount = features.length;
+
+  const ownerFound = new Set();
+  const idFound = new Set();
+
+  features.forEach((feature) => {
+    const geomType = feature && feature.geometry && feature.geometry.type
+      ? String(feature.geometry.type)
+      : 'Unknown';
+
+    result.geometryTypes[geomType] = (result.geometryTypes[geomType] || 0) + 1;
+
+    const props = feature && feature.properties ? feature.properties : {};
+    let hasOwnerValue = false;
+    let hasIdValue = false;
+
+    MONAHINGA_OWNER_FIELD_CANDIDATES.forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(props, key)) {
+        ownerFound.add(key);
+        const value = props[key];
+        if (value !== null && value !== undefined && String(value).trim() !== '') {
+          hasOwnerValue = true;
+        }
+      }
+    });
+
+    MONAHINGA_PARCEL_ID_FIELD_CANDIDATES.forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(props, key)) {
+        idFound.add(key);
+        const value = props[key];
+        if (value !== null && value !== undefined && String(value).trim() !== '') {
+          hasIdValue = true;
+        }
+      }
+    });
+
+    if (hasOwnerValue) result.ownerValueCount += 1;
+    if (hasIdValue) result.idValueCount += 1;
+  });
+
+  result.ownerFields = Array.from(ownerFound);
+  result.idFields = Array.from(idFound);
+
+  if (result.featureCount <= 0) {
+    result.warning = 'No parcel features found.';
+    return result;
+  }
+
+  if (byteSize && byteSize > 1800000) {
+    result.warning = 'Large parcel file. It may display on Page 1, but may be too large to carry into Page 2. Use a smaller AOI/export if needed.';
+  }
+
+  result.ok = true;
+  return result;
+}
+
+function parcelImportStatusMessage(report) {
+  if (!report || !report.ok) {
+    return 'Parcel import failed. ' + String((report && report.warning) || 'Unknown error.');
+  }
+
+  const geometryBits = Object.entries(report.geometryTypes || {})
+    .map(([key, value]) => key + ':' + value)
+    .join(', ') || 'unknown geometry';
+
+  const ownerBit = report.ownerFields.length
+    ? report.ownerFields.join('/')
+    : 'no obvious owner field';
+
+  const idBit = report.idFields.length
+    ? report.idFields.join('/')
+    : 'no obvious parcel ID field';
+
+  let msg =
+    'IMPORTED GEOJSON ACTIVE: ' +
+    report.featureCount + ' feature(s), ' +
+    geometryBits +
+    '. Owner fields detected: ' + ownerBit +
+    ' (' + report.ownerValueCount + ' feature(s) with owner value).' +
+    ' Parcel ID fields detected: ' + idBit +
+    ' (' + report.idValueCount + ' feature(s) with parcel ID value).' +
+    ' Demo parcels have been replaced in the run payload.';
+
+  if (report.warning) msg += ' Warning: ' + report.warning;
+
+  return msg;
+}
+
+function applyParcelImportReportMetadata(geojson, report) {
+  if (!geojson || typeof geojson !== 'object' || !report) return geojson;
+
+  geojson.properties = geojson.properties || {};
+  geojson.properties.monahinga_parcel_source = 'imported_geojson';
+  geojson.properties.monahinga_parcel_source_label = report.label || 'Imported parcel GeoJSON';
+  geojson.properties.monahinga_parcel_warning = 'IMPORTED GEOJSON. Ownership context only; verify county records and permission.';
+  geojson.properties.monahinga_feature_count = report.featureCount || 0;
+  geojson.properties.monahinga_detected_owner_fields = report.ownerFields || [];
+  geojson.properties.monahinga_detected_parcel_id_fields = report.idFields || [];
+  geojson.properties.monahinga_owner_value_count = report.ownerValueCount || 0;
+  geojson.properties.monahinga_parcel_id_value_count = report.idValueCount || 0;
+
+  return geojson;
+}
+
+function updateParcelSourceStatusFromImportReport(report) {
+  const el = document.getElementById('parcel_source_status');
+  if (!el || !report || !report.ok) return;
+
+  const ownerBit = report.ownerFields && report.ownerFields.length
+    ? report.ownerFields.join(' / ')
+    : 'none detected';
+
+  const idBit = report.idFields && report.idFields.length
+    ? report.idFields.join(' / ')
+    : 'none detected';
+
+  el.className = 'parcel-source-status imported';
+  el.innerHTML =
+    '<strong>PRIVATE PARCELS: IMPORTED GEOJSON ACTIVE</strong><br>' +
+    String(report.label || 'Imported parcel GeoJSON') + ' · ' +
+    String(report.featureCount || 0) + ' feature(s). Demo parcels are replaced in the run payload.<br>' +
+    'Owner fields: ' + ownerBit + ' · owner values on ' + String(report.ownerValueCount || 0) + ' feature(s).<br>' +
+    'Parcel ID fields: ' + idBit + ' · parcel IDs on ' + String(report.idValueCount || 0) + ' feature(s).<br>' +
+    'Ownership context only. Verify county records, access, permission, and regulations.';
+}
+
+
+// MONAHINGA_AUTO_PRIVATE_PARCEL_FETCH_V2_2026_05_08
+async function fetchPrivateParcelsForSelectedArea() {
+  const btn = document.getElementById('fetch_private_parcels_btn');
+  try {
+    if (btn) btn.disabled = true;
+    setStatus('Fetching automatic private parcel preview for selected area...');
+
+    const minLon = parseFloat(document.getElementById('min_lon').value);
+    const minLat = parseFloat(document.getElementById('min_lat').value);
+    const maxLon = parseFloat(document.getElementById('max_lon').value);
+    const maxLat = parseFloat(document.getElementById('max_lat').value);
+    if (![minLon, minLat, maxLon, maxLat].every(Number.isFinite)) {
+      throw new Error('Draw or paste a valid selected box first.');
+    }
+
+    const params = new URLSearchParams({
+      min_lon: String(minLon),
+      min_lat: String(minLat),
+      max_lon: String(maxLon),
+      max_lat: String(maxLat),
+    });
+
+    const resp = await fetch('/parcel-preview?' + params.toString());
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data || data.ok === false) {
+      throw new Error((data && (data.detail || data.message)) || 'Automatic parcel preview failed.');
+    }
+    if (!data.geojson || !Array.isArray(data.geojson.features)) {
+      throw new Error('Automatic parcel preview returned no GeoJSON features.');
+    }
+
+    const label = data.source_label || data.source || 'Automatic parcel preview';
+    const normalized = normalizeParcelGeoJsonForMonahinga(data.geojson, 'imported', label);
+    loadPrivateParcelGeoJson(normalized, label);
+    updateParcelSourceStatus('imported', normalized.features.length, label, data.message || 'Automatic parcels loaded.');
+
+    const parcelToggle = document.getElementById('parcel_layer_toggle');
+    if (parcelToggle) parcelToggle.checked = true;
+    if (!map.hasLayer(privateParcelLayer)) map.addLayer(privateParcelLayer);
+
+    setStatus((data.message || 'Automatic parcels loaded.') + ' Feature count: ' + String(normalized.features.length) + '.');
+  } catch (err) {
+    setStatus('Automatic parcel fetch failed. ' + String(err && err.message ? err.message : err));
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+
+
+function escapeParcelSummaryHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatParcelSourceSummaryForPanel(summary) {
+  if (!summary || typeof summary !== 'object') return '';
+  const sample = summary.sample || {};
+  const rows = [];
+  if (sample.owner) rows.push('<div><span>Owner field</span><b>' + escapeParcelSummaryHtml(sample.owner) + '</b></div>');
+  if (sample.parcel_id) rows.push('<div><span>Parcel ID</span><b>' + escapeParcelSummaryHtml(sample.parcel_id) + '</b></div>');
+  if (sample.situs) rows.push('<div><span>Situs</span><b>' + escapeParcelSummaryHtml(sample.situs) + '</b></div>');
+  const extras = [];
+  if (sample.acres) extras.push('Acres: ' + escapeParcelSummaryHtml(sample.acres));
+  if (sample.year_built) extras.push('Built: ' + escapeParcelSummaryHtml(sample.year_built));
+  if (extras.length) rows.push('<div><span>Extra</span><b>' + extras.join(' · ') + '</b></div>');
+  if (!rows.length) return '';
+  return '<div class="parcel-source-summary"><strong>Detected parcel proof fields</strong>' + rows.join('') + '</div>';
+}
+
+
+function parcelAttemptStatusClassForPanel(statusText) {
+  const s = String(statusText || '').toLowerCase();
+  if (s.includes('ok') || s.includes('success') || s.includes('features=')) return 'attempt-ok';
+  if (s.includes('skipped') || s.includes('zero usable') || s.includes('returned zero') || s.includes('fallback')) return 'attempt-warn';
+  return 'attempt-fail';
+}
+
+function shortenParcelAttemptForPanel(statusText) {
+  let s = String(statusText || '').replace(/\s+/g, ' ').trim();
+  s = s.replace(/ValueError:\s*/g, '');
+  s = s.replace(/identify failed:\s*/g, 'identify: ');
+  s = s.replace(/query failed:\s*/g, 'query: ');
+  s = s.replace(/returned zero usable private parcel polygon geometries after rejecting county\/state\/road layers/g, 'zero usable parcel polygons after filtering county/state/road layers');
+  s = s.replace(/identify returned zero usable private parcel geometries after rejecting county\/state\/road layers/g, 'identify found zero usable parcel polygons after filtering county/state/road layers');
+  if (s.length > 150) s = s.slice(0, 147) + '...';
+  return s || 'no detail';
+}
+
+function formatParcelSourceAttemptsForPanel(sourceAttempts) {
+  if (!Array.isArray(sourceAttempts) || !sourceAttempts.length) return '';
+  const rows = sourceAttempts.slice(0, 6).map(function(attempt) {
+    const source = String((attempt && attempt.source) || 'source');
+    const status = String((attempt && attempt.status) || '');
+    const klass = parcelAttemptStatusClassForPanel(status);
+    return '<div><span class="' + klass + '">• ' + source + '</span>: ' + shortenParcelAttemptForPanel(status) + '</div>';
+  }).join('');
+  const extra = sourceAttempts.length > 6
+    ? '<div class="attempt-warn">• +' + String(sourceAttempts.length - 6) + ' more source attempt(s)</div>'
+    : '';
+  return '<div class="parcel-source-attempts"><strong>Source attempts</strong>' + rows + extra + '</div>';
+}
+
+function summarizeParcelSourceAttemptsForStatus(sourceAttempts) {
+  if (!Array.isArray(sourceAttempts) || !sourceAttempts.length) return '';
+  const failed = sourceAttempts.filter(function(a) {
+    const s = String((a && a.status) || '').toLowerCase();
+    return !(s.includes('ok') || s.includes('success') || s.includes('features='));
+  }).length;
+  return ' Source attempts checked: ' + String(sourceAttempts.length) + '; needing fallback/filtering: ' + String(failed) + '.';
+}
+
+async function fetchPrivateParcelsForCurrentSelection() {
+  try {
+    const bounds = normalizeBoundsFromInputs();
+    if (!bounds) throw new Error('Draw or paste a valid selected box first.');
+    applyBBoxToForm(bounds);
+    const payload = {
+      min_lon: Number(document.getElementById('min_lon').value),
+      min_lat: Number(document.getElementById('min_lat').value),
+      max_lon: Number(document.getElementById('max_lon').value),
+      max_lat: Number(document.getElementById('max_lat').value),
+      selection_polygon: storedSelectionPolygonForPayload() || selectionPolygonForPayload(bounds) || null
+    };
+    const manualArcgisInput = document.getElementById('manual_arcgis_url');
+    const manualArcgisUrl = manualArcgisInput ? String(manualArcgisInput.value || '').trim() : '';
+    if (manualArcgisUrl) {
+      payload.manual_arcgis_url = manualArcgisUrl;
+      try { localStorage.setItem('monahinga_manual_arcgis_url', manualArcgisUrl); } catch(e) {}
+    }
+    setStatus('Fetching private parcel source for selected area...');
+    const res = await fetch('/parcel-preview', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    let data = null;
+    try { data = await res.json(); } catch (_) { data = null; }
+    if (!res.ok || !data || !data.ok || !data.geojson) {
+      const detail = data && (data.detail || data.message) ? (data.detail || data.message) : ('HTTP ' + res.status);
+      throw new Error(String(detail));
+    }
+    const label = data.source_label || data.source || 'Automatic parcel source';
+    const sourceKindRaw = String(data.source || '').toLowerCase();
+    const isDemoSource = sourceKindRaw.includes('demo');
+    const isProviderSource = !isDemoSource && (
+      data.render_ready === true ||
+      sourceKindRaw.includes('arcgis') ||
+      sourceKindRaw.includes('pasda') ||
+      sourceKindRaw.includes('configured') ||
+      sourceKindRaw.includes('regrid') ||
+      sourceKindRaw.includes('public') ||
+      sourceKindRaw.includes('parcel')
+    );
+    const monahingaSourceKind = isDemoSource ? 'demo' : (isProviderSource ? 'provider' : 'imported');
+    let geojson = normalizeParcelGeoJsonForMonahinga(data.geojson, monahingaSourceKind, label);
+    const report = analyzeParcelGeoJsonForImport(geojson, label, 0);
+    applyParcelImportReportMetadata(geojson, report);
+    geojson.properties = geojson.properties || {};
+    geojson.properties.monahinga_parcel_source = monahingaSourceKind === 'provider'
+      ? 'auto_source'
+      : (monahingaSourceKind === 'demo' ? 'demo' : 'imported_geojson');
+    geojson.properties.monahinga_parcel_source_ref = data.source || '';
+    geojson.properties.monahinga_parcel_source_label = label;
+    geojson.properties.monahinga_parcel_warning = data.message || geojson.properties.monahinga_parcel_warning || 'Verify county records, access, permission, and regulations.';
+    geojson.properties.monahinga_render_ready = !!data.render_ready;
+    loadPrivateParcelGeoJson(geojson, label);
+    const parcelToggle = document.getElementById('parcel_layer_toggle');
+    if (parcelToggle) parcelToggle.checked = true;
+    const statusEl = document.getElementById('parcel_source_status');
+    if (statusEl) {
+      const sourceKind = String(data.source || '').toLowerCase();
+      const isDemo = sourceKind.includes('demo');
+      const isProvider = !isDemo && (
+        data.render_ready === true ||
+        sourceKind.includes('arcgis') ||
+        sourceKind.includes('pasda') ||
+        sourceKind.includes('configured') ||
+        sourceKind.includes('regrid') ||
+        sourceKind.includes('public') ||
+        sourceKind.includes('parcel')
+      );
+      const statusClass = isDemo ? 'demo' : (isProvider ? 'provider' : 'imported');
+      const headline = isDemo
+        ? 'PRIVATE PARCELS: DEMO VISUAL ONLY'
+        : (isProvider ? 'PRIVATE PARCELS: BBOX-SCOPED SOURCE ACTIVE' : 'PRIVATE PARCELS: IMPORTED SOURCE ACTIVE');
+      const proofLine = isDemo
+        ? 'Demo only — not real ownership. Do not use this as parcel truth.'
+        : 'Ownership context only. Verify county records, access, permission, and local regulations before field use.';
+      const summaryLine = formatParcelSourceSummaryForPanel(data.source_summary);
+      const attemptLine = formatParcelSourceAttemptsForPanel(data.source_attempts);
+      statusEl.className = 'parcel-source-status ' + statusClass;
+      statusEl.innerHTML =
+        '<strong>' + headline + '</strong><br>' +
+        String(label) + ' · ' + String(data.feature_count || 0) + ' feature(s).<br>' +
+        proofLine + summaryLine + attemptLine;
+    }
+    const attemptText = summarizeParcelSourceAttemptsForStatus(data.source_attempts);
+    setStatus(String(data.message || ('Private parcels loaded: ' + label)) + attemptText);
+  } catch (err) {
+    setStatus('Automatic private parcel fetch failed. ' + String(err && err.message ? err.message : err));
+  }
+}
+
+function wirePrivateParcelFileInput() {
+  const input = document.getElementById('parcel_geojson_file');
+  // Legacy duplicate fetch button intentionally disabled by MONAHINGA_FREE_PARCEL_LADDER_V2.
+const demoBtn = document.getElementById('load_demo_parcels_btn');
+  if (demoBtn && demoBtn.dataset.wired !== 'yes') {
+    demoBtn.dataset.wired = 'yes';
+    demoBtn.addEventListener('click', function () {
+      console.log('[MONAHINGA] Demo parcels button clicked');
+      setStatus('Loading demo parcel overlays...');
+      loadDemoParcels();
+
+      const parcelToggle = document.getElementById('parcel_layer_toggle');
+      if (parcelToggle) {
+        parcelToggle.checked = true;
+      }
+    });
+  }
+
+  if (!input || input.dataset.wired === 'yes') return;
+  input.dataset.wired = 'yes';
+
+  input.addEventListener('change', function () {
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      try {
+        let geojson = JSON.parse(String(reader.result || ''));
+        geojson = normalizeParcelGeoJsonForMonahinga(geojson, 'imported', file.name || 'Imported parcel GeoJSON');
+        const report = analyzeParcelGeoJsonForImport(geojson, file.name, file.size || 0);
+        if (!report.ok) {
+          throw new Error(report.warning || 'Parcel GeoJSON did not pass validation.');
+        }
+        applyParcelImportReportMetadata(geojson, report);
+        loadPrivateParcelGeoJson(geojson, file.name);
+        updateParcelSourceStatusFromImportReport(report);
+        setStatus(parcelImportStatusMessage(report));
+      } catch (err) {
+        clearPrivateParcelLayer();
+        const parcelToggle = document.getElementById('parcel_layer_toggle');
+        if (parcelToggle) parcelToggle.checked = false;
+        if (map.hasLayer(privateParcelLayer)) map.removeLayer(privateParcelLayer);
+        setStatus('Private parcel GeoJSON load failed. ' + String(err && err.message ? err.message : err));
+      }
+    };
+    reader.onerror = function () {
+      setStatus('Private parcel GeoJSON load failed. Could not read file.');
+    };
+    reader.readAsText(file);
+  });
+}
+
 function wireLandLayerToggles() {
   const padusToggle = document.getElementById('padus_layer_toggle');
   const parcelToggle = document.getElementById('parcel_layer_toggle');
   const padusRefreshBtn = document.getElementById('padus_refresh_btn');
+  const parcelFetchBtn = document.getElementById('parcel_fetch_btn');
 
+  wirePrivateParcelFileInput();
+
+
+  if (parcelFetchBtn && !parcelFetchBtn.dataset.wired) {
+    parcelFetchBtn.dataset.wired = 'yes';
+    parcelFetchBtn.addEventListener('click', async function () {
+      try {
+        if (parcelToggle) parcelToggle.checked = true;
+        await fetchPrivateParcelsForCurrentSelection();
+      } catch (err) {
+        if (parcelToggle) parcelToggle.checked = false;
+        if (map.hasLayer(privateParcelLayer)) map.removeLayer(privateParcelLayer);
+        updateParcelSourceStatus('none', 0, '', 'Real parcel source is not configured yet. Regrid is selected for Pass 2. Use demo/GeoJSON only as visual proof until MONAHINGA_REGRID_TOKEN is wired and verified.');
+        setStatus('Automatic private parcel fetch failed. ' + String(err && err.message ? err.message : err));
+      }
+    });
+  }
 
   if (padusRefreshBtn && !padusRefreshBtn.dataset.wired) {
     padusRefreshBtn.dataset.wired = 'yes';
@@ -1213,9 +2337,14 @@ function wireLandLayerToggles() {
     parcelToggle.dataset.wired = 'yes';
     parcelToggle.addEventListener('change', function () {
       if (parcelToggle.checked) {
-        parcelToggle.checked = false;
-        if (map.hasLayer(privateParcelLayer)) map.removeLayer(privateParcelLayer);
-        setStatus('Private parcels need a parcel source/provider before they can display. Best next options: county GIS feed for the selected area, or a parcel data provider such as Regrid/ReportAll. PAD-US is active now; parcels come next.');
+        if (activePrivateParcelGeoJsonLayer) {
+          if (!map.hasLayer(privateParcelLayer)) map.addLayer(privateParcelLayer);
+          setStatus('Private parcels layer shown: ' + activePrivateParcelFeatureCount + ' feature(s). Verify permission and county records.');
+        } else {
+          parcelToggle.checked = false;
+          if (map.hasLayer(privateParcelLayer)) map.removeLayer(privateParcelLayer);
+          setStatus('Private parcels need a source first. Click Fetch private parcels, or Load GeoJSON and choose a county GIS/Regrid/ReportAll parcel GeoJSON export.');
+        }
       } else {
         if (map.hasLayer(privateParcelLayer)) map.removeLayer(privateParcelLayer);
         setStatus('Private parcels layer hidden.');
@@ -1399,6 +2528,41 @@ function parseBBoxText(raw) {
   };
 }
 
+function applyKnownParcelBox(kind) {
+  const presets = {
+    spearfish: {
+      label: 'Spearfish / Lawrence County SD',
+      bbox: '-103.870979, 44.491702, -103.866728, 44.493386'
+    },
+    shinglehouse: {
+      label: 'Shinglehouse / Potter County PA',
+      bbox: '-78.205500, 41.948500, -78.175500, 41.969500'
+    }
+  };
+  const preset = presets[kind];
+  if (!preset) {
+    setStatus('Unknown parcel preset.');
+    return;
+  }
+  const manualArcgisInput = document.getElementById('manual_arcgis_url');
+  if (manualArcgisInput) {
+    manualArcgisInput.value = '';
+    try { localStorage.setItem('monahinga_manual_arcgis_url', ''); } catch(e) {}
+  }
+  const bboxText = document.getElementById('bbox_text');
+  if (bboxText) bboxText.value = preset.bbox;
+  applyPastedBBox();
+  const parcelToggle = document.getElementById('parcel_layer_toggle');
+  if (parcelToggle) parcelToggle.checked = true;
+  setStatus(preset.label + ' preset applied. Manual ArcGIS URL cleared so Fetch private parcels proves automatic county-source mode.');
+  if (typeof fetchPrivateParcelsForCurrentSelection === 'function') {
+    window.setTimeout(function() {
+      fetchPrivateParcelsForCurrentSelection();
+    }, 250);
+  }
+}
+
+
 function applyPastedBBox() {
   try {
     const parsed = parseBBoxText(document.getElementById('bbox_text').value);
@@ -1453,6 +2617,257 @@ function clearSearchResult() {
   if (input) input.value = '';
 }
 
+function monahingaSearchUnique(list) {
+  const out = [];
+  const seen = new Set();
+  (list || []).forEach(function(item) {
+    const value = String(item || '').replace(/\s+/g, ' ').trim();
+    const key = value.toLowerCase();
+    if (value && !seen.has(key)) {
+      seen.add(key);
+      out.push(value);
+    }
+  });
+  return out;
+}
+
+function monahingaAddressSearchVariants(rawQuery) {
+  const q = String(rawQuery || '').replace(/\s+/g, ' ').trim();
+  const variants = [q];
+
+  const srMatch = q.match(/\bSR\s*([0-9]+)\s*([NSEW])?\b/i);
+  if (srMatch) {
+    const num = srMatch[1];
+    const dir = srMatch[2] ? (' ' + srMatch[2].toUpperCase()) : '';
+    variants.push(q.replace(/\bSR\s*[0-9]+\s*[NSEW]?\b/i, 'State Route ' + num + dir));
+    variants.push(q.replace(/\bSR\s*[0-9]+\s*[NSEW]?\b/i, 'Route ' + num + dir));
+    variants.push(q.replace(/\bSR\s*[0-9]+\s*[NSEW]?\b/i, 'PA-' + num));
+    variants.push(q.replace(/\bSR\s*[0-9]+\s*[NSEW]?\b/i, 'PA ' + num));
+    variants.push(q.replace(/\bSR\s*[0-9]+\s*[NSEW]?\b/i, 'Pennsylvania ' + num));
+    variants.push(q.replace(/\bSR\s*[0-9]+\s*[NSEW]?\b/i, 'Pennsylvania Route ' + num + dir));
+  }
+
+  const paMatch = q.match(/\bPA[-\s]*([0-9]+)\s*([NSEW])?\b/i);
+  if (paMatch) {
+    const num = paMatch[1];
+    const dir = paMatch[2] ? (' ' + paMatch[2].toUpperCase()) : '';
+    variants.push(q.replace(/\bPA[-\s]*[0-9]+\s*[NSEW]?\b/i, 'State Route ' + num + dir));
+    variants.push(q.replace(/\bPA[-\s]*[0-9]+\s*[NSEW]?\b/i, 'Route ' + num + dir));
+    variants.push(q.replace(/\bPA[-\s]*[0-9]+\s*[NSEW]?\b/i, 'Pennsylvania Route ' + num + dir));
+  }
+
+  if (/shinglehouse/i.test(q) && /44/.test(q)) {
+    variants.push('1854 State Route 44 N, Shinglehouse, Potter County, PA 16748');
+    variants.push('1854 Pennsylvania Route 44, Shinglehouse, Potter County, PA 16748');
+    variants.push('1854 PA-44, Shinglehouse, PA 16748');
+    variants.push('1854 Route 44, Shinglehouse, PA 16748');
+    variants.push('1854 State Route 44, Shinglehouse, PA 16748');
+  }
+
+  return monahingaSearchUnique(variants).slice(0, 10);
+}
+
+
+async function monahingaFetchParcelAddressLookup(query) {
+  const url = '/parcel-address-lookup?query=' + encodeURIComponent(query);
+  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data || data.ok !== true) return null;
+  const lat = Number(data.lat);
+  const lon = Number(data.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || !pointLooksLower48(lat, lon)) return null;
+  return data;
+}
+
+function monahingaApplyParcelAddressLookup(hit, originalQuery) {
+  const lat = Number(hit.lat);
+  const lon = Number(hit.lon);
+  if (searchMarker) map.removeLayer(searchMarker);
+  searchMarker = L.marker([lat, lon]).addTo(map);
+  const name = String(hit.display_name || originalQuery || 'Parcel address match');
+  searchMarker.bindPopup(name).openPopup();
+
+  if (Array.isArray(hit.bbox) && hit.bbox.length === 4) {
+    const west = Number(hit.bbox[0]);
+    const south = Number(hit.bbox[1]);
+    const east = Number(hit.bbox[2]);
+    const north = Number(hit.bbox[3]);
+    if ([south, north, west, east].every(Number.isFinite)) {
+      map.fitBounds([[south, west], [north, east]], { padding:[36,36] });
+      const bboxText = document.getElementById('bbox_text');
+      if (bboxText) {
+        bboxText.value = [west, south, east, north].map(function(v){ return Number(v).toFixed(6); }).join(', ');
+        applyPastedBBox();
+      }
+    } else {
+      map.setView([lat, lon], 16);
+    }
+  } else {
+    map.setView([lat, lon], 16);
+  }
+
+  setSearchMeta('Found by Potter County parcel lookup: ' + name + '. Parcel ID: ' + String(hit.parcel_id || 'unknown') + '. Draw or adjust your hunt box.');
+  setStatus('Place found from county parcel data. The map jumped to the matching parcel/address area.');
+}
+
+
+async function monahingaFetchSearchResults(query) {
+  const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&dedupe=1&limit=5&countrycodes=us&q=' + encodeURIComponent(query);
+  const res = await fetch(url, {
+    headers: { 'Accept': 'application/json' }
+  });
+  if (!res.ok) throw new Error('Place search failed for: ' + query);
+  const results = await res.json();
+  return Array.isArray(results) ? results : [];
+}
+
+function monahingaPickLower48SearchHit(results) {
+  for (const hit of (results || [])) {
+    const lat = Number(hit && hit.lat);
+    const lon = Number(hit && hit.lon);
+    if (Number.isFinite(lat) && Number.isFinite(lon) && pointLooksLower48(lat, lon)) {
+      return hit;
+    }
+  }
+  return null;
+}
+
+
+async function monahingaFetchKnownAddressLookup(query) {
+  const url = '/known-address-lookup?query=' + encodeURIComponent(query);
+  try {
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || data.ok !== true) return null;
+    const lat = Number(data.lat);
+    const lon = Number(data.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || !pointLooksLower48(lat, lon)) return null;
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
+function monahingaApplyKnownAddressLookup(hit, originalQuery) {
+  const lat = Number(hit.lat);
+  const lon = Number(hit.lon);
+  if (searchMarker) map.removeLayer(searchMarker);
+  searchMarker = L.marker([lat, lon]).addTo(map);
+  const name = String(hit.display_name || originalQuery || 'Known address match');
+  searchMarker.bindPopup(name).openPopup();
+
+  if (Array.isArray(hit.bbox) && hit.bbox.length === 4) {
+    const west = Number(hit.bbox[0]);
+    const south = Number(hit.bbox[1]);
+    const east = Number(hit.bbox[2]);
+    const north = Number(hit.bbox[3]);
+    if ([south, north, west, east].every(Number.isFinite)) {
+      map.fitBounds([[south, west], [north, east]], { padding:[44,44] });
+    } else {
+      map.setView([lat, lon], 16);
+    }
+  } else {
+    map.setView([lat, lon], 16);
+  }
+
+  setSearchMeta('Found exact Potter County parcel/address match: ' + name + '. Parcel ID: ' + String(hit.parcel_id || 'verify county records') + '. Now draw your bbox around the property/terrain.');
+  setStatus('Place found from known Potter County parcel record. The map moved only; now draw the bbox.');
+}
+
+
+
+function monahingaLooksLikeStreetAddress(query) {
+  const q = String(query || '').trim();
+  return /\d/.test(q) && /(street|st\b|road|rd\b|route|rt\b|sr\b|state|highway|hwy|pa[-\s]*\d+|us[-\s]*\d+)/i.test(q);
+}
+
+function monahingaAddressRouteToken(query) {
+  const q = String(query || '').toUpperCase();
+  const sr = q.match(/\bSR\s*([0-9]+)\b/);
+  if (sr) return sr[1];
+  const pa = q.match(/\bPA[-\s]*([0-9]+)\b/);
+  if (pa) return pa[1];
+  const route = q.match(/\bROUTE\s*([0-9]+)\b/);
+  if (route) return route[1];
+  const stateRoute = q.match(/\bSTATE\s+ROUTE\s*([0-9]+)\b/);
+  if (stateRoute) return stateRoute[1];
+  return '';
+}
+
+function monahingaRejectWrongStreetHit(query, label) {
+  const q = String(query || '').toUpperCase();
+  const name = String(label || '').toUpperCase();
+  const house = (q.match(/\b\d{2,6}\b/) || [''])[0];
+  const route = monahingaAddressRouteToken(q);
+
+  if (house && route) {
+    const hasHouse = name.includes(house);
+    const hasRoute = name.includes(route) || name.includes('STATE ROUTE') || name.includes('ROUTE') || name.includes('PA-') || name.includes('PA ');
+    if (!hasHouse && !hasRoute) return true;
+  }
+  return false;
+}
+
+async function monahingaFetchArcgisAddressHit(query) {
+  if (!monahingaLooksLikeStreetAddress(query)) return null;
+
+  const variants = (typeof monahingaAddressSearchVariants === 'function')
+    ? monahingaAddressSearchVariants(query)
+    : [String(query || '')];
+
+  for (const candidate of variants) {
+    const url = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&maxLocations=5&countryCode=USA&outFields=*&SingleLine=' + encodeURIComponent(candidate);
+    try {
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const candidates = Array.isArray(data && data.candidates) ? data.candidates : [];
+      for (const item of candidates) {
+        const loc = item.location || {};
+        const lon = Number(loc.x);
+        const lat = Number(loc.y);
+        const label = String(item.address || candidate);
+        const score = Number(item.score || 0);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+        if (!pointLooksLower48(lat, lon)) continue;
+        if (score < 70) continue;
+        if (monahingaRejectWrongStreetHit(query, label)) continue;
+        return {
+          lat: lat,
+          lon: lon,
+          display_name: label,
+          used_query: candidate,
+          score: score,
+          source: 'ArcGIS World Geocoder'
+        };
+      }
+    } catch (e) {
+      // Keep trying variants / fallback geocoders.
+    }
+  }
+  return null;
+}
+
+function monahingaApplyAddressHit(hit, originalQuery) {
+  const lat = Number(hit.lat);
+  const lon = Number(hit.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+  if (!pointLooksLower48(lat, lon)) return false;
+
+  if (searchMarker) map.removeLayer(searchMarker);
+  searchMarker = L.marker([lat, lon]).addTo(map);
+  const name = String(hit.display_name || originalQuery || 'Address match');
+  searchMarker.bindPopup(name).openPopup();
+  map.setView([lat, lon], 16);
+
+  setSearchMeta('Found: ' + name + '. Source: ' + String(hit.source || 'address geocoder') + '. Query used: "' + String(hit.used_query || originalQuery) + '". Draw your bbox around the property/terrain.');
+  setStatus('Place found. The map moved to the searched address; now draw the bbox.');
+  return true;
+}
+
+
 async function searchPlace() {
   const input = document.getElementById('place_search');
   const query = String(input && input.value || '').trim();
@@ -1460,25 +2875,53 @@ async function searchPlace() {
     setStatus('Type an address, town, road, or landmark first.');
     return;
   }
+  const variants = monahingaAddressSearchVariants(query);
   setStatus('Searching for place... Please wait.');
-  setSearchMeta('Searching for "' + query + '"...');
+  setSearchMeta('Searching for "' + query + '" with rural road variants...');
   try {
-    const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q=' + encodeURIComponent(query);
-    const res = await fetch(url, {
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('Place search failed.');
-    const results = await res.json();
-    if (!Array.isArray(results) || !results.length) throw new Error('No matching place found.');
-    const hit = results[0];
+    const arcgisAddressHit = await monahingaFetchArcgisAddressHit(query);
+    if (arcgisAddressHit && monahingaApplyAddressHit(arcgisAddressHit, query)) {
+      return;
+    }
+    const knownAddressHit = await monahingaFetchKnownAddressLookup(query);
+    if (knownAddressHit) {
+      monahingaApplyKnownAddressLookup(knownAddressHit, query);
+      return;
+    }
+    const parcelLookupHit = await monahingaFetchParcelAddressLookup(query);
+    if (parcelLookupHit) {
+      monahingaApplyParcelAddressLookup(parcelLookupHit, query);
+      return;
+    }
+    let hit = null;
+    let usedQuery = '';
+    let searched = 0;
+    for (const candidate of variants) {
+      searched += 1;
+      const results = await monahingaFetchSearchResults(candidate);
+      hit = monahingaPickLower48SearchHit(results);
+      if (hit) {
+        usedQuery = candidate;
+        break;
+      }
+    }
+
+    if (!hit) {
+      throw new Error('No matching place found after trying ' + String(searched) + ' address variant(s). Try State Route, PA-44, Route 44, town, county, and ZIP spelling.');
+    }
+
     const lat = Number(hit.lat);
     const lon = Number(hit.lon);
     if (!pointLooksLower48(lat, lon)) throw new Error('Place was found, but it falls outside the lower-48 hunting footprint.');
     if (searchMarker) map.removeLayer(searchMarker);
     searchMarker = L.marker([lat, lon]).addTo(map);
-    const name = String(hit.display_name || query);
+    const name = String(hit.display_name || usedQuery || query);
     searchMarker.bindPopup(name).openPopup();
-    if (Array.isArray(hit.boundingbox) && hit.boundingbox.length === 4) {
+
+    const isAddressLike = /\d/.test(query);
+    if (isAddressLike) {
+      map.setView([lat, lon], 16);
+    } else if (Array.isArray(hit.boundingbox) && hit.boundingbox.length === 4) {
       const south = Number(hit.boundingbox[0]), north = Number(hit.boundingbox[1]);
       const west = Number(hit.boundingbox[2]), east = Number(hit.boundingbox[3]);
       if ([south, north, west, east].every(Number.isFinite)) {
@@ -1489,11 +2932,12 @@ async function searchPlace() {
     } else {
       map.setView([lat, lon], 14);
     }
-    setSearchMeta('Found: ' + name + '. Draw your bbox around the terrain you want to hunt.');
+
+    setSearchMeta('Found: ' + name + '. Query used: "' + usedQuery + '". Draw your bbox around the terrain you want to hunt.');
     setStatus('Place found. The map jumped to the searched location; now draw the hunt box.');
   } catch (err) {
-    setSearchMeta('Search failed. You can still paste coordinates or draw the box manually.');
-    setStatus('FAILED\n\n' + String(err && err.message ? err.message : err));
+    setSearchMeta('Search failed after trying rural address variants. You can still paste coordinates or draw the box manually.');
+    setStatus('FAILED\\n\\n' + String(err && err.message ? err.message : err));
   }
 }
 
@@ -1743,6 +3187,11 @@ function payloadFromForm() {
   const selectionPolygon = storedSelectionPolygonForPayload() || selectionPolygonForPayload(bounds);
   if (selectionPolygon && selectionPolygon.length >= 3) {
     payload.selection_polygon = selectionPolygon;
+  }
+
+  const parcelGeoJson = parcelGeoJsonForPayload();
+  if (parcelGeoJson) {
+    payload.parcel_geojson = parcelGeoJson;
   }
 
   return payload;
@@ -2119,3 +3568,20 @@ def render_home_page(default_bbox: BBox) -> str:
         .replace('__DEFAULT_BBOX_TEXT__', f"{default_bbox.min_lon}, {default_bbox.min_lat}, {default_bbox.max_lon}, {default_bbox.max_lat}")
         .replace('__DEFAULTS_JSON__', json.dumps(defaults))
     )
+
+
+
+
+# MONAHINGA_FORCE_VISIBLE_DEMO_PARCEL_2026_05_06
+
+
+# MONAHINGA_PARCEL_VIS_ENGINE_V1_2026_05_06
+
+
+# MONAHINGA_CARRY_PARCEL_GEOJSON_PAGE1_2026_05_06
+
+
+# MONAHINGA_REAL_PARCEL_IMPORT_VALIDATOR_V1_2026_05_06
+
+
+# MONAHINGA_PARCEL_SOURCE_TRUTH_LABELS_V1_2026_05_06

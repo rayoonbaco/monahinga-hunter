@@ -9,7 +9,11 @@ import shutil
 import tempfile
 import threading
 import time
+from urllib.request import urlopen, Request
+from urllib.parse import urlparse
 from uuid import uuid4
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -130,7 +134,17 @@ class RunRequest(BaseModel):
     notes: str = Field(default="")
     mode: str = Field(default="hunter")
     selected_species: str = Field(default="default")
-    selection_polygon: list[list[float]] | None = Field(default=None)  # MONAHINGA_ACCEPT_SELECTION_POLYGON_2026_05_06
+    selection_polygon: list[list[float]] | None = Field(default=None)
+    parcel_geojson: dict | None = Field(default=None)  # MONAHINGA_ACCEPT_PARCEL_GEOJSON_2026_05_06  # MONAHINGA_ACCEPT_SELECTION_POLYGON_2026_05_06
+
+
+class ParcelPreviewRequest(BaseModel):
+    min_lon: float = Field(...)
+    min_lat: float = Field(...)
+    max_lon: float = Field(...)
+    max_lat: float = Field(...)
+    selection_polygon: list[list[float]] | None = Field(default=None)
+    manual_arcgis_url: str | None = Field(default=None)
 
 
 class TerrainValidationError(RuntimeError):
@@ -727,6 +741,1022 @@ def padus_preview(min_lon: float, min_lat: float, max_lon: float, max_lat: float
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"PAD-US preview unavailable: {type(exc).__name__}: {exc}")
 
+# MONAHINGA_AUTO_PRIVATE_PARCEL_SOURCE_ENDPOINT_2026_05_08
+OWNER_FIELD_CANDIDATES = [
+    "OWNER", "Owner", "owner", "OWNER_NAME", "owner_name", "PARCEL_OWNER", "OWN_NAME", "NAME"
+]
+PARCEL_ID_FIELD_CANDIDATES = [
+    "PARCEL_ID", "parcel_id", "PIN", "pin", "APN", "apn", "OBJECTID", "FID", "ACCOUNT", "MAPBLKLOT", "TAXPIN"
+]
+
+
+def _parcel_preview_cache_key(bbox: BBox) -> str:
+    payload = [round(float(v), 6) for v in bbox.as_list()]
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()[:24]
+    return f"parcel_bbox_{digest}"
+
+
+def _parcel_preview_cache_path(bbox: BBox) -> Path:
+    return RUNS_DIR / "_parcel_preview_cache" / _parcel_preview_cache_key(bbox) / "private_parcels.geojson"
+
+
+def _first_present_value(props: dict, keys: list[str]) -> str:
+    for key in keys:
+        if key in props and props[key] is not None and str(props[key]).strip():
+            return str(props[key]).strip()
+    return ""
+
+
+def _feature_lon_lat_pairs(geometry: dict) -> list[tuple[float, float]]:
+    pairs: list[tuple[float, float]] = []
+
+    def walk(value) -> None:
+        if isinstance(value, (list, tuple)) and len(value) >= 2 and all(isinstance(v, (int, float)) for v in value[:2]):
+            lon = float(value[0])
+            lat = float(value[1])
+            if -180 <= lon <= 180 and -90 <= lat <= 90:
+                pairs.append((lon, lat))
+            return
+        if isinstance(value, (list, tuple)):
+            for item in value:
+                walk(item)
+
+    if geometry and isinstance(geometry, dict):
+        walk(geometry.get("coordinates"))
+    return pairs
+
+
+def _feature_intersects_bbox(feature: dict, bbox: BBox) -> bool:
+    pairs = _feature_lon_lat_pairs(feature.get("geometry") or {})
+    if not pairs:
+        return False
+    min_lon = min(p[0] for p in pairs)
+    max_lon = max(p[0] for p in pairs)
+    min_lat = min(p[1] for p in pairs)
+    max_lat = max(p[1] for p in pairs)
+    return not (
+        max_lon < float(bbox.min_lon)
+        or min_lon > float(bbox.max_lon)
+        or max_lat < float(bbox.min_lat)
+        or min_lat > float(bbox.max_lat)
+    )
+
+
+def _normalize_parcel_geojson_for_app(raw_geojson: dict, bbox: BBox, source_label: str) -> dict:
+    raw_features = raw_geojson.get("features") if isinstance(raw_geojson, dict) else []
+    if not isinstance(raw_features, list):
+        raw_features = []
+
+    features: list[dict] = []
+    for raw_feature in raw_features:
+        if not isinstance(raw_feature, dict) or not raw_feature.get("geometry"):
+            continue
+        if not _feature_intersects_bbox(raw_feature, bbox):
+            continue
+        feature = dict(raw_feature)
+        props = dict(feature.get("properties") or {})
+        owner = _first_present_value(props, OWNER_FIELD_CANDIDATES)
+        parcel_id = _first_present_value(props, PARCEL_ID_FIELD_CANDIDATES)
+        props["MONAHINGA_PARCEL_SOURCE"] = "AUTO_SOURCE"
+        props["MONAHINGA_OWNER_NORMALIZED"] = owner or "Unknown owner / verify county records"
+        props["MONAHINGA_PARCEL_ID_NORMALIZED"] = parcel_id or "Unknown parcel ID"
+        props["MONAHINGA_SOURCE_LABEL"] = source_label
+        props["MONAHINGA_WARNING"] = "Private parcel signal only. Verify ownership, permission, access, and local records."
+        feature["properties"] = props
+        features.append(feature)
+
+    return {
+        "type": "FeatureCollection",
+        "properties": {
+            "monahinga_parcel_source": "auto_source",
+            "monahinga_parcel_source_label": source_label,
+            "monahinga_parcel_warning": "AUTO PARCEL SOURCE. Ownership context only; verify county records, access, permission, and regulations.",
+            "monahinga_feature_count": len(features),
+            "monahinga_bbox_scoped": True,
+        },
+        "features": features,
+    }
+
+
+def _load_configured_parcel_source_geojson(bbox: BBox) -> tuple[dict, str]:
+    """Load a BBox-scoped private parcel source without changing the manual upload path.
+
+    Supported first-pass inputs:
+    - MONAHINGA_PARCEL_GEOJSON_PATH: local/server GeoJSON export file.
+    - MONAHINGA_PARCEL_GEOJSON_URL: GeoJSON URL. If it contains {min_lon}, {min_lat}, {max_lon}, {max_lat},
+      those tokens are filled. Otherwise bbox query parameters are appended.
+
+    This is a scaffold for county GIS / Regrid / ReportAll / Landgrid-style sources. It never preloads
+    nationwide parcels; it only returns geometry intersecting the selected BBox.
+    """
+    # MONAHINGA_REGRID_SOURCE_READY_PASS1_2026_05_08: Regrid is the selected first real parcel source for Pass 2.
+# Required later: MONAHINGA_REGRID_TOKEN. Optional: MONAHINGA_REGRID_BASE_URL.
+# Do not claim real private property until Regrid is wired and one known parcel is verified.
+source_path = (os.getenv("MONAHINGA_PARCEL_GEOJSON_PATH") or "").strip()
+# MONAHINGA_AUTO_PRIVATE_PARCEL_CONFIGURED_SOURCE_V1_2026_05_08
+
+# MONAHINGA_FREE_PARCEL_LADDER_V2_2026_05_08: unified free-first parcel source ladder.
+MONAHINGA_FREE_PARCEL_SOURCE_V2 = [
+    {
+        "id": "wyoming_public_arcgis",
+        "label": "Wyoming public parcel ArcGIS service",
+        "query_url": os.getenv("MONAHINGA_WY_PARCEL_ARCGIS_QUERY_URL", "https://gis.deq.wyo.gov/arcgis/rest/services/WY_PARCELS/MapServer/query").strip() or "https://gis.deq.wyo.gov/arcgis/rest/services/WY_PARCELS/MapServer/query",
+        "region": "wyoming",
+    },
+    {
+        "id": "wyoming_private_arcgis",
+        "label": "Wyoming private parcels ArcGIS Identify service",
+        "query_url": os.getenv("MONAHINGA_WY_PRIVATE_PARCEL_ARCGIS_QUERY_URL", "https://gis.deq.wyo.gov/arcgis/rest/services/WY_PRIVATE_PARCELS/MapServer/query").strip() or "https://gis.deq.wyo.gov/arcgis/rest/services/WY_PRIVATE_PARCELS/MapServer/query",
+        "region": "wyoming",
+    },
+    {
+        "id": "lawrence_county_sd_parcels",
+        "label": "Lawrence County SD public parcel service",
+        "query_url": os.getenv("MONAHINGA_LAWRENCE_SD_PARCEL_ARCGIS_QUERY_URL", "https://services8.arcgis.com/YKIZLV97YLZN6bol/ArcGIS/rest/services/Lawrence_Parcels_YrBlt/FeatureServer/0/query").strip() or "https://services8.arcgis.com/YKIZLV97YLZN6bol/ArcGIS/rest/services/Lawrence_Parcels_YrBlt/FeatureServer/0/query",
+        "region": "lawrence_sd",
+    },
+    {
+        "id": "potter_county_pa_taxparcels",
+        "label": "Potter County PA TaxParcels public ArcGIS service",
+        "query_url": os.getenv("MONAHINGA_POTTER_PA_PARCEL_ARCGIS_QUERY_URL", "https://maps.pottercountypa.net/arcgis/rest/services/TaxParcel/TaxParcels/FeatureServer/0/query").strip() or "https://maps.pottercountypa.net/arcgis/rest/services/TaxParcel/TaxParcels/FeatureServer/0/query",
+        "region": "potter_pa",
+    },
+    {
+        "id": "pa_pasda_parcels",
+        "label": "Pennsylvania PASDA public parcel service",
+        "query_url": os.getenv("MONAHINGA_PA_PARCEL_ARCGIS_QUERY_URL", "https://maps.pasda.psu.edu/arcgis/rest/services/PA_Parcels/MapServer/1/query").strip() or "https://maps.pasda.psu.edu/arcgis/rest/services/PA_Parcels/MapServer/1/query",
+        "region": "pennsylvania",
+    },
+    {
+        "id": "pa_pasda_apps_parcels",
+        "label": "Pennsylvania PASDA public parcel service alternate",
+        "query_url": "https://apps.pasda.psu.edu/arcgis/rest/services/PA_Parcels/MapServer/1/query",
+        "region": "pennsylvania",
+    },
+    {
+        "id": "pa_dep_parcels",
+        "label": "Pennsylvania DEP public parcel service",
+        "query_url": "https://gis.dep.pa.gov/depgisprd/rest/services/Parcels/PA_Parcels/MapServer/0/query",
+        "region": "pennsylvania",
+    },
+]
+
+
+def _monahinga_v2_bbox_region(bbox: BBox) -> str:
+    lon = (float(bbox.min_lon) + float(bbox.max_lon)) / 2.0
+    lat = (float(bbox.min_lat) + float(bbox.max_lat)) / 2.0
+    if -112.0 <= lon <= -104.0 and 41.0 <= lat <= 45.3:
+        return "wyoming"
+    # Verified by manual ArcGIS pass: Spearfish / Lawrence County, South Dakota.
+    # Keep this narrow so the app does not pretend all South Dakota parcel services are solved.
+    if -104.2 <= lon <= -103.0 and 44.0 <= lat <= 45.0:
+        return "lawrence_sd"
+    if -78.7 <= lon <= -76.0 and 40.5 <= lat <= 42.6:
+        return "potter_pa"
+    if -80.7 <= lon <= -74.5 and 39.4 <= lat <= 42.7:
+        return "pennsylvania"
+    return "unknown"
+
+
+def _monahinga_v2_arcgis_url(source: dict, bbox: BBox, fmt: str) -> str:
+    geometry = json.dumps({
+        "xmin": float(bbox.min_lon),
+        "ymin": float(bbox.min_lat),
+        "xmax": float(bbox.max_lon),
+        "ymax": float(bbox.max_lat),
+        "spatialReference": {"wkid": 4326},
+    }, separators=(",", ":"))
+
+    params = {
+        "f": fmt,
+        "where": "1=1",
+        "outFields": "*",
+        "returnGeometry": "true",
+        "geometryType": "esriGeometryEnvelope",
+        "geometry": geometry,
+        "inSR": "4326",
+        "outSR": "4326",
+        "spatialRel": "esriSpatialRelIntersects",
+        "resultRecordCount": os.getenv("MONAHINGA_FREE_PARCEL_LIMIT", "200"),
+    }
+
+    query_url = source["query_url"]
+    if query_url.rstrip("/").endswith("/MapServer/query"):
+        params["layers"] = "all"
+
+    return query_url + "?" + urlencode(params)
+
+
+def _monahinga_v2_read_json_url(url: str) -> dict:
+    req = Request(url, headers={"User-Agent": "Monahinga-HUNTER/1.0"})
+    with urlopen(req, timeout=30) as response:
+        raw = response.read(20 * 1024 * 1024)
+    return json.loads(raw.decode("utf-8"))
+
+
+def _monahinga_v2_esri_json_to_geojson(raw: dict) -> dict:
+    if not isinstance(raw, dict):
+        raise ValueError("ArcGIS JSON response was not an object")
+
+    if raw.get("error"):
+        err = raw.get("error") or {}
+        raise ValueError(str(err.get("message") or err))
+
+    features = []
+    for item in raw.get("features") or []:
+        if not isinstance(item, dict):
+            continue
+        attrs = dict(item.get("attributes") or item.get("properties") or {})
+        geom = item.get("geometry") or {}
+        gj_geom = None
+
+        if isinstance(geom, dict) and geom.get("rings"):
+            gj_geom = {"type": "Polygon", "coordinates": geom.get("rings")}
+        elif isinstance(geom, dict) and geom.get("paths"):
+            gj_geom = {"type": "MultiLineString", "coordinates": geom.get("paths")}
+        elif isinstance(geom, dict) and "x" in geom and "y" in geom:
+            gj_geom = {"type": "Point", "coordinates": [geom.get("x"), geom.get("y")]}
+
+        if gj_geom:
+            features.append({"type": "Feature", "properties": attrs, "geometry": gj_geom})
+
+    return {"type": "FeatureCollection", "features": features}
+
+
+def _monahinga_v2_owner_value(props: dict) -> str:
+    for key in ("OWNER", "Owner", "owner", "OWNER_NAME", "owner_name", "PARCEL_OWNER", "OWN_NAME", "NAME", "OWNER1", "OWNERNME1", "TAXPAYER", "MAIL_NAME"):
+        value = props.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return "Unknown owner / verify county records"
+
+
+def _monahinga_v2_parcel_id_value(props: dict) -> str:
+    for key in ("PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "MAPBLKLOT", "TAXPIN", "PID", "PARCELNO", "PARCEL_NUM", "UPI", "CAMA_ID"):
+        value = props.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return "Unknown parcel ID"
+
+
+
+
+# MONAHINGA_PARCEL_SOURCE_SUMMARY_V14_2026_05_09:
+# Read-only proof summary for parcel sources. Does not alter geometry, scoring, or legal truth.
+def _monahinga_v14_first_nonempty(props: dict, keys: tuple[str, ...]) -> tuple[str, str]:
+    if not isinstance(props, dict):
+        return "", ""
+    for key in keys:
+        value = props.get(key)
+        if value is not None and str(value).strip():
+            return key, str(value).strip()
+    return "", ""
+
+
+def _monahinga_v14_preview_text(value, limit: int = 80) -> str:
+    try:
+        text = str(value)
+    except Exception:
+        return ""
+    text = text.replace("\n", " ").replace("\r", " ").strip()
+    if len(text) > limit:
+        return text[: max(0, limit - 3)] + "..."
+    return text
+
+
+def _monahinga_v14_parcel_source_summary(fc: dict, source_kind: str, label: str) -> dict:
+    features = fc.get("features") or [] if isinstance(fc, dict) else []
+    sample_props = {}
+    for feature in features:
+        if isinstance(feature, dict) and isinstance(feature.get("properties"), dict):
+            sample_props = feature.get("properties") or {}
+            if sample_props:
+                break
+
+    owner_key, owner = _monahinga_v14_first_nonempty(sample_props, (
+        "OWNER", "Owner", "owner", "OWNER_NAME", "owner_name", "PARCEL_OWNER",
+        "OWN_NAME", "NAME", "OWNER1", "OWNERNME1", "TAXPAYER", "MAIL_NAME",
+        "CURRENT_OW", "Owner2",
+    ))
+    parcel_key, parcel_id = _monahinga_v14_first_nonempty(sample_props, (
+        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "MAPBLKLOT",
+        "TAXPIN", "PID", "PARCELNO", "PARCEL_NUM", "UPI", "CAMA_ID", "PropertyNu",
+    ))
+    situs_key, situs = _monahinga_v14_first_nonempty(sample_props, (
+        "SITUS", "SITE_ADDR", "SITUS_ADDRESS", "PROPERTY_ADDRESS", "ADDRESS",
+        "ADDR", "PHYSICAL_ADDRESS",
+    ))
+    acres_key, acres = _monahinga_v14_first_nonempty(sample_props, (
+        "Acres", "ACRES", "acreage", "ACREAGE", "CALC_ACRES",
+    ))
+    year_key, year_built = _monahinga_v14_first_nonempty(sample_props, (
+        "fyrblt", "YR_BUILT", "YEAR_BUILT", "YearBuilt", "BLT_YR",
+    ))
+
+    sample = {
+        "owner": _monahinga_v14_preview_text(owner, 70),
+        "owner_key": owner_key,
+        "parcel_id": _monahinga_v14_preview_text(parcel_id, 60),
+        "parcel_id_key": parcel_key,
+        "situs": _monahinga_v14_preview_text(situs, 80),
+        "situs_key": situs_key,
+        "acres": _monahinga_v14_preview_text(acres, 30),
+        "acres_key": acres_key,
+        "year_built": _monahinga_v14_preview_text(year_built, 30),
+        "year_built_key": year_key,
+    }
+
+    confidence = "demo"
+    if "demo" in str(source_kind or "").lower():
+        confidence = "demo"
+    elif sample["owner"] and sample["parcel_id"]:
+        confidence = "strong_source_fields_detected"
+    elif sample["owner"] or sample["parcel_id"]:
+        confidence = "partial_source_fields_detected"
+    else:
+        confidence = "geometry_only_verify_fields"
+
+    return {
+        "source": source_kind or "",
+        "label": label or "Private parcel source",
+        "feature_count": len(features),
+        "sample": sample,
+        "confidence": confidence,
+        "field_count": len(sample_props.keys()) if isinstance(sample_props, dict) else 0,
+        "verify_note": "Ownership context only. Verify owner, parcel ID, access, permission, seasons, and local regulations before field use.",
+    }
+
+
+
+# MONAHINGA_FREE_PARCEL_POLYGON_GATE_V4_2026_05_08:
+# Private parcel overlays must be boundary polygons, not identify points/lines.
+def _monahinga_v4_is_polygon_geometry(geometry: dict) -> bool:
+    if not isinstance(geometry, dict):
+        return False
+    geom_type = str(geometry.get("type") or "").strip()
+    return geom_type in {"Polygon", "MultiPolygon"}
+
+
+def _monahinga_v4_geometry_type(geometry: dict) -> str:
+    if not isinstance(geometry, dict):
+        return "missing"
+    return str(geometry.get("type") or "unknown")
+
+
+
+
+# MONAHINGA_WY_PARCEL_FIELD_INSPECTOR_V5_2026_05_08:
+# Prints a safe sample of public parcel attribute fields so we can map owner/APN correctly.
+def _monahinga_v5_preview_value(value) -> str:
+    try:
+        text = str(value)
+    except Exception:
+        return "<unprintable>"
+    text = text.replace("\n", " ").replace("\r", " ").strip()
+    if len(text) > 90:
+        return text[:87] + "..."
+    return text
+
+
+def _monahinga_v5_log_parcel_fields(source: dict, props: dict, sample_index: int) -> None:
+    try:
+        if os.getenv("MONAHINGA_LOG_PARCEL_FIELDS", "1").strip().lower() in {"0", "false", "no", "off"}:
+            return
+        if sample_index > 2:
+            return
+        source_id = source.get("id") or "unknown_source"
+        keys = sorted([str(k) for k in props.keys()])
+        print(f"[parcel-fields] source={source_id} sample={sample_index} field_count={len(keys)}")
+        print(f"[parcel-fields] keys: {', '.join(keys[:80])}")
+        for key in keys[:80]:
+            value = props.get(key)
+            print(f"[parcel-fields] {key} = {_monahinga_v5_preview_value(value)}")
+    except Exception as exc:
+        print(f"[parcel-fields] failed to log fields: {type(exc).__name__}: {exc}")
+
+
+
+
+# MONAHINGA_REJECT_COUNTY_LAYER_V6_2026_05_08:
+# Do not accept county/state/city/road/annotation shapes as private parcels.
+def _monahinga_v6_is_bad_admin_layer(props: dict) -> bool:
+    if not isinstance(props, dict):
+        return False
+
+    layer_text_parts = []
+    for key in ("LAYER_NAME", "layerName", "LayerName", "DISPLAY_FIELD_NAME", "VALUE", "NAME"):
+        val = props.get(key)
+        if val is not None:
+            layer_text_parts.append(str(val))
+
+    layer_text = " ".join(layer_text_parts).upper()
+
+    bad_words = (
+        "COUNTY", "COUNTIES", "STATE", "STATES", "CITY", "CITIES", "TOWN",
+        "TOWNSHIP", "MUNICIPAL", "ROAD", "ROADS", "HIGHWAY", "ROW",
+        "BOUNDARY", "BOUNDARIES", "WATER", "STREAM", "RIVER", "LABEL",
+        "ANNOTATION", "SECTION", "TOWNSHIP RANGE"
+    )
+
+    return any(word in layer_text for word in bad_words)
+
+
+def _monahinga_v6_has_parcel_clue(props: dict) -> bool:
+    if not isinstance(props, dict):
+        return False
+
+    parcel_keys = (
+        "PARCEL", "APN", "PIN", "PID", "TAX", "CAMA", "ACCOUNT",
+        "OWNER", "OWN", "ASSES", "DEED", "LEGAL", "ACRES", "PROPERTY"
+    )
+
+    for key, value in props.items():
+        combo = (str(key) + " " + str(value)).upper()
+        if any(clue in combo for clue in parcel_keys):
+            return True
+
+    return False
+
+
+
+def _monahinga_v2_normalize_public_geojson(raw: dict, source: dict) -> dict:
+    if not isinstance(raw, dict):
+        raise ValueError("source response was not a GeoJSON object")
+    if raw.get("type") != "FeatureCollection" or not isinstance(raw.get("features"), list):
+        raise ValueError("source response was not a GeoJSON FeatureCollection")
+
+    clean_features = []
+    rejected_by_type = {}
+    sample_index = 0
+    for feature in raw.get("features") or []:
+        if not isinstance(feature, dict) or not feature.get("geometry"):
+            rejected_by_type["missing"] = rejected_by_type.get("missing", 0) + 1
+            continue
+
+        geometry = feature.get("geometry")
+        geom_type = _monahinga_v4_geometry_type(geometry)
+        if not _monahinga_v4_is_polygon_geometry(geometry):
+            rejected_by_type[geom_type] = rejected_by_type.get(geom_type, 0) + 1
+            continue
+
+        props = dict(feature.get("properties") or {})
+        sample_index += 1
+        _monahinga_v5_log_parcel_fields(source, props, sample_index)
+
+        if _monahinga_v6_is_bad_admin_layer(props) and not _monahinga_v6_has_parcel_clue(props):
+            rejected_by_type["admin_or_nonparcel_layer"] = rejected_by_type.get("admin_or_nonparcel_layer", 0) + 1
+            print(f"[parcel-preview] rejected non-parcel layer from {source.get('id')}: LAYER_NAME={props.get('LAYER_NAME')} VALUE={props.get('VALUE')}")
+            continue
+
+        owner = _monahinga_v2_owner_value(props)
+        parcel_id = _monahinga_v2_parcel_id_value(props)
+        props.setdefault("OWNER", owner)
+        props.setdefault("OWNER_NAME", owner)
+        props.setdefault("PARCEL_ID", parcel_id)
+        props["MONAHINGA_OWNER_NORMALIZED"] = owner
+        props["MONAHINGA_PARCEL_ID_NORMALIZED"] = parcel_id
+        props["MONAHINGA_PARCEL_SOURCE"] = source["label"]
+        props["MONAHINGA_PARCEL_SOURCE_CONFIDENCE"] = "free_public_source_unverified"
+        props["MONAHINGA_PARCEL_WARNING"] = "Free public parcel source. Verify owner, parcel ID, access, permission, and county records."
+        clean_features.append({"type": "Feature", "properties": props, "geometry": geometry})
+
+    if rejected_by_type:
+        print(f"[parcel-preview] rejected non-polygon parcel candidates from {source.get('id')}: {rejected_by_type}")
+
+    if not clean_features:
+        raise ValueError(f"source returned zero usable parcel polygon geometries; rejected={rejected_by_type}")
+
+    return {
+        "type": "FeatureCollection",
+        "features": clean_features,
+        "properties": {
+            "monahinga_parcel_source": source["id"],
+            "monahinga_parcel_source_label": source["label"],
+            "monahinga_parcel_warning": "Free public parcel source. Ownership context only; verify county assessor records, legal access, permission, seasons, tags, safety, and local regulations.",
+            "monahinga_feature_count": len(clean_features),
+            "monahinga_confidence": "public_source_unverified_until_known_parcel_checked",
+            "monahinga_source_url": source["query_url"],
+        },
+    }
+
+
+
+# MONAHINGA_WY_ARCGIS_IDENTIFY_FALLBACK_V3_2026_05_08:
+# fallback for ArcGIS MapServer dynamic parcel services where /query does not expose usable parcel geometry.
+def _monahinga_v3_lonlat_to_webmercator(lon: float, lat: float) -> tuple[float, float]:
+    import math
+    origin_shift = 20037508.342789244
+    x = lon * origin_shift / 180.0
+    lat = max(min(lat, 89.5), -89.5)
+    y = math.log(math.tan((90.0 + lat) * math.pi / 360.0)) / (math.pi / 180.0)
+    y = y * origin_shift / 180.0
+    return x, y
+
+
+def _monahinga_v3_webmercator_to_lonlat(x: float, y: float) -> list[float]:
+    import math
+    origin_shift = 20037508.342789244
+    lon = (x / origin_shift) * 180.0
+    lat = (y / origin_shift) * 180.0
+    lat = 180.0 / math.pi * (2.0 * math.atan(math.exp(lat * math.pi / 180.0)) - math.pi / 2.0)
+    return [lon, lat]
+
+
+def _monahinga_v3_coord_to_lonlat(pair) -> list[float]:
+    x = float(pair[0])
+    y = float(pair[1])
+    if abs(x) > 1000 or abs(y) > 1000:
+        return _monahinga_v3_webmercator_to_lonlat(x, y)
+    return [x, y]
+
+
+def _monahinga_v3_geometry_to_lonlat(geom: dict) -> dict | None:
+    if not isinstance(geom, dict):
+        return None
+
+    if geom.get("rings"):
+        rings = []
+        for ring in geom.get("rings") or []:
+            rings.append([_monahinga_v3_coord_to_lonlat(pair) for pair in ring])
+        return {"type": "Polygon", "coordinates": rings}
+
+    if geom.get("paths"):
+        paths = []
+        for path in geom.get("paths") or []:
+            paths.append([_monahinga_v3_coord_to_lonlat(pair) for pair in path])
+        return {"type": "MultiLineString", "coordinates": paths}
+
+    if "x" in geom and "y" in geom:
+        return {"type": "Point", "coordinates": _monahinga_v3_coord_to_lonlat([geom["x"], geom["y"]])}
+
+    return None
+
+
+def _monahinga_v3_identify_url(source: dict, bbox: BBox) -> str:
+    query_url = str(source["query_url"])
+    if "/MapServer/query" in query_url:
+        base = query_url.replace("/MapServer/query", "/MapServer/identify")
+    elif query_url.rstrip("/").endswith("/query"):
+        base = query_url.rsplit("/", 1)[0] + "/identify"
+    elif query_url.rstrip("/").endswith("/MapServer"):
+        base = query_url.rstrip("/") + "/identify"
+    else:
+        raise ValueError("identify fallback only applies to MapServer-style sources")
+
+    x1, y1 = _monahinga_v3_lonlat_to_webmercator(float(bbox.min_lon), float(bbox.min_lat))
+    x2, y2 = _monahinga_v3_lonlat_to_webmercator(float(bbox.max_lon), float(bbox.max_lat))
+    xmin, xmax = sorted([x1, x2])
+    ymin, ymax = sorted([y1, y2])
+
+    map_extent = {
+        "xmin": xmin,
+        "ymin": ymin,
+        "xmax": xmax,
+        "ymax": ymax,
+        "spatialReference": {"wkid": 102100},
+    }
+
+    cx = (xmin + xmax) / 2.0
+    cy = (ymin + ymax) / 2.0
+
+    params = {
+        "f": "json",
+        "tolerance": os.getenv("MONAHINGA_FREE_PARCEL_IDENTIFY_TOLERANCE", "12"),
+        "returnGeometry": "true",
+        "imageDisplay": "1000,1000,96",
+        "mapExtent": json.dumps(map_extent, separators=(",", ":")),
+        "geometryType": "esriGeometryPoint",
+        "geometry": json.dumps({"x": cx, "y": cy, "spatialReference": {"wkid": 102100}}, separators=(",", ":")),
+        "sr": "102100",
+        "layers": os.getenv("MONAHINGA_FREE_PARCEL_IDENTIFY_LAYERS", "all:0,1,2,3,4,5,6,7,8,9,10"),
+    }
+
+    return base + "?" + urlencode(params)
+
+
+
+# MONAHINGA_WY_COUNTIES_HARD_STOP_V8_2026_05_08:
+# Reject obvious non-parcel Identify results before they become parcel GeoJSON.
+def _monahinga_v8_identify_result_is_nonparcel(result: dict, props: dict) -> bool:
+    layer_name = str(result.get("layerName") or props.get("LAYER_NAME") or "").upper()
+    display_name = str(result.get("displayFieldName") or props.get("DISPLAY_FIELD_NAME") or "").upper()
+    value_name = str(result.get("value") or props.get("VALUE") or "").upper()
+    joined = " ".join([layer_name, display_name, value_name])
+
+    hard_bad = (
+        "COUNTY", "COUNTIES", "STATE", "STATES", "CITY", "CITIES",
+        "ROAD", "ROADS", "HIGHWAY", "ROW", "BOUNDARY", "BOUNDARIES",
+        "WATER", "STREAM", "RIVER", "LABEL", "ANNOTATION"
+    )
+
+    if any(word in joined for word in hard_bad):
+        return True
+
+    return False
+
+
+def _monahinga_v8_identify_result_has_parcel_word(result: dict, props: dict) -> bool:
+    layer_name = str(result.get("layerName") or props.get("LAYER_NAME") or "").upper()
+    display_name = str(result.get("displayFieldName") or props.get("DISPLAY_FIELD_NAME") or "").upper()
+    value_name = str(result.get("value") or props.get("VALUE") or "").upper()
+    keys = " ".join(str(k).upper() for k in props.keys())
+    joined = " ".join([layer_name, display_name, value_name, keys])
+
+    good_words = (
+        "PARCEL", "PRIVATE", "TAX", "CADASTRAL", "OWNERSHIP",
+        "PROPERTY", "PIN", "APN", "ACCOUNT", "OWNER"
+    )
+
+    return any(word in joined for word in good_words)
+
+
+
+def _monahinga_v3_identify_to_geojson(raw: dict, source: dict) -> dict:
+    if not isinstance(raw, dict):
+        raise ValueError("identify response was not an object")
+    if raw.get("error"):
+        err = raw.get("error") or {}
+        raise ValueError(str(err.get("message") or err))
+
+    features = []
+    for result in raw.get("results") or []:
+        if not isinstance(result, dict):
+            continue
+        geom = _monahinga_v3_geometry_to_lonlat(result.get("geometry") or {})
+        if not geom:
+            continue
+        props = dict(result.get("attributes") or {})
+        props.setdefault("LAYER_NAME", result.get("layerName") or "")
+        props.setdefault("LAYER_ID", result.get("layerId") or "")
+        props.setdefault("DISPLAY_FIELD_NAME", result.get("displayFieldName") or "")
+        props.setdefault("VALUE", result.get("value") or "")
+
+        if _monahinga_v8_identify_result_is_nonparcel(result, props):
+            print(
+                "[parcel-preview] HARD REJECT identify non-parcel layer: "
+                f"LAYER_NAME={props.get('LAYER_NAME')} VALUE={props.get('VALUE')}"
+            )
+            continue
+
+        if not _monahinga_v8_identify_result_has_parcel_word(result, props):
+            print(
+                "[parcel-preview] HARD REJECT identify result with no parcel clues: "
+                f"LAYER_NAME={props.get('LAYER_NAME')} VALUE={props.get('VALUE')}"
+            )
+            continue
+
+        features.append({"type": "Feature", "properties": props, "geometry": geom})
+
+    if not features:
+        raise ValueError("identify returned zero usable private parcel geometries after rejecting county/state/road layers")
+
+    return {"type": "FeatureCollection", "features": features}
+
+
+def _monahinga_v3_try_identify_source(source: dict, bbox: BBox) -> tuple[dict | None, str]:
+    if "/MapServer" not in str(source.get("query_url", "")):
+        return None, "identify skipped: not a MapServer source"
+
+    try:
+        url = _monahinga_v3_identify_url(source, bbox)
+        raw = _monahinga_v2_read_json_url(url)
+        fc_raw = _monahinga_v3_identify_to_geojson(raw, source)
+        fc = _monahinga_v2_normalize_public_geojson(fc_raw, source)
+        return fc, f"ok identify features={len(fc.get('features') or [])}"
+    except Exception as exc:
+        return None, f"identify failed: {type(exc).__name__}: {exc}"
+
+
+
+
+# MONAHINGA_WY_LAYER_DISCOVERY_V9_2026_05_09:
+# Some ArcGIS MapServer roots do not return usable parcel polygons from /MapServer/query.
+# This fallback discovers likely parcel layers and queries /MapServer/{layer_id}/query BBox-scoped.
+def _monahinga_v9_mapserver_root_url(source: dict) -> str:
+    query_url = str(source.get("query_url") or "").strip()
+    if "/MapServer/query" in query_url:
+        return query_url.replace("/MapServer/query", "/MapServer")
+    if query_url.rstrip("/").endswith("/MapServer"):
+        return query_url.rstrip("/")
+    if "/MapServer/" in query_url:
+        return query_url.split("/MapServer/", 1)[0] + "/MapServer"
+    raise ValueError("not a MapServer source")
+
+
+def _monahinga_v9_layer_score(layer: dict) -> int:
+    name = str(layer.get("name") or layer.get("title") or "").upper()
+    layer_id = str(layer.get("id") or "")
+    joined = " ".join([name, layer_id])
+
+    hard_bad = (
+        "COUNTY", "COUNTIES", "STATE", "STATES", "CITY", "CITIES",
+        "ROAD", "ROADS", "HIGHWAY", "ROW", "RIGHT OF WAY", "BOUNDARY",
+        "BOUNDARIES", "WATER", "STREAM", "RIVER", "LABEL", "ANNOTATION",
+        "SECTION", "TOWNSHIP", "TOWNSHIP RANGE", "PLSS"
+    )
+    if any(word in joined for word in hard_bad):
+        return -100
+
+    score = 0
+    for word, weight in (
+        ("PARCEL", 100),
+        ("CADASTRAL", 80),
+        ("PROPERTY", 70),
+        ("OWNERSHIP", 70),
+        ("OWNER", 60),
+        ("TAX", 55),
+        ("ASSESS", 45),
+        ("CAMA", 45),
+        ("PRIVATE", 35),
+        ("LAND", 15),
+    ):
+        if word in joined:
+            score += weight
+
+    return score
+
+
+def _monahinga_v9_discover_candidate_layers(source: dict) -> tuple[list[dict], str]:
+    try:
+        root = _monahinga_v9_mapserver_root_url(source)
+        raw = _monahinga_v2_read_json_url(root + "?f=json")
+        layers = raw.get("layers") or []
+        if not isinstance(layers, list):
+            return [], "layer discovery: no layers list"
+
+        scored = []
+        for layer in layers:
+            if not isinstance(layer, dict):
+                continue
+            if "id" not in layer:
+                continue
+            score = _monahinga_v9_layer_score(layer)
+            if score > 0:
+                scored.append((score, layer))
+
+        scored.sort(key=lambda item: item[0], reverse=True)
+        limit = int(os.getenv("MONAHINGA_FREE_PARCEL_LAYER_DISCOVERY_LIMIT", "8"))
+        chosen = [layer for _score, layer in scored[:max(1, limit)]]
+        names = ", ".join(str(layer.get("id")) + ":" + str(layer.get("name") or "") for layer in chosen[:6])
+        if not chosen:
+            return [], "layer discovery: no likely parcel layers"
+        return chosen, "layer discovery candidates: " + names
+    except Exception as exc:
+        return [], f"layer discovery failed: {type(exc).__name__}: {exc}"
+
+
+def _monahinga_v9_layer_query_url(source: dict, bbox: BBox, layer_id, fmt: str) -> str:
+    root = _monahinga_v9_mapserver_root_url(source)
+    query_url = root.rstrip("/") + "/" + str(layer_id) + "/query"
+
+    geometry = json.dumps({
+        "xmin": float(bbox.min_lon),
+        "ymin": float(bbox.min_lat),
+        "xmax": float(bbox.max_lon),
+        "ymax": float(bbox.max_lat),
+        "spatialReference": {"wkid": 4326},
+    }, separators=(",", ":"))
+
+    params = {
+        "f": fmt,
+        "where": "1=1",
+        "outFields": "*",
+        "returnGeometry": "true",
+        "geometryType": "esriGeometryEnvelope",
+        "geometry": geometry,
+        "inSR": "4326",
+        "outSR": "4326",
+        "spatialRel": "esriSpatialRelIntersects",
+        "resultRecordCount": os.getenv("MONAHINGA_FREE_PARCEL_LIMIT", "200"),
+    }
+
+    return query_url + "?" + urlencode(params)
+
+
+def _monahinga_v9_try_discovered_layers(source: dict, bbox: BBox) -> tuple[dict | None, str]:
+    if "/MapServer" not in str(source.get("query_url", "")):
+        return None, "layer discovery skipped: not a MapServer source"
+
+    layers, discovery_status = _monahinga_v9_discover_candidate_layers(source)
+    if not layers:
+        print(f"[parcel-preview] source attempt {source.get('id')} {discovery_status}")
+        return None, discovery_status
+
+    statuses = [discovery_status]
+    for layer in layers:
+        layer_id = layer.get("id")
+        layer_name = str(layer.get("name") or "")
+        layer_source = dict(source)
+        layer_source["id"] = str(source.get("id") or "source") + "_layer_" + str(layer_id)
+        layer_source["label"] = str(source.get("label") or "ArcGIS parcel source") + " layer " + str(layer_id) + (" " + layer_name if layer_name else "")
+        layer_source["query_url"] = _monahinga_v9_mapserver_root_url(source).rstrip("/") + "/" + str(layer_id) + "/query"
+
+        for fmt in ("geojson", "json"):
+            try:
+                url = _monahinga_v9_layer_query_url(source, bbox, layer_id, fmt)
+                raw = _monahinga_v2_read_json_url(url)
+                if fmt == "json" and (raw.get("type") != "FeatureCollection"):
+                    raw = _monahinga_v2_esri_json_to_geojson(raw)
+                fc = _monahinga_v2_normalize_public_geojson(raw, layer_source)
+                status = f"ok layer={layer_id} fmt={fmt} features={len(fc.get('features') or [])}"
+                print(f"[parcel-preview] FREE LAYER SOURCE SUCCESS {source.get('id')} {status}")
+                return fc, status
+            except Exception as exc:
+                status = f"layer={layer_id} fmt={fmt} failed: {type(exc).__name__}: {exc}"
+                statuses.append(status)
+                print(f"[parcel-preview] source attempt {source.get('id')} {status}")
+
+    return None, " | ".join(statuses[-4:])
+
+
+def _monahinga_v2_try_source(source: dict, bbox: BBox) -> tuple[dict | None, str]:
+    last = "not attempted"
+    for fmt in ("geojson", "json"):
+        url = _monahinga_v2_arcgis_url(source, bbox, fmt)
+        try:
+            raw = _monahinga_v2_read_json_url(url)
+            if fmt == "json" and (raw.get("type") != "FeatureCollection"):
+                raw = _monahinga_v2_esri_json_to_geojson(raw)
+            fc = _monahinga_v2_normalize_public_geojson(raw, source)
+            return fc, f"ok fmt={fmt} features={len(fc.get('features') or [])}"
+        except Exception as exc:
+            last = f"fmt={fmt} failed: {type(exc).__name__}: {exc}"
+            print(f"[parcel-preview] source attempt {source['id']} {last}")
+
+    layer_fc, layer_status = _monahinga_v9_try_discovered_layers(source, bbox)
+    print(f"[parcel-preview] source attempt {source['id']} {layer_status}")
+    if layer_fc:
+        return layer_fc, layer_status
+
+    identify_fc, identify_status = _monahinga_v3_try_identify_source(source, bbox)
+    print(f"[parcel-preview] source attempt {source['id']} {identify_status}")
+    if identify_fc:
+        return identify_fc, identify_status
+
+    return None, last + " | " + layer_status + " | " + identify_status
+
+
+# MONAHINGA_MANUAL_ARCGIS_URL_V12_2026_05_09:
+# Manual county/provider ArcGIS override. Always queried only against the current BBox.
+def _monahinga_v12_normalize_manual_arcgis_url(raw_url: str) -> str:
+    url = str(raw_url or "").strip()
+    if not url:
+        raise ValueError("manual ArcGIS URL is empty")
+    if not (url.startswith("http://") or url.startswith("https://")):
+        raise ValueError("manual ArcGIS URL must start with http:// or https://")
+
+    url = url.split("#", 1)[0].split("?", 1)[0].rstrip("/")
+
+    if url.endswith("/query"):
+        return url
+
+    parts = url.split("/")
+    if len(parts) >= 2 and parts[-1].isdigit() and parts[-2] in ("MapServer", "FeatureServer"):
+        return url + "/query"
+
+    if url.endswith("/MapServer") or url.endswith("/FeatureServer"):
+        return url + "/query"
+
+    if "/MapServer/" in url:
+        return url.split("/MapServer/", 1)[0] + "/MapServer/query"
+
+    if "/FeatureServer/" in url:
+        return url.split("/FeatureServer/", 1)[0] + "/FeatureServer/query"
+
+    raise ValueError("manual ArcGIS URL must contain MapServer or FeatureServer")
+
+
+def _monahinga_v12_source_from_manual_url(raw_url: str) -> dict:
+    query_url = _monahinga_v12_normalize_manual_arcgis_url(raw_url)
+    label = "Manual ArcGIS parcel service"
+    if "/FeatureServer/" in query_url or query_url.endswith("/FeatureServer/query"):
+        label = "Manual ArcGIS FeatureServer parcel service"
+    elif "/MapServer/" in query_url or query_url.endswith("/MapServer/query"):
+        label = "Manual ArcGIS MapServer parcel service"
+
+    return {
+        "id": "manual_arcgis_url",
+        "label": label,
+        "region": "manual",
+        "bbox_scoped": True,
+        "query_url": query_url,
+    }
+
+
+def _monahinga_v12_try_manual_arcgis_url(raw_url: str, bbox: BBox) -> tuple[dict | None, str]:
+    if not str(raw_url or "").strip():
+        return None, "manual ArcGIS URL not provided"
+
+    source = _monahinga_v12_source_from_manual_url(raw_url)
+    fc, status = _monahinga_v2_try_source(source, bbox)
+
+    if fc:
+        fc.setdefault("properties", {})
+        fc["properties"]["monahinga_parcel_source"] = "manual_arcgis_url"
+        fc["properties"]["monahinga_parcel_source_label"] = source["label"]
+        fc["properties"]["monahinga_manual_arcgis_url"] = str(raw_url or "").strip()
+        fc["properties"]["monahinga_source_note"] = "Manual ArcGIS parcel source; verify ownership/access against county/provider records."
+        return fc, "manual ArcGIS source loaded: " + status
+
+    return None, "manual ArcGIS source failed: " + status
+
+
+def _monahinga_v2_free_public_ladder(bbox: BBox) -> tuple[dict | None, str, str, list[dict]]:
+    if os.getenv("MONAHINGA_FREE_PUBLIC_PARCELS", "1").strip().lower() in {"0", "false", "no", "off"}:
+        return None, "", "", [{"source": "free_public", "status": "disabled"}]
+
+    region = _monahinga_v2_bbox_region(bbox)
+    sources = []
+    for source in MONAHINGA_FREE_PARCEL_SOURCE_V2:
+        if source["region"] == region:
+            sources.append(source)
+    if region == "potter_pa":
+        sources.extend([s for s in MONAHINGA_FREE_PARCEL_SOURCE_V2 if s["region"] == "pennsylvania"])
+
+    if not sources:
+        print(f"[parcel-preview] free ladder skipped: no source for region={region}")
+        return None, "", "", [{"source": "free_public", "status": f"no source for region {region}"}]
+
+    attempts = []
+    for source in sources:
+        fc, status = _monahinga_v2_try_source(source, bbox)
+        attempts.append({"source": source["id"], "label": source["label"], "status": status})
+        if fc:
+            print(f"[parcel-preview] FREE POLYGON SOURCE SUCCESS {source['id']}: {status}")
+            return fc, source["id"], source["label"], attempts
+
+    print("[parcel-preview] FREE SOURCES FAILED: " + " | ".join(a["source"] + "=" + a["status"] for a in attempts))
+    return None, "", "", attempts
+
+
+def _monahinga_v2_preview_payload(bbox: BBox, manual_arcgis_url: str | None = None) -> dict:
+    manual_attempts = []
+    if manual_arcgis_url and str(manual_arcgis_url).strip():
+        try:
+            configured, manual_status = _monahinga_v12_try_manual_arcgis_url(manual_arcgis_url, bbox)
+            manual_attempts.append({"source": "manual_arcgis_url", "label": "Manual ArcGIS parcel service", "status": manual_status})
+            if configured is not None:
+                source_kind = "manual_arcgis_url"
+                source_ref = "Manual ArcGIS parcel service"
+                attempts = manual_attempts
+            else:
+                configured, source_kind, source_ref, free_attempts = _monahinga_v2_free_public_ladder(bbox)
+                attempts = manual_attempts + free_attempts
+        except Exception as exc:
+            manual_attempts.append({"source": "manual_arcgis_url", "label": "Manual ArcGIS parcel service", "status": f"failed: {type(exc).__name__}: {exc}"})
+            configured, source_kind, source_ref, free_attempts = _monahinga_v2_free_public_ladder(bbox)
+            attempts = manual_attempts + free_attempts
+    else:
+        configured, source_kind, source_ref, attempts = _monahinga_v2_free_public_ladder(bbox)
+
+    if configured is None:
+        try:
+            configured, source_kind, source_ref = _monahinga_configured_parcel_geojson()
+            if configured is not None:
+                attempts.append({"source": source_kind, "label": source_ref, "status": "configured source loaded"})
+        except Exception as exc:
+            attempts.append({"source": "configured", "status": f"failed: {type(exc).__name__}: {exc}"})
+            print(f"[parcel-preview] configured source failed: {exc}")
+
+    if configured is None:
+        configured = _monahinga_demo_parcel_geojson_for_bbox(bbox)
+        source_kind = "auto_demo"
+        source_ref = "generated_from_selected_bbox"
+        attempts.append({"source": "auto_demo", "label": "Automatic demo parcels", "status": "fallback used"})
+
+    props = configured.get("properties") or {}
+    feature_count = len(configured.get("features") or [])
+    label = props.get("monahinga_parcel_source_label") or source_ref or "Private parcels"
+    warning = props.get("monahinga_parcel_warning") or "Verify county records, access, permission, and regulations."
+    render_ready_sources = {"manual_arcgis_url", "lawrence_county_sd_parcels", "wyoming_public_arcgis", "wyoming_private_arcgis", "potter_county_pa_taxparcels", "pa_pasda_parcels", "pa_pasda_apps_parcels", "pa_dep_parcels", "configured_path", "configured_url", "regrid"}
+
+    return {
+        "ok": True,
+        "bbox": bbox.as_list(),
+        "source": source_kind,
+        "source_ref": source_ref,
+        "source_label": label,
+        "feature_count": feature_count,
+        "geojson": configured,
+        "message": f"{label} loaded for this selected area. {warning}",
+        "render_ready": source_kind in render_ready_sources,
+        "source_attempts": attempts,
+        "source_summary": _monahinga_v14_parcel_source_summary(configured, source_kind, label),
+        "proof_required": "Verify one known owner/parcel ID against the public/county source before calling this confirmed real private-property truth.",
+    }
+
+
+@app.get("/parcel-preview")
+def parcel_preview_get(min_lon: float, min_lat: float, max_lon: float, max_lat: float, manual_arcgis_url: str | None = None) -> dict:
+    try:
+        bbox = BBox.normalized(min_lon, min_lat, max_lon, max_lat)
+        return _monahinga_v2_preview_payload(bbox, manual_arcgis_url=manual_arcgis_url)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Parcel preview unavailable: {type(exc).__name__}: {exc}")
+
+
 @app.get("/live-wind")
 def live_wind(lat: float, lon: float) -> dict:
     """Return live wind for the command surface.
@@ -761,6 +1791,452 @@ def live_wind(lat: float, lon: float) -> dict:
         }
 
 
+
+# MONAHINGA_AUTO_PRIVATE_PARCEL_RENDER_BRIDGE_V1_2026_05_08: automatic private parcel source bridge.
+def _monahinga_read_json_file(path_value: str) -> dict:
+    path = Path(path_value).expanduser()
+    if not path.is_absolute():
+        path = Path(__file__).resolve().parents[2] / path
+    if not path.exists():
+        raise FileNotFoundError(f"Parcel GeoJSON path does not exist: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _monahinga_read_json_url(url_value: str) -> dict:
+    parsed = urlparse(url_value)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("Parcel GeoJSON URL must start with http:// or https://")
+    req = Request(url_value, headers={"User-Agent": "Monahinga-HUNTER/1.0"})
+    with urlopen(req, timeout=20) as response:
+        raw = response.read(8 * 1024 * 1024)
+    return json.loads(raw.decode("utf-8"))
+
+
+def _monahinga_bbox_demo_cells(min_lon: float, min_lat: float, max_lon: float, max_lat: float) -> list[dict]:
+    lon_span = max_lon - min_lon
+    lat_span = max_lat - min_lat
+    x0 = min_lon + lon_span * 0.18
+    x1 = min_lon + lon_span * 0.50
+    x2 = min_lon + lon_span * 0.82
+    y0 = min_lat + lat_span * 0.30
+    y1 = min_lat + lat_span * 0.54
+    y2 = min_lat + lat_span * 0.76
+    boxes = [
+        ("AUTO-DEMO-001", "DEMO OWNER A - NOT REAL", [[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]]),
+        ("AUTO-DEMO-002", "DEMO OWNER B - NOT REAL", [[x1,y0],[x2,y0],[x2,y1],[x1,y1],[x1,y0]]),
+        ("AUTO-DEMO-003", "DEMO OWNER C - NOT REAL", [[x0,y1],[x1,y1],[x1,y2],[x0,y2],[x0,y1]]),
+        ("AUTO-DEMO-004", "DEMO OWNER D - NOT REAL", [[x1,y1],[x2,y1],[x2,y2],[x1,y2],[x1,y1]]),
+    ]
+    features = []
+    for parcel_id, owner, coords in boxes:
+        features.append({
+            "type": "Feature",
+            "properties": {"PARCEL_ID": parcel_id, "OWNER": owner, "monahinga_demo": True},
+            "geometry": {"type": "Polygon", "coordinates": [coords]},
+        })
+    return features
+
+
+def _monahinga_demo_parcel_geojson_for_bbox(bbox: BBox) -> dict:
+    return {
+        "type": "FeatureCollection",
+        "features": _monahinga_bbox_demo_cells(float(bbox.min_lon), float(bbox.min_lat), float(bbox.max_lon), float(bbox.max_lat)),
+        "properties": {
+            "monahinga_parcel_source": "auto_demo",
+            "monahinga_parcel_source_label": "Automatic demo parcels - not real ownership",
+            "monahinga_parcel_warning": "DEMO ONLY. Not real parcel ownership. Regrid is selected as the first real source. Configure MONAHINGA_REGRID_TOKEN in Pass 2, or use MONAHINGA_PARCEL_GEOJSON_PATH / MONAHINGA_PARCEL_GEOJSON_URL only as a temporary real GeoJSON source.",
+            "monahinga_feature_count": 4,
+            "monahinga_confidence": "demo_only",
+        },
+    }
+
+
+def _monahinga_normalize_parcel_geojson(geojson: dict, source: str, label: str, warning: str) -> dict:
+    if not isinstance(geojson, dict):
+        raise ValueError("Parcel source did not return a GeoJSON object.")
+    if geojson.get("type") != "FeatureCollection":
+        raise ValueError("Parcel source must be a GeoJSON FeatureCollection.")
+    features = geojson.get("features")
+    if not isinstance(features, list):
+        raise ValueError("Parcel source FeatureCollection is missing features[].")
+    geojson.setdefault("properties", {})
+    geojson["properties"]["monahinga_parcel_source"] = source
+    geojson["properties"]["monahinga_parcel_source_label"] = label
+    geojson["properties"]["monahinga_parcel_warning"] = warning
+    geojson["properties"]["monahinga_feature_count"] = len(features)
+    return geojson
+
+
+def _monahinga_configured_parcel_geojson() -> tuple[dict | None, str, str]:
+    path_value = os.getenv("MONAHINGA_PARCEL_GEOJSON_PATH", "").strip()
+    url_value = os.getenv("MONAHINGA_PARCEL_GEOJSON_URL", "").strip()
+    if path_value:
+        geojson = _monahinga_read_json_file(path_value)
+        return (_monahinga_normalize_parcel_geojson(geojson, "configured_path", f"Configured parcel GeoJSON path: {Path(path_value).name}", "Configured parcel GeoJSON. Ownership context only; verify county records, access, permission, and regulations."), "configured_path", path_value)
+    if url_value:
+        geojson = _monahinga_read_json_url(url_value)
+        return (_monahinga_normalize_parcel_geojson(geojson, "configured_url", "Configured parcel GeoJSON URL", "Configured parcel GeoJSON URL. Ownership context only; verify county records, access, permission, and regulations."), "configured_url", url_value)
+    return None, "", ""
+
+
+
+
+# MONAHINGA_REGRID_READINESS_SELF_CHECK_PASS4_2026_05_08: safe source status endpoint. Does not expose secrets.
+
+# MONAHINGA_LAND_SOURCE_READINESS_STATUS_V1_2026_05_08: parcels + PAD-US truth/readiness endpoint.
+
+# MONAHINGA_POTTER_ADDRESS_LOOKUP_V17_2026_05_09:
+# Exact rural-address fallback for Potter County parcel searches.
+def _monahinga_v17_geojson_bounds_and_center(fc: dict) -> tuple[list[float], float, float]:
+    xs = []
+    ys = []
+
+    def walk(obj):
+        if isinstance(obj, (list, tuple)):
+            if len(obj) >= 2 and isinstance(obj[0], (int, float)) and isinstance(obj[1], (int, float)):
+                xs.append(float(obj[0]))
+                ys.append(float(obj[1]))
+            else:
+                for child in obj:
+                    walk(child)
+
+    for feature in (fc.get("features") or []):
+        geom = feature.get("geometry") or {}
+        walk(geom.get("coordinates"))
+
+    if not xs or not ys:
+        raise ValueError("parcel lookup returned no usable coordinates")
+
+    min_lon, max_lon = min(xs), max(xs)
+    min_lat, max_lat = min(ys), max(ys)
+    pad_lon = max(0.0015, (max_lon - min_lon) * 1.8)
+    pad_lat = max(0.0015, (max_lat - min_lat) * 1.8)
+    bbox = [min_lon - pad_lon, min_lat - pad_lat, max_lon + pad_lon, max_lat + pad_lat]
+    return bbox, (min_lat + max_lat) / 2.0, (min_lon + max_lon) / 2.0
+
+
+def _monahinga_v17_first_feature_collection(raw: dict) -> dict:
+    if raw.get("type") == "FeatureCollection":
+        return raw
+    return _monahinga_v2_esri_json_to_geojson(raw)
+
+
+def _monahinga_v17_potter_address_candidates(query: str) -> list[str]:
+    q = str(query or "").strip()
+    candidates = []
+    if "1854" in q and re.search(r"(sr\s*44|state route\s*44|pa[-\s]*44|route\s*44)", q, re.I):
+        candidates.extend([
+            "Street_Number = '1854'",
+            "Street_Number = '1854' AND Situs_Street LIKE '%44%'",
+            "Street_Number = '1854' AND Situs_Street LIKE '%ROUTE%'",
+        ])
+    return candidates
+
+
+def _monahinga_v17_potter_feature_score(props: dict, query: str) -> int:
+    joined = " ".join(str(props.get(k, "")) for k in (
+        "Street_Number", "Situs_Street", "Situs_Suffix", "Situs_Direction",
+        "Situs_Description_1", "Situs_Description_2", "Map_Number",
+        "Owner_Name_1", "Owner_Name_2",
+    )).upper()
+    q = str(query or "").upper()
+    score = 0
+    if "1854" in joined:
+        score += 100
+    if "44" in joined:
+        score += 60
+    if "STATE" in joined or "ROUTE" in joined or "SR" in joined or "PA" in joined:
+        score += 20
+    if "SHINGLEHOUSE" in q:
+        score += 10
+    return score
+
+
+@app.get("/parcel-address-lookup")
+def parcel_address_lookup(query: str) -> dict:
+    q = str(query or "").strip()
+    if not q:
+        return {"ok": False, "message": "No address query provided."}
+
+    # Keep this deliberately narrow for now. It is a surgical fallback for the
+    # known Shinglehouse / Potter County rural route problem.
+    if not re.search(r"(shinglehouse|potter|sr\s*44|state route\s*44|pa[-\s]*44|route\s*44)", q, re.I):
+        return {"ok": False, "message": "No supported county parcel lookup for this query."}
+
+    source = next((s for s in MONAHINGA_FREE_PARCEL_SOURCE_V2 if s.get("id") == "potter_county_pa_taxparcels"), None)
+    if not source:
+        return {"ok": False, "message": "Potter County parcel source is not configured."}
+
+    attempts = []
+    best = None
+    best_score = -1
+
+    for where in _monahinga_v17_potter_address_candidates(q):
+        try:
+            url = source["query_url"] + "?" + urlencode({
+                "f": "geojson",
+                "where": where,
+                "outFields": "*",
+                "returnGeometry": "true",
+                "outSR": "4326",
+                "resultRecordCount": "25",
+            })
+            raw = _monahinga_v2_read_json_url(url)
+            fc = _monahinga_v17_first_feature_collection(raw)
+            for feature in (fc.get("features") or []):
+                props = dict(feature.get("properties") or {})
+                score = _monahinga_v17_potter_feature_score(props, q)
+                if score > best_score:
+                    best_score = score
+                    best = {"feature": feature, "props": props, "where": where}
+            attempts.append({"where": where, "status": f"ok features={len(fc.get('features') or [])}"})
+        except Exception as exc:
+            attempts.append({"where": where, "status": f"failed: {type(exc).__name__}: {exc}"})
+
+    if not best:
+        return {"ok": False, "message": "No matching Potter County parcel found.", "attempts": attempts}
+
+    fc_one = {"type": "FeatureCollection", "features": [best["feature"]]}
+    bbox, lat, lon = _monahinga_v17_geojson_bounds_and_center(fc_one)
+    props = best["props"]
+    display = "1854 State Route 44 N, Shinglehouse, Potter County, PA 16748"
+
+    return {
+        "ok": True,
+        "source": "potter_county_pa_taxparcels",
+        "display_name": display,
+        "lat": lat,
+        "lon": lon,
+        "bbox": bbox,
+        "parcel_id": props.get("Map_Number") or props.get("Join1") or "",
+        "owner": props.get("Owner_Name_1") or "",
+        "situs": " ".join(str(props.get(k, "")).strip() for k in ("Street_Number", "Situs_Street", "Situs_Suffix", "Situs_Direction") if str(props.get(k, "")).strip()),
+        "acres": props.get("Acreage"),
+        "year_built": props.get("Year_Built"),
+        "attempts": attempts,
+        "note": "Parcel-based address match. Verify against county records before field use.",
+    }
+
+
+
+
+# MONAHINGA_KNOWN_ADDRESS_LOOKUP_V18_2026_05_09:
+# Exact known-address fallback. This is intentionally narrow: it only handles
+# the verified Shinglehouse/Potter County address that Nominatim misroutes.
+def _monahinga_v18_fc_bounds_and_center(fc: dict) -> tuple[list[float], float, float]:
+    xs = []
+    ys = []
+
+    def walk(coords):
+        if isinstance(coords, (list, tuple)):
+            if len(coords) >= 2 and isinstance(coords[0], (int, float)) and isinstance(coords[1], (int, float)):
+                xs.append(float(coords[0]))
+                ys.append(float(coords[1]))
+            else:
+                for child in coords:
+                    walk(child)
+
+    for feature in (fc.get("features") or []):
+        geom = feature.get("geometry") or {}
+        walk(geom.get("coordinates"))
+
+    if not xs or not ys:
+        raise ValueError("no geometry coordinates returned for known address")
+
+    min_lon, max_lon = min(xs), max(xs)
+    min_lat, max_lat = min(ys), max(ys)
+    pad_lon = max(0.0015, (max_lon - min_lon) * 2.0)
+    pad_lat = max(0.0015, (max_lat - min_lat) * 2.0)
+    return [min_lon - pad_lon, min_lat - pad_lat, max_lon + pad_lon, max_lat + pad_lat], (min_lat + max_lat) / 2.0, (min_lon + max_lon) / 2.0
+
+
+def _monahinga_v18_esri_or_geojson_to_fc(raw: dict) -> dict:
+    if isinstance(raw, dict) and raw.get("type") == "FeatureCollection":
+        return raw
+    return _monahinga_v2_esri_json_to_geojson(raw)
+
+
+def _monahinga_v18_is_known_shinglehouse_address(query: str) -> bool:
+    q = str(query or "").upper()
+    return ("1854" in q and "44" in q and ("SHINGLEHOUSE" in q or "16748" in q))
+
+
+def _monahinga_v18_query_potter_known_address(source: dict) -> tuple[dict | None, str]:
+    # Public records shown by real-estate/public-record pages identify this
+    # property as APN 120 43315 / parcel number 1200060221. Try those stable
+    # identifiers first, then common Potter/PASDA field names.
+    candidates = [
+        "Map_Number = '120 43315'",
+        "Map_Number = '12043315'",
+        "Join1 = '1200060221'",
+        "PARCEL_ID = '1200060221'",
+        "PARCEL_ID = '120 43315'",
+        "PIN = '1200060221'",
+        "APN = '120 43315'",
+    ]
+    errors = []
+    for where in candidates:
+        try:
+            url = source["query_url"] + "?" + urlencode({
+                "f": "geojson",
+                "where": where,
+                "outFields": "*",
+                "returnGeometry": "true",
+                "outSR": "4326",
+                "resultRecordCount": "5",
+            })
+            raw = _monahinga_v2_read_json_url(url)
+            fc = _monahinga_v18_esri_or_geojson_to_fc(raw)
+            features = fc.get("features") or []
+            if features:
+                return {"type": "FeatureCollection", "features": features[:1]}, f"ok where={where} features={len(features)}"
+            errors.append(f"{where}: zero features")
+        except Exception as exc:
+            errors.append(f"{where}: {type(exc).__name__}: {exc}")
+    return None, " | ".join(errors[-3:])
+
+
+@app.get("/known-address-lookup")
+def known_address_lookup(query: str) -> dict:
+    q = str(query or "").strip()
+    if not _monahinga_v18_is_known_shinglehouse_address(q):
+        return {"ok": False, "message": "No exact known-address fallback for this query."}
+
+    source = next((s for s in MONAHINGA_FREE_PARCEL_SOURCE_V2 if s.get("id") == "potter_county_pa_taxparcels"), None)
+    if not source:
+        return {"ok": False, "message": "Potter County parcel source is not configured."}
+
+    try:
+        fc, status = _monahinga_v18_query_potter_known_address(source)
+        if not fc:
+            return {"ok": False, "message": "Known address parcel lookup failed.", "status": status}
+
+        bbox, lat, lon = _monahinga_v18_fc_bounds_and_center(fc)
+        props = dict((fc.get("features") or [{}])[0].get("properties") or {})
+        return {
+            "ok": True,
+            "display_name": "1854 State Route 44 N, Shinglehouse, Potter County, PA 16748",
+            "lat": lat,
+            "lon": lon,
+            "bbox": bbox,
+            "source": "potter_county_pa_taxparcels",
+            "status": status,
+            "parcel_id": props.get("Map_Number") or props.get("Join1") or props.get("PARCEL_ID") or "120 43315",
+            "owner": props.get("Owner_Name_1") or props.get("OWNER") or "",
+            "note": "Known address matched using Potter County parcel identifiers. Search moves the map only; draw the bbox after confirming the location.",
+        }
+    except Exception as exc:
+        return {"ok": False, "message": f"Known address lookup failed: {type(exc).__name__}: {exc}"}
+
+
+
+@app.get("/parcel-source-status")
+def parcel_source_status():
+    """Report land-source readiness without exposing secrets or changing run behavior.
+
+    This endpoint is intentionally read-only. It helps the operator distinguish:
+    - PAD-US public/hunting signal readiness
+    - real parcel source readiness
+    - demo parcel fallback
+
+    It must not claim permission, legal access, or confirmed private ownership.
+    """
+    padus_env_name = "PADUS_PUBLIC_ACCESS_FEATURESERVER_URL"
+    padus_url = (os.getenv(padus_env_name) or "").strip()
+    parcel_path = (os.getenv("MONAHINGA_PARCEL_GEOJSON_PATH") or "").strip()
+    parcel_url = (os.getenv("MONAHINGA_PARCEL_GEOJSON_URL") or "").strip()
+    regrid_token_present = bool((os.getenv("MONAHINGA_REGRID_TOKEN") or "").strip())
+    regrid_base_url = (os.getenv("MONAHINGA_REGRID_BASE_URL") or "").strip()
+
+    configured_sources = []
+    if parcel_path:
+        configured_sources.append({
+            "kind": "configured_geojson_path",
+            "configured": True,
+            "label": Path(parcel_path).name or "configured GeoJSON path",
+            "secret_exposed": False,
+        })
+    if parcel_url:
+        parsed = urlparse(parcel_url)
+        configured_sources.append({
+            "kind": "configured_geojson_url",
+            "configured": True,
+            "label": parsed.netloc or "configured GeoJSON URL",
+            "secret_exposed": False,
+        })
+    if regrid_token_present or regrid_base_url:
+        configured_sources.append({
+            "kind": "regrid",
+            "configured": regrid_token_present,
+            "label": "Regrid token present" if regrid_token_present else "Regrid base URL present but token missing",
+            "secret_exposed": False,
+        })
+
+    free_sources = []
+    for source in MONAHINGA_FREE_PARCEL_SOURCE_V2:
+        free_sources.append({
+            "id": source.get("id"),
+            "label": source.get("label"),
+            "region": source.get("region"),
+            "bbox_scoped": True,
+        })
+
+    parcel_mode = "demo_fallback_only"
+    if configured_sources:
+        parcel_mode = "configured_or_regrid_available"
+    elif free_sources:
+        parcel_mode = "free_public_ladder_available"
+
+    return {
+        "ok": True,
+        "active_mode": "land_source_readiness",
+        "headline": "Parcels / PAD-US readiness",
+        "padus": {
+            "configured": bool(padus_url),
+            "env_var": padus_env_name,
+            "source_label": "PAD-US public/hunting signal",
+            "bbox_scoped": True,
+            "secret_exposed": False,
+            "status": "configured" if padus_url else "not configured",
+            "warning": "PAD-US is a public/hunting signal, not permission or guaranteed legal access.",
+        },
+        "parcels": {
+            "mode": parcel_mode,
+            "configured_sources": configured_sources,
+            "free_public_sources": free_sources,
+            "demo_fallback_available": True,
+            "bbox_scoped": True,
+            "safe_to_claim_real_private_property": False,
+            "warning": "Parcel overlays are ownership context only until one known parcel/owner is verified against county or provider records.",
+        },
+        "protected_systems_untouched": [
+            "BBox terrain envelope",
+            "selection_polygon transport",
+            "parcel_geojson payload flow",
+            "PAD-US preview flow",
+            "DEM generation",
+            "scoring stack",
+            "2D/3D orientation",
+        ],
+        "proof_required": [
+            "Confirm the selected BBox is small and local enough for PAD-US/parcel lookup.",
+            "Verify one known owner or parcel ID against the county/provider source before calling parcel truth confirmed.",
+            "Verify ownership, permission, access, season dates, tags, safety, and local regulations before field use.",
+        ],
+    }
+
+
+@app.post("/parcel-preview")
+def parcel_preview_post(req: ParcelPreviewRequest):
+    try:
+        bbox = BBox.normalized(req.min_lon, req.min_lat, req.max_lon, req.max_lat)
+        return _monahinga_v2_preview_payload(bbox, manual_arcgis_url=req.manual_arcgis_url)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Private parcel preview unavailable: {type(exc).__name__}: {exc}")
+
+
 @app.post("/preview-wildlife")
 def preview_wildlife(req: RunRequest):
     try:
@@ -786,6 +2262,7 @@ def run_terrain_truth(req: RunRequest):
                 "selected_species": req.selected_species or "default",
                 "target_species": req.selected_species or "default",
                 "selection_polygon": req.selection_polygon,
+                "parcel_geojson": req.parcel_geojson,
             },
         )
 
@@ -802,3 +2279,5 @@ def run_terrain_truth(req: RunRequest):
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+# MONAHINGA_REPAIR_MAIN_PY_PARCEL_INDENT_V1_2026_05_08: emergency parcel indentation repair applied.
