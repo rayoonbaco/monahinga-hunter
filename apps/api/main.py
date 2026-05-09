@@ -2247,10 +2247,176 @@ def preview_wildlife(req: RunRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
+
+# MONAHINGA_RENDER_PAGE2_AUTO_PARCEL_CARRY_V25_2026_05_09:
+# Backend safety net: if Page 1 preview parcels did not survive the browser run payload,
+# fetch a compact BBox-scoped real parcel subset during /run-terrain-truth.
+def _monahinga_v25_round_coord(value):
+    try:
+        return round(float(value), 6)
+    except Exception:
+        return value
+
+
+def _monahinga_v25_compact_coords(coords):
+    if isinstance(coords, (list, tuple)):
+        if len(coords) >= 2 and isinstance(coords[0], (int, float)) and isinstance(coords[1], (int, float)):
+            return [_monahinga_v25_round_coord(coords[0]), _monahinga_v25_round_coord(coords[1])]
+        return [_monahinga_v25_compact_coords(item) for item in coords]
+    return coords
+
+
+def _monahinga_v25_prop_value(props: dict, keys: tuple[str, ...]) -> str:
+    for key in keys:
+        value = props.get(key)
+        if value is not None and str(value).strip():
+            return str(value).strip()
+    return ""
+
+
+def _monahinga_v25_detect_fields(features: list[dict], keys: tuple[str, ...]) -> tuple[list[str], int]:
+    found: list[str] = []
+    value_count = 0
+    seen = set()
+    for feature in features:
+        props = feature.get("properties") or {}
+        hit_this_feature = False
+        for key in keys:
+            value = props.get(key)
+            if value is not None and str(value).strip():
+                if key not in seen:
+                    seen.add(key)
+                    found.append(key)
+                hit_this_feature = True
+        if hit_this_feature:
+            value_count += 1
+    return found, value_count
+
+
+def _monahinga_v25_compact_props(props: dict) -> dict:
+    props = dict(props or {})
+    keep = (
+        "OWNER", "Owner", "owner", "OWNER_NAME", "OWNER_NAME1", "owner_name", "OWNER1",
+        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Owner2", "TAXPAYER", "MAIL_NAME",
+        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "TAXPIN", "PID", "PARCELNO",
+        "PropertyNu", "Map_Number", "Join1", "SITUS", "SITE_ADDR", "SITUS_ADDRESS",
+        "PROPERTY_ADDRESS", "ADDRESS", "ADDR", "PHYSICAL_ADDRESS", "Street_Number",
+        "Situs_Street", "Situs_Suffix", "Situs_Direction", "Acres", "ACRES", "Acreage",
+        "ACREAGE", "Year_Built", "YEAR_BUILT", "fyrblt",
+    )
+    out = {}
+    for key in keep:
+        if key in props and props[key] is not None:
+            text = str(props[key]).strip()
+            if text and len(text) <= 160:
+                out[key] = props[key]
+
+    owner = _monahinga_v25_prop_value(props, (
+        "OWNER", "Owner", "owner", "OWNER_NAME", "OWNER_NAME1", "owner_name", "OWNER1",
+        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Owner2", "TAXPAYER", "MAIL_NAME",
+    ))
+    parcel_id = _monahinga_v25_prop_value(props, (
+        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "TAXPIN", "PID",
+        "PARCELNO", "PropertyNu", "Map_Number", "Join1",
+    ))
+    if owner:
+        out["MONAHINGA_OWNER_NORMALIZED"] = owner
+    if parcel_id:
+        out["MONAHINGA_PARCEL_ID_NORMALIZED"] = parcel_id
+    return out
+
+
+def _monahinga_v25_compact_parcel_geojson_for_run(geojson: dict, label: str, source: str) -> dict | None:
+    if not isinstance(geojson, dict):
+        return None
+
+    raw_features = geojson.get("features") if isinstance(geojson.get("features"), list) else []
+    max_features = 350
+    features: list[dict] = []
+    for raw_feature in raw_features[:max_features]:
+        if not isinstance(raw_feature, dict):
+            continue
+        geom = raw_feature.get("geometry")
+        if not isinstance(geom, dict) or not geom.get("coordinates"):
+            continue
+        features.append({
+            "type": "Feature",
+            "properties": _monahinga_v25_compact_props(raw_feature.get("properties") or {}),
+            "geometry": {
+                "type": geom.get("type"),
+                "coordinates": _monahinga_v25_compact_coords(geom.get("coordinates")),
+            },
+        })
+
+    if not features:
+        return None
+
+    owner_fields, owner_value_count = _monahinga_v25_detect_fields(features, (
+        "OWNER", "Owner", "owner", "OWNER_NAME", "OWNER_NAME1", "owner_name", "OWNER1",
+        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Owner2", "TAXPAYER", "MAIL_NAME",
+        "MONAHINGA_OWNER_NORMALIZED",
+    ))
+    parcel_fields, parcel_value_count = _monahinga_v25_detect_fields(features, (
+        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "TAXPIN", "PID",
+        "PARCELNO", "PropertyNu", "Map_Number", "Join1", "MONAHINGA_PARCEL_ID_NORMALIZED",
+    ))
+
+    return {
+        "type": "FeatureCollection",
+        "properties": {
+            "monahinga_parcel_source": "imported_geojson",
+            "monahinga_parcel_source_label": label or "Automatic BBox parcel source",
+            "monahinga_parcel_source_ref": source or "auto_backend_bbox",
+            "monahinga_parcel_warning": "Ownership context only. Verify county records, legal access, landowner permission, season dates, and local regulations.",
+            "monahinga_feature_count": len(features),
+            "monahinga_bbox_scoped": True,
+            "monahinga_backend_auto_carried": True,
+            "monahinga_detected_owner_fields": owner_fields,
+            "monahinga_detected_parcel_id_fields": parcel_fields,
+            "monahinga_owner_value_count": owner_value_count,
+            "monahinga_parcel_id_value_count": parcel_value_count,
+        },
+        "features": features,
+    }
+
+
+def _monahinga_v25_auto_parcel_geojson_for_run(bbox: BBox) -> dict | None:
+    try:
+        preview = _monahinga_v2_preview_payload(bbox, manual_arcgis_url=None)
+        if not isinstance(preview, dict) or preview.get("ok") is not True:
+            return None
+
+        source = str(preview.get("source") or "")
+        if "demo" in source.lower():
+            print("[parcel-run-carry] skipped demo parcel fallback for Page 2")
+            return None
+
+        geojson = preview.get("geojson")
+        label = str(preview.get("source_label") or "Automatic BBox parcel source")
+        compact = _monahinga_v25_compact_parcel_geojson_for_run(geojson, label, source)
+        if compact:
+            print(f"[parcel-run-carry] auto-carried {len(compact.get('features') or [])} parcel feature(s) from {source}")
+        return compact
+    except Exception as exc:
+        print(f"[parcel-run-carry] auto parcel carry failed: {type(exc).__name__}: {exc}")
+        return None
+
+
+def _monahinga_v25_resolve_run_parcel_geojson(req: RunRequest, bbox: BBox) -> dict | None:
+    provided = req.parcel_geojson
+    if isinstance(provided, dict) and provided.get("features"):
+        compact = _monahinga_v25_compact_parcel_geojson_for_run(provided, "Browser-carried parcel GeoJSON", "browser_payload")
+        return compact or provided
+    return _monahinga_v25_auto_parcel_geojson_for_run(bbox)
+
+
+
 @app.post("/run-terrain-truth")
 def run_terrain_truth(req: RunRequest):
     try:
         bbox = BBox.normalized(req.min_lon, req.min_lat, req.max_lon, req.max_lat)
+        parcel_geojson_for_run = _monahinga_v25_resolve_run_parcel_geojson(req, bbox)
+
         result = _run(
             bbox,
             req.width,
@@ -2262,7 +2428,7 @@ def run_terrain_truth(req: RunRequest):
                 "selected_species": req.selected_species or "default",
                 "target_species": req.selected_species or "default",
                 "selection_polygon": req.selection_polygon,
-                "parcel_geojson": req.parcel_geojson,
+                "parcel_geojson": parcel_geojson_for_run,
             },
         )
 
