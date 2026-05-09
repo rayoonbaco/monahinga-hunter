@@ -586,7 +586,31 @@ def render_command_surface(run_root: Path, contract: TerrainTruthContract) -> Pa
         default_padus_mode=resolved_padus_mode,
     )
     payload["defaultPadusMode"] = resolved_padus_mode
-    payload["selection_polygon"] = (contract.operator_context or {}).get("selection_polygon") or []  # MONAHINGA_PAYLOAD_SELECTION_POLYGON_2026_05_06
+    payload["selection_polygon"] = (contract.operator_context or {}).get("selection_polygon") or []
+    parcel_geojson = (contract.operator_context or {}).get("parcel_geojson") or None
+    payload["parcel_geojson"] = parcel_geojson  # MONAHINGA_RENDER_PARCEL_HANDOFF_HARDENED_V26_2026_05_09
+    if isinstance(parcel_geojson, dict):
+        parcel_features = parcel_geojson.get("features") if isinstance(parcel_geojson.get("features"), list) else []
+        parcel_props = parcel_geojson.get("properties") if isinstance(parcel_geojson.get("properties"), dict) else {}
+        payload["parcel_source_summary"] = {
+            "received_by_page2": bool(parcel_features),
+            "feature_count": int(parcel_props.get("monahinga_feature_count") or len(parcel_features) or 0),
+            "label": str(parcel_props.get("monahinga_parcel_source_label") or "Private parcel source"),
+            "source": str(parcel_props.get("monahinga_parcel_source_ref") or parcel_props.get("monahinga_parcel_source") or "unknown"),
+            "owner_fields": parcel_props.get("monahinga_detected_owner_fields") or [],
+            "parcel_id_fields": parcel_props.get("monahinga_detected_parcel_id_fields") or [],
+            "warning": str(parcel_props.get("monahinga_parcel_warning") or "Ownership context only. Verify county records, access, permission, and regulations."),
+        }
+    else:
+        payload["parcel_source_summary"] = {
+            "received_by_page2": False,
+            "feature_count": 0,
+            "label": "No private parcel GeoJSON received by Page 2",
+            "source": "none",
+            "owner_fields": [],
+            "parcel_id_fields": [],
+            "warning": "No imported parcel GeoJSON was present in this run. Verify ownership and permission independently.",
+        }
     payload_json = json.dumps(payload)
 
     decision_summary = contract.decision.summary or {}

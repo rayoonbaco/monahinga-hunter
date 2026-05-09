@@ -9287,26 +9287,20 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 // MONAHINGA_PARCEL_TRUTH_DOWNLOAD_V23_2026_05_09
-(function installReadableParcelTruthDownloadV23() {
+(function installReadableParcelStatusDownloadV26() {
   function cleanText(value) {
     return String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
   }
 
-  function firstNonEmpty(values, fallback) {
-    for (const value of values || []) {
-      const text = cleanText(value);
-      if (text) return text;
-    }
-    return fallback || '';
+  function asArray(value) {
+    if (Array.isArray(value)) return value.map(cleanText).filter(Boolean);
+    if (value == null || value === '') return [];
+    return String(value).split(',').map(cleanText).filter(Boolean);
   }
 
   function getPayloadSafe() {
-    try {
-      if (typeof payload !== 'undefined' && payload) return payload;
-    } catch (e) {}
-    try {
-      if (window.payload) return window.payload;
-    } catch (e) {}
+    try { if (typeof payload !== 'undefined' && payload) return payload; } catch (e) {}
+    try { if (window.payload) return window.payload; } catch (e) {}
     return {};
   }
 
@@ -9322,116 +9316,105 @@ document.addEventListener('DOMContentLoaded', function(){
     return Array.from(found);
   }
 
-  function buildReadableParcelTruthTextV23() {
+  function buildParcelStatusTextV26() {
     const data = getPayloadSafe();
-    const parcelGeo = data.parcel_geojson || {};
+    const parcelGeo = data.parcel_geojson && typeof data.parcel_geojson === 'object' ? data.parcel_geojson : {};
     const features = Array.isArray(parcelGeo.features) ? parcelGeo.features : [];
-    const sourceSummary = data.parcel_source_summary || {};
-    const sample = sourceSummary.sample || {};
+    const props = parcelGeo.properties && typeof parcelGeo.properties === 'object' ? parcelGeo.properties : {};
+    const summary = data.parcel_source_summary && typeof data.parcel_source_summary === 'object' ? data.parcel_source_summary : {};
 
-    const ownerFields = detectFields(features, [
-      'OWNER','Owner','owner','OWNER_NAME','owner_name','OWNER1','OWNER_NAME1',
-      'Owner_Name_1','Owner_Name_2','CURRENT_OW','Owner2'
+    const featureCount = Number(summary.feature_count || props.monahinga_feature_count || props.monahinga_payload_feature_count || features.length || 0);
+    const received = !!(summary.received_by_page2 || features.length > 0);
+    const sourceLabel = cleanText(summary.label || props.monahinga_parcel_source_label || 'No private parcel source label');
+    const sourceId = cleanText(summary.source || props.monahinga_parcel_source_ref || props.monahinga_parcel_source || 'none');
+    const ownerFields = asArray(summary.owner_fields || props.monahinga_detected_owner_fields);
+    const parcelIdFields = asArray(summary.parcel_id_fields || props.monahinga_detected_parcel_id_fields);
+    const warning = cleanText(summary.warning || props.monahinga_parcel_warning || 'Ownership context only. Verify county records, legal access, landowner permission, season dates, and local regulations.');
+
+    const fallbackOwnerFields = ownerFields.length ? ownerFields : detectFields(features, [
+      'OWNER','Owner','owner','OWNER_NAME','OWNER_NAME1','owner_name','OWNER1','Owner_Name_1','Owner_Name_2','CURRENT_OW','Owner2','TAXPAYER','MAIL_NAME','MONAHINGA_OWNER_NORMALIZED'
     ]);
-    const parcelIdFields = detectFields(features, [
-      'PARCEL_ID','PIN','APN','OBJECTID','FID','ACCOUNT','TAXPIN','PID',
-      'PARCELNO','PropertyNu','Map_Number','Join1'
+    const fallbackParcelFields = parcelIdFields.length ? parcelIdFields : detectFields(features, [
+      'PARCEL_ID','PIN','APN','OBJECTID','FID','ACCOUNT','TAXPIN','PID','PARCELNO','PropertyNu','Map_Number','Join1','MONAHINGA_PARCEL_ID_NORMALIZED'
     ]);
-    const situsFields = detectFields(features, [
-      'SITUS','SITE_ADDR','SITUS_ADDRESS','PROPERTY_ADDRESS','ADDRESS','ADDR',
-      'PHYSICAL_ADDRESS','Situs_Street','Street_Number'
-    ]);
-
-    const sourceLabel = firstNonEmpty([
-      sourceSummary.label,
-      parcelGeo.properties && parcelGeo.properties.monahinga_parcel_source_label
-    ], 'Private parcel source');
-
-    const sourceId = firstNonEmpty([
-      sourceSummary.source,
-      parcelGeo.properties && parcelGeo.properties.monahinga_parcel_source
-    ], 'unknown');
-
-    const featureCount = Number(sourceSummary.feature_count || features.length || 0);
 
     const lines = [];
-    lines.push('PRIVATE PARCEL SOURCE TRUTH');
+    lines.push('MONAHINGA PARCEL STATUS');
     lines.push('');
-    lines.push('STATUS');
-    lines.push('  Source check: active');
-    lines.push('  Source: ' + sourceLabel);
-    lines.push('  Source ID: ' + sourceId);
-    lines.push('  Feature count detected from page: ' + featureCount);
+    lines.push('PAGE 2 HANDOFF');
+    lines.push('  Received parcel_geojson by Page 2: ' + (received ? 'YES' : 'NO'));
+    lines.push('  Feature count visible to Page 2: ' + String(featureCount));
     lines.push('');
-    lines.push('VISIBLE PAGE 2 TRUTH LABEL');
-    lines.push('  PRIVATE PARCELS: SOURCE CHECK');
-    lines.push('  ' + featureCount + ' GeoJSON feature(s) are present.');
-    lines.push('  Verify county records and landowner permission before field use.');
+    lines.push('SOURCE');
+    lines.push('  Label: ' + sourceLabel);
+    lines.push('  Source/ref: ' + sourceId);
     lines.push('');
     lines.push('DETECTED FIELDS');
-    lines.push('  Owner fields: ' + (ownerFields.length ? ownerFields.join(' / ') : 'none detected'));
-    lines.push('  Parcel ID fields: ' + (parcelIdFields.length ? parcelIdFields.join(' / ') : 'none detected'));
-    lines.push('  Situs/address fields: ' + (situsFields.length ? situsFields.join(' / ') : 'none detected'));
+    lines.push('  Owner fields: ' + (fallbackOwnerFields.length ? fallbackOwnerFields.join(' / ') : 'none detected'));
+    lines.push('  Parcel ID fields: ' + (fallbackParcelFields.length ? fallbackParcelFields.join(' / ') : 'none detected'));
     lines.push('');
-
-    if (sample && Object.keys(sample).length) {
-      lines.push('SAMPLE PROOF FIELDS');
-      lines.push('  Owner: ' + firstNonEmpty([sample.owner], 'Unknown owner / verify county records'));
-      lines.push('  Parcel ID: ' + firstNonEmpty([sample.parcel_id], 'Unknown parcel ID / verify county records'));
-      if (sample.situs) lines.push('  Situs/address: ' + cleanText(sample.situs));
-      if (sample.acres) lines.push('  Acres: ' + cleanText(sample.acres));
-      if (sample.year_built) lines.push('  Year built: ' + cleanText(sample.year_built));
-      lines.push('');
-    }
-
-    lines.push('INSPECTOR INSTRUCTIONS');
-    lines.push('  Click a private parcel polygon on the command map to inspect owner / parcel-ID fields.');
-    lines.push('  Treat parcel context as ownership context only.');
-    lines.push('');
-    lines.push('CAUTION');
-    lines.push('  Verify county records, legal access, landowner permission, season dates, local regulations, weapon rules, safety conditions, and field conditions before entering or hunting any area.');
+    lines.push('WARNING');
+    lines.push('  ' + warning);
+    lines.push('  This is ownership context only, not legal proof. Verify county records, access, permission, season dates, local regulations, weapon rules, safety, and field conditions before entering or hunting.');
     lines.push('');
     lines.push('SCORING NOTE');
-    lines.push('  Parcel context is warning-only in this build.');
-    lines.push('  Core sit / scoring logic is unchanged.');
-
+    lines.push('  Parcel context is warning-only in this build. Core terrain, DEM, sit, and scoring logic are unchanged.');
     return lines.join('\n') + '\n';
   }
 
-  function downloadReadableParcelTruthV23() {
-    const blob = new Blob([buildReadableParcelTruthTextV23()], { type: 'text/plain;charset=utf-8' });
+  function downloadParcelStatusV26() {
+    const blob = new Blob([buildParcelStatusTextV26()], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'monahinga_parcel_source_truth_summary.txt';
+    link.download = 'monahinga_parcel_status.txt';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   }
 
-  // Override common callable names in case the button uses a named handler.
-  window.downloadParcelTruth = downloadReadableParcelTruthV23;
-  window.downloadParcelTruthV23 = downloadReadableParcelTruthV23;
-  window.buildReadableParcelTruthTextV23 = buildReadableParcelTruthTextV23;
+  window.downloadParcelTruth = downloadParcelStatusV26;
+  window.downloadParcelTruthV23 = downloadParcelStatusV26;
+  window.downloadParcelStatus = downloadParcelStatusV26;
+  window.buildReadableParcelTruthTextV23 = buildParcelStatusTextV26;
+  window.buildParcelStatusTextV26 = buildParcelStatusTextV26;
 
-  // Capture-phase interceptor: catches the button before older inline/listener code.
+  function relabelButtons() {
+    try {
+      document.querySelectorAll('button, a').forEach(function(node) {
+        const label = cleanText(node.textContent || node.value || node.getAttribute('aria-label') || '');
+        if (/download\s+parcel\s+truth/i.test(label)) {
+          node.textContent = 'Download Parcel Status';
+          node.title = 'Download a concise Page 2 parcel handoff/status report. Ownership context only; verify county records and permission.';
+        }
+      });
+    } catch (_err) {}
+  }
+
   document.addEventListener('click', function(event) {
     const target = event.target && event.target.closest ? event.target.closest('button, a') : null;
     if (!target) return;
     const label = cleanText(target.textContent || target.value || target.getAttribute('aria-label') || '');
     const onclick = String(target.getAttribute('onclick') || '');
     const href = String(target.getAttribute('href') || '');
-    const looksLikeParcelTruth =
-      /download\s+parcel\s+truth/i.test(label) ||
-      /downloadParcelTruth/i.test(onclick) ||
-      /parcel_source_truth|parcel.*truth/i.test(href);
-    if (!looksLikeParcelTruth) return;
+    const looksLikeParcelDownload =
+      /download\s+parcel\s+(truth|status)/i.test(label) ||
+      /downloadParcelTruth|downloadParcelStatus/i.test(onclick) ||
+      /parcel_source_truth|parcel.*truth|parcel.*status/i.test(href);
+    if (!looksLikeParcelDownload) return;
     event.preventDefault();
     event.stopPropagation();
     if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-    downloadReadableParcelTruthV23();
+    downloadParcelStatusV26();
   }, true);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', relabelButtons);
+  } else {
+    relabelButtons();
+  }
+  window.setTimeout(relabelButtons, 500);
 })();
 
 </script>

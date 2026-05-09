@@ -1062,7 +1062,7 @@ h1 + .card {
     <div class="card">
       <h2>Draw your hunting box <span style="font-size:14px; opacity:0.7;">(3D render may take 5–10 seconds)</span></h2>
       <div class="search-row">
-        <input id="place_search" type="text" placeholder="Search address, town, road, camp, or landmark">
+        <input id="place_search" type="search" name="monahinga_lookup_area" autocomplete="off" autocapitalize="off" spellcheck="false" aria-autocomplete="none" data-form-type="other" placeholder="Search address, town, road, camp, or landmark">
         <button class="secondary" type="button" onclick="searchPlace()">Find place</button>
         <button class="ghost" type="button" onclick="clearSearchResult()">Clear result</button>
       </div>
@@ -1461,7 +1461,7 @@ function monahingaCompactParcelProperties(props) {
 function monahingaCompactParcelGeoJsonForPayload(geojson) {
   if (!geojson || typeof geojson !== 'object') return null;
   const rawFeatures = Array.isArray(geojson.features) ? geojson.features : [];
-  const maxFeatures = 350;
+  const maxFeatures = 180;
   const features = rawFeatures.slice(0, maxFeatures).map(function(feature) {
     const geom = feature && feature.geometry ? feature.geometry : null;
     return {
@@ -1493,7 +1493,7 @@ function storeParcelGeoJsonForPayload(geojson) {
   try {
     const compact = monahingaCompactParcelGeoJsonForPayload(geojson || null);
     const serialized = JSON.stringify(compact || null);
-    if (serialized.length > 2800000) {
+    if (serialized.length > 850000) {
       el.value = '';
       setStatus('Parcel source loaded on Page 1, but the compact run payload is still too large for Page 2. Draw a smaller box and fetch parcels again.');
       return;
@@ -2803,6 +2803,37 @@ function monahingaPickLower48SearchHit(results) {
 }
 
 
+
+// MONAHINGA_ADDRESS_PRIVACY_V26_2026_05_09
+function monahingaIsAddressLikeForPrivacy(value) {
+  const q = String(value || '').trim();
+  return /\d/.test(q) && /(street|st\b|road|rd\b|route|rt\b|sr\b|state|highway|hwy|pa[-\s]*\d+|us[-\s]*\d+|\d{5})/i.test(q);
+}
+
+function monahingaSafeSearchLabel(rawLabel, originalQuery, fallback) {
+  const original = String(originalQuery || '');
+  const label = String(rawLabel || fallback || 'Located area');
+  if (monahingaIsAddressLikeForPrivacy(original) || monahingaIsAddressLikeForPrivacy(label)) {
+    if (/shinglehouse|potter/i.test(label + ' ' + original)) return 'Known Shinglehouse parcel area';
+    return 'Located parcel/search area';
+  }
+  return label;
+}
+
+function monahingaScrubPlaceSearchInput() {
+  try {
+    const input = document.getElementById('place_search');
+    if (!input) return;
+    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocapitalize', 'off');
+    input.setAttribute('spellcheck', 'false');
+    input.setAttribute('aria-autocomplete', 'none');
+    input.setAttribute('data-form-type', 'other');
+    input.value = '';
+    input.blur();
+  } catch (_err) {}
+}
+
 async function monahingaFetchKnownAddressLookup(query) {
   const url = '/known-address-lookup?query=' + encodeURIComponent(query);
   try {
@@ -2824,7 +2855,7 @@ function monahingaApplyKnownAddressLookup(hit, originalQuery) {
   const lon = Number(hit.lon);
   if (searchMarker) map.removeLayer(searchMarker);
   searchMarker = L.marker([lat, lon]).addTo(map);
-  const name = String(hit.display_name || originalQuery || 'Known address match');
+  const name = monahingaSafeSearchLabel(hit.display_name, originalQuery, 'Known address match');
   searchMarker.bindPopup(name).openPopup();
 
   if (Array.isArray(hit.bbox) && hit.bbox.length === 4) {
@@ -2841,8 +2872,9 @@ function monahingaApplyKnownAddressLookup(hit, originalQuery) {
     map.setView([lat, lon], 16);
   }
 
-  setSearchMeta('Found exact Potter County parcel/address match: ' + name + '. Parcel ID: ' + String(hit.parcel_id || 'verify county records') + '. Now draw your bbox around the property/terrain.');
+  setSearchMeta('Found known Potter County parcel area. Parcel ID: ' + String(hit.parcel_id || 'verify county records') + '. Now draw your bbox around the property/terrain. Exact private address is not retained in the search box.');
   setStatus('Place found from known Potter County parcel record. The map moved only; now draw the bbox.');
+  monahingaScrubPlaceSearchInput();
 }
 
 
@@ -2927,12 +2959,13 @@ function monahingaApplyAddressHit(hit, originalQuery) {
 
   if (searchMarker) map.removeLayer(searchMarker);
   searchMarker = L.marker([lat, lon]).addTo(map);
-  const name = String(hit.display_name || originalQuery || 'Address match');
+  const name = monahingaSafeSearchLabel(hit.display_name, originalQuery, 'Address match');
   searchMarker.bindPopup(name).openPopup();
   map.setView([lat, lon], 16);
 
-  setSearchMeta('Found: ' + name + '. Source: ' + String(hit.source || 'address geocoder') + '. Query used: "' + String(hit.used_query || originalQuery) + '". Draw your bbox around the property/terrain.');
-  setStatus('Place found. The map moved to the searched address; now draw the bbox.');
+  setSearchMeta('Found: ' + name + '. Source: ' + String(hit.source || 'address geocoder') + '. Draw your bbox around the property/terrain. Exact private address is not retained in the search box.');
+  setStatus('Place found. The map moved to the searched area; now draw the bbox.');
+  monahingaScrubPlaceSearchInput();
   return true;
 }
 
@@ -2946,7 +2979,7 @@ async function searchPlace() {
   }
   const variants = monahingaAddressSearchVariants(query);
   setStatus('Searching for place... Please wait.');
-  setSearchMeta('Searching for "' + query + '" with rural road variants...');
+  setSearchMeta(monahingaIsAddressLikeForPrivacy(query) ? 'Searching rural road/address variants...' : 'Searching for "' + query + '" with rural road variants...');
   try {
     const arcgisAddressHit = await monahingaFetchArcgisAddressHit(query);
     if (arcgisAddressHit && monahingaApplyAddressHit(arcgisAddressHit, query)) {
@@ -2984,7 +3017,7 @@ async function searchPlace() {
     if (!pointLooksLower48(lat, lon)) throw new Error('Place was found, but it falls outside the lower-48 hunting footprint.');
     if (searchMarker) map.removeLayer(searchMarker);
     searchMarker = L.marker([lat, lon]).addTo(map);
-    const name = String(hit.display_name || usedQuery || query);
+    const name = monahingaSafeSearchLabel(hit.display_name || usedQuery, query, 'Search match');
     searchMarker.bindPopup(name).openPopup();
 
     const isAddressLike = /\d/.test(query);
@@ -3002,8 +3035,9 @@ async function searchPlace() {
       map.setView([lat, lon], 14);
     }
 
-    setSearchMeta('Found: ' + name + '. Query used: "' + usedQuery + '". Draw your bbox around the terrain you want to hunt.');
+    setSearchMeta('Found: ' + name + '. Draw your bbox around the terrain you want to hunt. Exact private address is not retained in the search box.');
     setStatus('Place found. The map jumped to the searched location; now draw the hunt box.');
+    monahingaScrubPlaceSearchInput();
   } catch (err) {
     setSearchMeta('Search failed after trying rural address variants. You can still paste coordinates or draw the box manually.');
     setStatus('FAILED\\n\\n' + String(err && err.message ? err.message : err));
