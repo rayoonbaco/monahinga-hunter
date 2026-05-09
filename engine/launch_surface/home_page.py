@@ -1424,20 +1424,89 @@ function parcelGeoJsonStoreEl() {
   return document.getElementById('parcel_geojson_json');
 }
 
+// MONAHINGA_RENDER_PARCEL_HANDOFF_V24_2026_05_09:
+function monahingaRoundParcelCoord(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Number(n.toFixed(6)) : value;
+}
+
+function monahingaCompactParcelCoords(coords) {
+  if (!Array.isArray(coords)) return coords;
+  if (coords.length >= 2 && typeof coords[0] === 'number' && typeof coords[1] === 'number') {
+    return [monahingaRoundParcelCoord(coords[0]), monahingaRoundParcelCoord(coords[1])];
+  }
+  return coords.map(monahingaCompactParcelCoords);
+}
+
+function monahingaCompactParcelProperties(props) {
+  const source = props && typeof props === 'object' ? props : {};
+  const keep = [
+    'OWNER','Owner','owner','OWNER_NAME','OWNER_NAME1','owner_name','OWNER1','Owner_Name_1','Owner_Name_2',
+    'CURRENT_OW','Owner2','TAXPAYER','MAIL_NAME',
+    'PARCEL_ID','PIN','APN','OBJECTID','FID','ACCOUNT','TAXPIN','PID','PARCELNO','PropertyNu','Map_Number','Join1',
+    'SITUS','SITE_ADDR','SITUS_ADDRESS','PROPERTY_ADDRESS','ADDRESS','ADDR','PHYSICAL_ADDRESS',
+    'Street_Number','Situs_Street','Situs_Suffix','Situs_Direction',
+    'Acres','ACRES','Acreage','ACREAGE','Year_Built','YEAR_BUILT','fyrblt',
+    'monahinga_parcel_source','monahinga_parcel_source_label','monahinga_parcel_source_ref','monahinga_parcel_warning','monahinga_render_ready'
+  ];
+  const out = {};
+  keep.forEach(function(key) {
+    if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== null && source[key] !== undefined && String(source[key]).length <= 140) {
+      out[key] = source[key];
+    }
+  });
+  return out;
+}
+
+function monahingaCompactParcelGeoJsonForPayload(geojson) {
+  if (!geojson || typeof geojson !== 'object') return null;
+  const rawFeatures = Array.isArray(geojson.features) ? geojson.features : [];
+  const maxFeatures = 350;
+  const features = rawFeatures.slice(0, maxFeatures).map(function(feature) {
+    const geom = feature && feature.geometry ? feature.geometry : null;
+    return {
+      type: 'Feature',
+      properties: monahingaCompactParcelProperties((feature && feature.properties) || {}),
+      geometry: geom ? {
+        type: geom.type,
+        coordinates: monahingaCompactParcelCoords(geom.coordinates)
+      } : null
+    };
+  }).filter(function(feature) {
+    return feature.geometry && feature.geometry.coordinates;
+  });
+
+  const properties = monahingaCompactParcelProperties(geojson.properties || {});
+  properties.monahinga_payload_compacted = true;
+  properties.monahinga_payload_feature_count = features.length;
+
+  return {
+    type: 'FeatureCollection',
+    properties: properties,
+    features: features
+  };
+}
+
 function storeParcelGeoJsonForPayload(geojson) {
   const el = parcelGeoJsonStoreEl();
   if (!el) return;
   try {
-    const serialized = JSON.stringify(geojson || null);
-    // Keep launch payload sane. Large real parcel datasets should later be tiled/server-side.
-    if (serialized.length > 1800000) {
+    const compact = monahingaCompactParcelGeoJsonForPayload(geojson || null);
+    const serialized = JSON.stringify(compact || null);
+    if (serialized.length > 2800000) {
       el.value = '';
-      setStatus('Parcel file is too large to carry into Page 2. Use a smaller AOI/export.');
+      setStatus('Parcel source loaded on Page 1, but the compact run payload is still too large for Page 2. Draw a smaller box and fetch parcels again.');
       return;
     }
     el.value = serialized;
-  } catch (_err) {
+    if (compact && compact.features && compact.features.length) {
+      try {
+        console.log('[monahinga] stored compact parcel payload features=', compact.features.length, 'bytes=', serialized.length);
+      } catch (_logErr) {}
+    }
+  } catch (err) {
     el.value = '';
+    setStatus('Parcel source loaded on Page 1, but compacting it for Page 2 failed: ' + String(err && err.message ? err.message : err));
   }
 }
 
