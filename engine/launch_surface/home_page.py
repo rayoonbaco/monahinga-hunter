@@ -1073,6 +1073,9 @@ h1 + .card {
         <button class="ghost" type="button" onclick="applyPastedBBox()">Use pasted coordinates</button>
         <button class="ghost" type="button" onclick="applyKnownParcelBox('spearfish')">Spearfish parcels</button>
         <button class="ghost" type="button" onclick="applyKnownParcelBox('shinglehouse')">Shinglehouse parcels</button>
+        <button class="ghost" type="button" onclick="applyKnownParcelBox('alleganyny')">Allegany NY parcels</button>
+        <button class="ghost" type="button" onclick="applyKnownParcelBox('summitco')">Summit CO hybrid/public box</button>
+        <button class="ghost" type="button" onclick="applyKnownParcelBox('summitco_town')">Summit CO town parcel test</button>
         <span class="toolbar-note">Clear the current selection first, then draw a BBox rectangle or polygon. Polygon currently launches using its bounding envelope while exact polygon scoring is built.</span>
       </div>
       <div class="field full" style="margin-bottom:12px;">
@@ -2597,6 +2600,7 @@ function parseBBoxText(raw) {
   };
 }
 
+// MONAHINGA_ALLEGANY_SUMMIT_PRESETS_2026_05_09: county parcel quick tests for Chris/Tom requests.
 function applyKnownParcelBox(kind) {
   const presets = {
     spearfish: {
@@ -2606,6 +2610,18 @@ function applyKnownParcelBox(kind) {
     shinglehouse: {
       label: 'Shinglehouse / Potter County PA',
       bbox: '-78.205500, 41.948500, -78.175500, 41.969500'
+    },
+    alleganyny: {
+      label: 'Allegany County NY',
+      bbox: '-78.365000, 42.205000, -78.245000, 42.285000'
+    },
+    summitco: {
+      label: 'Summit County CO hybrid/public-land box',
+      bbox: '-106.110000, 39.550000, -106.020000, 39.620000'
+    },
+    summitco_town: {
+      label: 'Summit County CO town parcel detail test - Frisco/Silverthorne edge',
+      bbox: '-106.085000, 39.570000, -106.035000, 39.610000'
     }
   };
   const preset = presets[kind];

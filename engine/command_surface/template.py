@@ -2721,6 +2721,46 @@ aside strong,
   margin-top:7px;
   color:#e8f5ec;
 }
+/* MONAHINGA_SUMMIT_CLARITY_V1_2026_05_09:
+   Keep parcel click popups readable. Summit county fields can be long mailing/context strings.
+   CSS-only: no DEM, scoring, PAD-US, polygon transport, payload, or orientation changes. */
+.leaflet-popup-content .monahinga-parcel-popup{
+  max-width:320px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  line-height:1.35;
+}
+.leaflet-popup-content .monahinga-parcel-popup table{
+  width:100%;
+  table-layout:fixed;
+}
+.leaflet-popup-content .monahinga-parcel-popup td:first-child{
+  width:104px;
+}
+.leaflet-popup-content .monahinga-parcel-popup td:last-child{
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.private-parcel-tooltip{
+  display:none !important;
+}
+.leaflet-popup-content .monahinga-parcel-popup{
+  min-width:240px !important;
+  max-width:360px !important;
+  white-space:normal !important;
+  overflow-wrap:break-word !important;
+  word-break:normal !important;
+  line-height:1.32 !important;
+}
+.leaflet-popup-content .monahinga-parcel-popup table,
+.leaflet-popup-content .monahinga-parcel-popup td{
+  white-space:normal !important;
+  word-break:normal !important;
+  overflow-wrap:break-word !important;
+}
+
+
 .private-parcel-tooltip{
   color:#211407;
   font-weight:850;
@@ -4202,8 +4242,8 @@ function getAnchorPoint(kind) {
       const sceneSpan = Math.max(state.widthWorld, state.depthWorld);
       // --- smarter terrain-aware camera distance ---
       const reliefNormalized = clamp(reliefFocus.relief * 2.2, 0, 1);
-      const baseRadius = sceneSpan * (0.75 + reliefNormalized * 0.65);
-      state.cameraRadius = clamp(baseRadius, 14, 42);
+      const baseRadius = sceneSpan * (0.88 + reliefNormalized * 0.72);
+      state.cameraRadius = clamp(baseRadius, 17, 46);
 
       // --- lift camera target slightly (prevents clipping) ---
       target.y = target.y + (1.2 + reliefNormalized * 2.0);
@@ -5060,7 +5100,7 @@ savedPins.forEach((pin, i) => {
       let dragging=false,lastX=0,lastY=0; renderer.domElement.addEventListener('pointerdown', (event) => { dragging=true; lastX=event.clientX; lastY=event.clientY; renderer.domElement.setPointerCapture(event.pointerId); }); renderer.domElement.addEventListener('pointermove', (event) => { if(!dragging)return; const dx=event.clientX-lastX, dy=event.clientY-lastY; lastX=event.clientX; lastY=event.clientY; state.rotationY -= dx*0.008; state.tiltDeg = clamp(state.tiltDeg + dy*0.08, 12, 42); tiltSlider.value = String(Math.round(state.tiltDeg)); updateCamera(); }); const endDrag=()=>{dragging=false;}; renderer.domElement.addEventListener('pointerup', endDrag); renderer.domElement.addEventListener('pointercancel', endDrag); renderer.domElement.addEventListener('wheel', (event) => { event.preventDefault(); state.cameraRadius = clamp(state.cameraRadius + event.deltaY*0.01, 10, 58); updateCamera(); }, { passive:false });
       const initialView = { rotationY: state.rotationY, tiltDeg: state.tiltDeg, cameraRadius: state.cameraRadius, depthValue: Number(depthSlider.value || 100), currentTexture: state.currentTexture, currentPadusMode: state.currentPadusMode, target: target.clone() };
       function resetView() { clearPinControlMode(); setInvisibleApproachVisible(true); state.rotationY = initialView.rotationY; state.tiltDeg = initialView.tiltDeg; state.cameraRadius = initialView.cameraRadius; tiltSlider.value = String(Math.round(initialView.tiltDeg)); depthSlider.value = String(Math.round(initialView.depthValue)); target.copy(initialView.target.clone()); applyHeights(); rebuildOverlays(); applyTexture(initialView.currentTexture); applyPadusMode(initialView.currentPadusMode); setFocusActive(1); updateSelectedSiteCard(siteByRank(1)); updateCamera(); }
-      function focusSiteByRank(rank) { const site = siteByRank(rank); if (!site) return; const p = sitePoint(site); moveTarget(p.nx, p.ny); state.cameraRadius = Number(site.rank) === 1 ? 16.5 : 18.5; state.tiltDeg = Number(site.rank) === 1 ? 24 : 27; tiltSlider.value = String(Math.round(state.tiltDeg)); setFocusActive(rank); updateSelectedSiteCard(site); updateCamera(); }
+      function focusSiteByRank(rank) { const site = siteByRank(rank); if (!site) return; const p = sitePoint(site); moveTarget(p.nx, p.ny); state.cameraRadius = Number(site.rank) === 1 ? 19.5 : 21.5; state.tiltDeg = Number(site.rank) === 1 ? 25 : 28; tiltSlider.value = String(Math.round(state.tiltDeg)); setFocusActive(rank); updateSelectedSiteCard(site); updateCamera(); }
       const raycaster = new THREE.Raycaster(); const pointer = new THREE.Vector2();
 
       function updateCursorTerrainRead(event) {
@@ -5616,15 +5656,73 @@ if (viewerSpecies) {
 // MONAHINGA_PAGE2_DRAW_PRIVATE_PARCELS_2026_05_06
   let privateParcelMapObjects = [];
 
+  function parcelHtmlEscape(value){
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]);
+    });
+  }
+
+  function parcelCleanValue(value){
+    if (value === null || value === undefined) return '';
+    const text = String(value).replace(/\|/g, ', ').replace(/\s+/g, ' ').trim();
+    if (!text || /^none$$/i.test(text) || /^null$$/i.test(text) || /^undefined$$/i.test(text)) return '';
+    return text;
+  }
+
+  function parcelFirstValue(props, keys){
+    props = props || {};
+    for (const key of keys) {
+      const value = parcelCleanValue(props[key]);
+      if (value) return value;
+    }
+    return '';
+  }
+
   function parcelLabelFromProps(props){
     if (!props) return 'Private parcel context';
-    const owner = props.MONAHINGA_OWNER_NORMALIZED || props.OWNER || props.Owner || props.owner || props.OWNER_NAME || props.owner_name || props.PARCEL_OWNER || props.OWN_NAME || props.NAME || props.Name || props.name || '';
-    const parcelId = props.MONAHINGA_PARCEL_ID_NORMALIZED || props.PARCEL_ID || props.parcel_id || props.PIN || props.pin || props.APN || props.apn || props.OBJECTID || props.FID || props.ACCOUNT || props.MAPBLKLOT || props.TAXPIN || '';
+    const owner = parcelFirstValue(props, [
+      'MONAHINGA_OWNER_NORMALIZED','MONAHINGA_OWNER_CONTEXT_NORMALIZED','OWNER','Owner','owner','OWNER_NAME','owner_name','PARCEL_OWNER','OWN_NAME','NAME','Name','name',
+      'Owner1','Owner2','Current_Ow','CURRENT_OW','FullName','FullAdd','OwnerAdd1','OwnerAdd2'
+    ]);
+    const parcelId = parcelFirstValue(props, [
+      'MONAHINGA_PARCEL_ID_NORMALIZED','PARCEL_ID','parcel_id','PIN','pin','APN','apn','OBJECTID','FID','ACCOUNT','Accountnum','MAPBLKLOT','TAXPIN',
+      'PPI','Schedule','ScheduleText','PrimaryID','SecondID','Printkey','SwisParID'
+    ]);
 
-    if (owner && parcelId) return 'Owner: ' + String(owner) + ' · Parcel ID: ' + String(parcelId);
-    if (owner) return 'Owner: ' + String(owner);
-    if (parcelId) return 'Parcel ID: ' + String(parcelId);
-    return 'Private parcel context';
+    if (owner && parcelId) return 'Owner/context: ' + owner + ' - Parcel ID: ' + parcelId;
+    if (owner) return 'Owner/context: ' + owner;
+    if (parcelId) return 'Parcel ID: ' + parcelId;
+    return 'Owner name not exposed by this source / verify county records';
+  }
+
+  function parcelDetailsHtmlFromProps(props, truth){
+    props = props || {};
+    const rows = [];
+    function add(label, value){
+      const cleaned = parcelCleanValue(value);
+      if (!cleaned) return;
+      rows.push('<tr><td style="padding:2px 8px 2px 0;color:#8fb0bd;white-space:nowrap;">' + parcelHtmlEscape(label) + '</td><td style="padding:2px 0;">' + parcelHtmlEscape(cleaned) + '</td></tr>');
+    }
+    const owner = parcelFirstValue(props, ['MONAHINGA_OWNER_NORMALIZED','MONAHINGA_OWNER_CONTEXT_NORMALIZED','OWNER','Owner','owner','OWNER_NAME','owner_name','Owner1','Owner2','Current_Ow','CURRENT_OW','FullName','Name']);
+    const mailing = parcelFirstValue(props, ['FullAdd','OwnerAdd1']);
+    const mailing2 = [parcelCleanValue(props.OwnerAdd2), parcelCleanValue(props.OwnerCity), parcelCleanValue(props.OwnerState), parcelCleanValue(props.PostCode)].filter(Boolean).join(', ');
+    const parcelId = parcelFirstValue(props, ['MONAHINGA_PARCEL_ID_NORMALIZED','PARCEL_ID','parcel_id','PIN','APN','OBJECTID','FID','ACCOUNT','Accountnum','PPI','Schedule','ScheduleText','PrimaryID','SecondID','Printkey','SwisParID']);
+    const address = parcelFirstValue(props, ['PROPERTY_ADDRESS','ADDRESS','SITUS','SITE_ADDR','SITUS_ADDRESS','PHYSICAL_ADDRESS','FullStreet','Street','street_add','Parcel_Loc']);
+    const acreage = parcelFirstValue(props, ['Acres','ACRES','Acreage','ACREAGE','Area_in_Ac']);
+    const use = parcelFirstValue(props, ['EcoDesc','NhoodDescr','MiscChar','prop_class','PropertyClass','LANDUSE','UseCode']);
+    add('Owner / mailing context', owner || 'Owner name not exposed by this source');
+    add('Parcel ID', parcelId);
+    add('Site / road', address);
+    add('Mailing / agency', mailing);
+    add('Mailing extra', mailing2);
+    add('Acres', acreage);
+    add('Use / notes', use);
+    add('Source', (truth && truth.label) || props.MONAHINGA_SOURCE_LABEL || props.MONAHINGA_PARCEL_SOURCE || 'Private parcel source');
+    return '<div class="monahinga-parcel-popup"><strong>Private parcel context</strong><br>' +
+      '<em>' + parcelHtmlEscape((truth && truth.label) || 'PRIVATE PARCELS: SOURCE CHECK') + '</em><br>' +
+      '<table style="margin-top:6px;font-size:12px;line-height:1.35;">' + rows.join('') + '</table>' +
+      '<div style="margin-top:6px;color:#ffd27a;">Ownership context only. Verify county records, legal access, landowner permission, seasons, safety, and local regulations.</div>' +
+      '<div style="margin-top:5px;color:#b9d6df;font-size:11px;">Summit note: big mountain blocks may be real public/agency/open-space parcels. Use the town parcel preset to verify small individual parcel behavior.</div></div>';
   }
 
 // MONAHINGA_EXACT_VISUAL_PARCEL_CLIP_2026_05_06
@@ -6635,12 +6733,9 @@ if (viewerSpecies) {
     const owner = parcelInspectorOwner(props) || 'Unknown owner';
     const parcelId = parcelInspectorParcelId(props) || 'Unknown parcel ID';
 
-    try {
-      layer.bindTooltip(
-        '<div class="private-parcel-tooltip">' + owner + '<br>' + parcelId + '</div>',
-        { sticky:true, direction:'top', opacity:0.92 }
-      );
-    } catch (_err) {}
+    // Finish-line v3: no private parcel hover tooltip text.
+    // Long Summit owner/mailing context can collapse into a vertical one-letter strip.
+    // Keep parcel details on click-only popups and the left inspector panel.
 
     layer.on('click', function(){
       try {
@@ -6722,12 +6817,7 @@ if (viewerSpecies) {
           const props = feature && feature.properties ? feature.properties : {};
           const label = parcelLabelFromProps(props);
           const truth = parcelSourceTruth(payload);
-          layer.bindPopup(
-            '<strong>Private parcel context</strong><br>' +
-            '<em>' + truth.label + '</em><br>' +
-            label + '<br>' +
-            'Verify ownership, access, permission, and county records.'
-          );
+          layer.bindPopup(parcelDetailsHtmlFromProps(props, truth), { maxWidth: 420 });
           wirePrivateParcelInspectorFeature(feature, layer, payload);
         }
       }).addTo(commandMap);
@@ -9332,10 +9422,15 @@ document.addEventListener('DOMContentLoaded', function(){
     const warning = cleanText(summary.warning || props.monahinga_parcel_warning || 'Ownership context only. Verify county records, legal access, landowner permission, season dates, and local regulations.');
 
     const fallbackOwnerFields = ownerFields.length ? ownerFields : detectFields(features, [
-      'OWNER','Owner','owner','OWNER_NAME','OWNER_NAME1','owner_name','OWNER1','Owner_Name_1','Owner_Name_2','CURRENT_OW','Owner2','TAXPAYER','MAIL_NAME','MONAHINGA_OWNER_NORMALIZED'
+      'OWNER','Owner','owner','OWNER_NAME','OWNER_NAME1','owner_name','OWNER1','Owner_Name_1','Owner_Name_2','CURRENT_OW','Current_Ow','Owner1','Owner2','TAXPAYER','MAIL_NAME',
+      'FullName','Name','FullAdd','OwnerAdd1','OwnerAdd2','OwnerCity','OwnerState','PostCode','MONAHINGA_OWNER_NORMALIZED','MONAHINGA_OWNER_CONTEXT_NORMALIZED'
     ]);
     const fallbackParcelFields = parcelIdFields.length ? parcelIdFields : detectFields(features, [
-      'PARCEL_ID','PIN','APN','OBJECTID','FID','ACCOUNT','TAXPIN','PID','PARCELNO','PropertyNu','Map_Number','Join1','MONAHINGA_PARCEL_ID_NORMALIZED'
+      'PARCEL_ID','PIN','APN','OBJECTID','FID','ACCOUNT','Accountnum','TAXPIN','PID','PARCELNO','PropertyNu','Map_Number','Join1',
+      'PPI','Schedule','ScheduleText','PrimaryID','SecondID','Printkey','SwisParID','MONAHINGA_PARCEL_ID_NORMALIZED'
+    ]);
+    const contextFields = detectFields(features, [
+      'FullAdd','OwnerAdd1','OwnerAdd2','OwnerCity','OwnerState','PostCode','FullStreet','Street','street_add','GeoCityName','EcoDesc','MiscChar','NhoodDescr','Acres','Area_in_Ac'
     ]);
 
     const lines = [];
@@ -9350,8 +9445,18 @@ document.addEventListener('DOMContentLoaded', function(){
     lines.push('  Source/ref: ' + sourceId);
     lines.push('');
     lines.push('DETECTED FIELDS');
-    lines.push('  Owner fields: ' + (fallbackOwnerFields.length ? fallbackOwnerFields.join(' / ') : 'none detected'));
+    lines.push('  Owner/context fields: ' + (fallbackOwnerFields.length ? fallbackOwnerFields.join(' / ') : 'none detected'));
     lines.push('  Parcel ID fields: ' + (fallbackParcelFields.length ? fallbackParcelFields.join(' / ') : 'none detected'));
+    lines.push('  Extra useful context fields: ' + (contextFields.length ? contextFields.join(' / ') : 'none detected'));
+    if (features[0] && features[0].properties) {
+      lines.push('');
+      lines.push('FIRST PARCEL SAMPLE');
+      const sampleProps = features[0].properties;
+      ['MONAHINGA_OWNER_NORMALIZED','FullName','FullAdd','OwnerAdd1','OwnerAdd2','OwnerCity','OwnerState','PostCode','PPI','Schedule','ScheduleText','EcoDesc','MiscChar','Acres','Area_in_Ac'].forEach(function(key) {
+        const value = cleanText(sampleProps[key]);
+        if (value) lines.push('  ' + key + ': ' + value);
+      });
+    }
     lines.push('');
     lines.push('WARNING');
     lines.push('  ' + warning);

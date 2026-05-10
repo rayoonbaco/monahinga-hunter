@@ -743,10 +743,13 @@ def padus_preview(min_lon: float, min_lat: float, max_lon: float, max_lat: float
 
 # MONAHINGA_AUTO_PRIVATE_PARCEL_SOURCE_ENDPOINT_2026_05_08
 OWNER_FIELD_CANDIDATES = [
-    "OWNER", "Owner", "owner", "OWNER_NAME", "owner_name", "PARCEL_OWNER", "OWN_NAME", "NAME"
+    "OWNER", "Owner", "owner", "OWNER_NAME", "owner_name", "PARCEL_OWNER", "OWN_NAME", "NAME",
+    "Owner1", "Owner2", "Current_Ow", "CURRENT_OW", "FullName", "Full_Name", "Name",
+    "OwnerAdd1", "OwnerAdd2", "FullAdd", "OwnerCity", "OwnerState", "PostCode",
 ]
 PARCEL_ID_FIELD_CANDIDATES = [
-    "PARCEL_ID", "parcel_id", "PIN", "pin", "APN", "apn", "OBJECTID", "FID", "ACCOUNT", "MAPBLKLOT", "TAXPIN"
+    "PARCEL_ID", "parcel_id", "PIN", "pin", "APN", "apn", "OBJECTID", "FID", "ACCOUNT", "MAPBLKLOT", "TAXPIN",
+    "PPI", "Schedule", "ScheduleText", "PrimaryID", "SecondID", "SwisParID", "Printkey", "Accountnum",
 ]
 
 
@@ -876,6 +879,40 @@ MONAHINGA_FREE_PARCEL_SOURCE_V2 = [
         "region": "lawrence_sd",
     },
     {
+        "id": "allegany_county_ny_parcels_2024",
+        "label": "Allegany County NY 2024 public parcel FeatureServer",
+        "query_url": os.getenv("MONAHINGA_ALLEGANY_NY_PARCEL_ARCGIS_QUERY_URL", "https://services5.arcgis.com/WcotYUBrYwlGLzUr/ArcGIS/rest/services/Allegany_Parcels_2024/FeatureServer/0/query").strip() or "https://services5.arcgis.com/WcotYUBrYwlGLzUr/ArcGIS/rest/services/Allegany_Parcels_2024/FeatureServer/0/query",
+        "region": "allegany_ny",
+    },
+    {
+        # MONAHINGA_SUMMIT_CLARITY_V1_2026_05_09:
+        # We probed Summit's ParcelQueryTool service, but the public MapServer returned
+        # "service not started" / 500 errors during testing. Keep this disabled unless
+        # MONAHINGA_ENABLE_SUMMIT_INACTIVE_ASSESSOR_PROBE=true is intentionally set later.
+        # This avoids confusing Chris/Tom with a known-dead preferred source before falling
+        # back to the actual working public parcel service.
+        "id": "summit_county_co_assessor_taxmap_parcels_disabled",
+        "label": "Summit County CO assessor tax-map parcels - inactive public service probe",
+        "query_url": os.getenv("MONAHINGA_SUMMIT_CO_ASSESSOR_PARCEL_ARCGIS_QUERY_URL", "https://gis.summitcountyco.gov/arcgis/rest/services/ParcelQueryTool/SummitMap1_Pro321_Transparent/MapServer/5/query").strip() or "https://gis.summitcountyco.gov/arcgis/rest/services/ParcelQueryTool/SummitMap1_Pro321_Transparent/MapServer/5/query",
+        "region": "summit_co" if os.getenv("MONAHINGA_ENABLE_SUMMIT_INACTIVE_ASSESSOR_PROBE", "").strip().lower() in {"1", "true", "yes"} else "summit_co_disabled",
+        "result_record_count": os.getenv("MONAHINGA_SUMMIT_CO_ASSESSOR_PARCEL_LIMIT", "2000"),
+        "post_filter": "summit_density_mix",
+    },
+    {
+        # MONAHINGA_SUMMIT_CLARITY_V1_2026_05_09:
+        # Best active public Summit source found so far. Despite the Road & Bridge service
+        # folder name, layer 0 exposes assessor-style parcel fields: PPI, Schedule,
+        # ShortDesc, SitusAdd, owner mailing context, acreage, assessed value fields,
+        # neighborhood/subdivision, and geometry. Large blocky polygons in the mountain
+        # portions are usually real public/agency/open-space parcels, not demo squares.
+        "id": "summit_county_co_parcel_query",
+        "label": "Summit County CO best-active public parcel/assessor context",
+        "query_url": os.getenv("MONAHINGA_SUMMIT_CO_PARCEL_ARCGIS_QUERY_URL", "https://gis.summitcountyco.gov/arcgis/rest/services/RoadandBridge/RightOfWayPermitData/MapServer/0/query").strip() or "https://gis.summitcountyco.gov/arcgis/rest/services/RoadandBridge/RightOfWayPermitData/MapServer/0/query",
+        "region": "summit_co",
+        "result_record_count": os.getenv("MONAHINGA_SUMMIT_CO_PARCEL_LIMIT", "2000"),
+        "post_filter": "summit_density_mix",
+    },
+    {
         "id": "potter_county_pa_taxparcels",
         "label": "Potter County PA TaxParcels public ArcGIS service",
         "query_url": os.getenv("MONAHINGA_POTTER_PA_PARCEL_ARCGIS_QUERY_URL", "https://maps.pottercountypa.net/arcgis/rest/services/TaxParcel/TaxParcels/FeatureServer/0/query").strip() or "https://maps.pottercountypa.net/arcgis/rest/services/TaxParcel/TaxParcels/FeatureServer/0/query",
@@ -911,6 +948,12 @@ def _monahinga_v2_bbox_region(bbox: BBox) -> str:
     # Keep this narrow so the app does not pretend all South Dakota parcel services are solved.
     if -104.2 <= lon <= -103.0 and 44.0 <= lat <= 45.0:
         return "lawrence_sd"
+    # MONAHINGA_ALLEGANY_SUMMIT_SOURCES_2026_05_09: narrow county-specific auto-source gates.
+    # Allegany County NY sits just north of Potter County PA, so it must be checked before the broader PA/Potter gate.
+    if -78.7 <= lon <= -77.6 and 42.0 <= lat <= 42.7:
+        return "allegany_ny"
+    if -107.1 <= lon <= -105.7 and 39.1 <= lat <= 40.3:
+        return "summit_co"
     if -78.7 <= lon <= -76.0 and 40.5 <= lat <= 42.6:
         return "potter_pa"
     if -80.7 <= lon <= -74.5 and 39.4 <= lat <= 42.7:
@@ -937,7 +980,7 @@ def _monahinga_v2_arcgis_url(source: dict, bbox: BBox, fmt: str) -> str:
         "inSR": "4326",
         "outSR": "4326",
         "spatialRel": "esriSpatialRelIntersects",
-        "resultRecordCount": os.getenv("MONAHINGA_FREE_PARCEL_LIMIT", "200"),
+        "resultRecordCount": str(source.get("result_record_count") or os.getenv("MONAHINGA_FREE_PARCEL_LIMIT", "200")),
     }
 
     query_url = source["query_url"]
@@ -971,6 +1014,9 @@ def _monahinga_v2_esri_json_to_geojson(raw: dict) -> dict:
         gj_geom = None
 
         if isinstance(geom, dict) and geom.get("rings"):
+            # Most ArcGIS services honor outSR=4326. Keep rings as returned.
+            # This preserves county services such as Allegany NY and Summit CO without
+            # guessing at non-WebMercator local state-plane feet.
             gj_geom = {"type": "Polygon", "coordinates": geom.get("rings")}
         elif isinstance(geom, dict) and geom.get("paths"):
             gj_geom = {"type": "MultiLineString", "coordinates": geom.get("paths")}
@@ -984,15 +1030,35 @@ def _monahinga_v2_esri_json_to_geojson(raw: dict) -> dict:
 
 
 def _monahinga_v2_owner_value(props: dict) -> str:
-    for key in ("OWNER", "Owner", "owner", "OWNER_NAME", "owner_name", "PARCEL_OWNER", "OWN_NAME", "NAME", "OWNER1", "OWNERNME1", "TAXPAYER", "MAIL_NAME"):
+    # Keep this honest: some county services do not expose a clean owner-name field.
+    # In that case, surface the best ownership/mailing/public-agency context instead of pretending.
+    primary_keys = (
+        "OWNER", "Owner", "owner", "OWNER_NAME", "owner_name", "PARCEL_OWNER", "OWN_NAME",
+        "OwnershipTable_OWNER", "OWNER1", "Owner1", "OWNERNME1", "TAXPAYER", "MAIL_NAME",
+        "Current_Ow", "CURRENT_OW", "NAME", "Name", "Parcels_NAME", "FullName",
+    )
+    for key in primary_keys:
         value = props.get(key)
-        if value is not None and str(value).strip():
+        if value is not None and str(value).strip() and str(value).strip().lower() not in {"none", "null"}:
             return str(value).strip()
-    return "Unknown owner / verify county records"
+
+    summit_parts = []
+    for key in ("FullAdd", "OwnerAdd1", "OwnerAdd2", "OwnerCity", "OwnerState", "PostCode", "MiscChar", "EcoDesc"):
+        value = props.get(key)
+        if value is not None and str(value).strip() and str(value).strip().lower() not in {"none", "null"}:
+            summit_parts.append(str(value).strip().replace("|", ", "))
+    if summit_parts:
+        return "Ownership/mailing context: " + " · ".join(summit_parts[:4])
+
+    return "Owner name not exposed by this source / verify county records"
 
 
 def _monahinga_v2_parcel_id_value(props: dict) -> str:
-    for key in ("PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "MAPBLKLOT", "TAXPIN", "PID", "PARCELNO", "PARCEL_NUM", "UPI", "CAMA_ID"):
+    for key in (
+        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "MAPBLKLOT", "TAXPIN",
+        "PID", "PARCELNO", "PARCEL_NUM", "UPI", "CAMA_ID",
+        "Serial", "SERIAL", "OwnershipTable_SERIAL", "Parcels_GISID", "GISID", "PPI", "Lotnum", "Parcels_Lotnum",
+    ):
         value = props.get(key)
         if value is not None and str(value).strip():
             return str(value).strip()
@@ -1179,6 +1245,65 @@ def _monahinga_v6_has_parcel_clue(props: dict) -> bool:
 
 
 
+
+# MONAHINGA_SUMMIT_PARCEL_DENSITY_V1_2026_05_09
+# Summit's public polygon service can return huge public/agency blocks before it returns
+# smaller town/private parcel-looking shapes. This helper keeps the page useful by mixing
+# many smaller parcels with a small set of large context parcels after the larger query.
+def _monahinga_v15_geometry_bbox_area_approx(geometry: dict) -> float:
+    try:
+        coords = []
+        if not isinstance(geometry, dict):
+            return 999999.0
+        gtype = geometry.get("type")
+        raw = geometry.get("coordinates") or []
+        if gtype == "Polygon":
+            for ring in raw:
+                for pair in ring:
+                    coords.append(pair)
+        elif gtype == "MultiPolygon":
+            for poly in raw:
+                for ring in poly:
+                    for pair in ring:
+                        coords.append(pair)
+        if not coords:
+            return 999999.0
+        xs = [float(p[0]) for p in coords if isinstance(p, (list, tuple)) and len(p) >= 2]
+        ys = [float(p[1]) for p in coords if isinstance(p, (list, tuple)) and len(p) >= 2]
+        if not xs or not ys:
+            return 999999.0
+        return abs((max(xs) - min(xs)) * (max(ys) - min(ys)))
+    except Exception:
+        return 999999.0
+
+
+def _monahinga_v15_summit_density_mix(features: list[dict]) -> tuple[list[dict], str]:
+    if not isinstance(features, list) or len(features) <= 900:
+        return features, "Summit density mix not needed."
+
+    indexed = []
+    for idx, feature in enumerate(features):
+        props = dict(feature.get("properties") or {}) if isinstance(feature, dict) else {}
+        area = _monahinga_v15_geometry_bbox_area_approx((feature or {}).get("geometry") or {})
+        has_id = bool(props.get("PPI") or props.get("Schedule") or props.get("ScheduleText") or props.get("MONAHINGA_PARCEL_ID_NORMALIZED"))
+        has_context = bool(props.get("OwnerAdd1") or props.get("FullAdd") or props.get("EcoDesc") or props.get("MiscChar"))
+        # Prefer parcel-looking features with useful context, then smaller geometry.
+        priority = (0 if has_id else 1, 0 if has_context else 1, area, idx)
+        indexed.append((priority, area, idx, feature))
+
+    indexed.sort(key=lambda item: item[0])
+    small_count = 850
+    big_count = 50
+    chosen = {idx: feature for _priority, _area, idx, feature in indexed[:small_count]}
+    # Keep a small number of the biggest parcels too, because agency/open-space blocks are
+    # still useful scouting context, just not enough by themselves.
+    for _priority, _area, idx, feature in sorted(indexed, key=lambda item: item[1], reverse=True)[:big_count]:
+        chosen.setdefault(idx, feature)
+    mixed = [chosen[idx] for idx in sorted(chosen)]
+    note = f"Summit density mix kept {len(mixed)} of {len(features)} features: smaller parcel-looking shapes plus major public/agency context."
+    return mixed, note
+
+
 def _monahinga_v2_normalize_public_geojson(raw: dict, source: dict) -> dict:
     if not isinstance(raw, dict):
         raise ValueError("source response was not a GeoJSON object")
@@ -1223,6 +1348,12 @@ def _monahinga_v2_normalize_public_geojson(raw: dict, source: dict) -> dict:
     if rejected_by_type:
         print(f"[parcel-preview] rejected non-polygon parcel candidates from {source.get('id')}: {rejected_by_type}")
 
+    summit_density_note = ""
+    if source.get("post_filter") == "summit_density_mix":
+        clean_features, summit_density_note = _monahinga_v15_summit_density_mix(clean_features)
+        if summit_density_note:
+            print(f"[parcel-preview] {summit_density_note}")
+
     if not clean_features:
         raise ValueError(f"source returned zero usable parcel polygon geometries; rejected={rejected_by_type}")
 
@@ -1236,6 +1367,7 @@ def _monahinga_v2_normalize_public_geojson(raw: dict, source: dict) -> dict:
             "monahinga_feature_count": len(clean_features),
             "monahinga_confidence": "public_source_unverified_until_known_parcel_checked",
             "monahinga_source_url": source["query_url"],
+            "monahinga_density_note": summit_density_note,
         },
     }
 
@@ -1527,7 +1659,7 @@ def _monahinga_v9_layer_query_url(source: dict, bbox: BBox, layer_id, fmt: str) 
         "inSR": "4326",
         "outSR": "4326",
         "spatialRel": "esriSpatialRelIntersects",
-        "resultRecordCount": os.getenv("MONAHINGA_FREE_PARCEL_LIMIT", "200"),
+        "resultRecordCount": str(source.get("result_record_count") or os.getenv("MONAHINGA_FREE_PARCEL_LIMIT", "200")),
     }
 
     return query_url + "?" + urlencode(params)
@@ -1722,13 +1854,13 @@ def _monahinga_v2_preview_payload(bbox: BBox, manual_arcgis_url: str | None = No
         configured = _monahinga_demo_parcel_geojson_for_bbox(bbox)
         source_kind = "auto_demo"
         source_ref = "generated_from_selected_bbox"
-        attempts.append({"source": "auto_demo", "label": "Automatic demo parcels", "status": "fallback used"})
+        attempts.append({"source": "auto_demo", "label": "DEMO FALLBACK - NOT REAL PARCELS", "status": "real parcel source failed; visual grid only"})
 
     props = configured.get("properties") or {}
     feature_count = len(configured.get("features") or [])
     label = props.get("monahinga_parcel_source_label") or source_ref or "Private parcels"
     warning = props.get("monahinga_parcel_warning") or "Verify county records, access, permission, and regulations."
-    render_ready_sources = {"manual_arcgis_url", "lawrence_county_sd_parcels", "wyoming_public_arcgis", "wyoming_private_arcgis", "potter_county_pa_taxparcels", "pa_pasda_parcels", "pa_pasda_apps_parcels", "pa_dep_parcels", "configured_path", "configured_url", "regrid"}
+    render_ready_sources = {"manual_arcgis_url", "lawrence_county_sd_parcels", "wyoming_public_arcgis", "wyoming_private_arcgis", "potter_county_pa_taxparcels", "allegany_county_ny_parcels_2024", "summit_county_co_assessor_taxmap_parcels", "summit_county_co_assessor_taxmap_parcels_disabled", "summit_county_co_parcel_query", "pa_pasda_parcels", "pa_pasda_apps_parcels", "pa_dep_parcels", "configured_path", "configured_url", "regrid"}
 
     return {
         "ok": True,
@@ -1843,8 +1975,8 @@ def _monahinga_demo_parcel_geojson_for_bbox(bbox: BBox) -> dict:
         "features": _monahinga_bbox_demo_cells(float(bbox.min_lon), float(bbox.min_lat), float(bbox.max_lon), float(bbox.max_lat)),
         "properties": {
             "monahinga_parcel_source": "auto_demo",
-            "monahinga_parcel_source_label": "Automatic demo parcels - not real ownership",
-            "monahinga_parcel_warning": "DEMO ONLY. Not real parcel ownership. Regrid is selected as the first real source. Configure MONAHINGA_REGRID_TOKEN in Pass 2, or use MONAHINGA_PARCEL_GEOJSON_PATH / MONAHINGA_PARCEL_GEOJSON_URL only as a temporary real GeoJSON source.",
+            "monahinga_parcel_source_label": "DEMO FALLBACK - NOT REAL PARCELS",
+            "monahinga_parcel_warning": "DEMO FALLBACK ONLY. These big square cells are visual placeholders, not real parcels, not ownership, and not parcel truth. Fix or configure a county parcel source before relying on parcel boundaries.",
             "monahinga_feature_count": 4,
             "monahinga_confidence": "demo_only",
         },
@@ -2297,12 +2429,14 @@ def _monahinga_v25_compact_props(props: dict) -> dict:
     props = dict(props or {})
     keep = (
         "OWNER", "Owner", "owner", "OWNER_NAME", "OWNER_NAME1", "owner_name", "OWNER1",
-        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Owner2", "TAXPAYER", "MAIL_NAME",
-        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "TAXPIN", "PID", "PARCELNO",
-        "PropertyNu", "Map_Number", "Join1", "SITUS", "SITE_ADDR", "SITUS_ADDRESS",
-        "PROPERTY_ADDRESS", "ADDRESS", "ADDR", "PHYSICAL_ADDRESS", "Street_Number",
-        "Situs_Street", "Situs_Suffix", "Situs_Direction", "Acres", "ACRES", "Acreage",
-        "ACREAGE", "Year_Built", "YEAR_BUILT", "fyrblt",
+        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Current_Ow", "Owner1", "Owner2", "TAXPAYER", "MAIL_NAME",
+        "FullName", "Name", "FullAdd", "OwnerAdd1", "OwnerAdd2", "OwnerCity", "OwnerState", "PostCode",
+        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "Accountnum", "TAXPIN", "PID", "PARCELNO",
+        "PropertyNu", "Map_Number", "Join1", "PPI", "Schedule", "ScheduleText", "PrimaryID", "SecondID", "Printkey", "SwisParID",
+        "SITUS", "SITE_ADDR", "SITUS_ADDRESS", "PROPERTY_ADDRESS", "ADDRESS", "ADDR", "PHYSICAL_ADDRESS", "Street_Number",
+        "Situs_Street", "Situs_Suffix", "Situs_Direction", "FullStreet", "GeoHouseNumber", "GeoStreetName", "GeoCityName",
+        "Acres", "ACRES", "Acreage", "ACREAGE", "Area_in_Ac", "EcoDesc", "MiscChar", "NhoodDescr", "prop_class",
+        "Year_Built", "YEAR_BUILT", "fyrblt",
     )
     out = {}
     for key in keep:
@@ -2313,12 +2447,15 @@ def _monahinga_v25_compact_props(props: dict) -> dict:
 
     owner = _monahinga_v25_prop_value(props, (
         "OWNER", "Owner", "owner", "OWNER_NAME", "OWNER_NAME1", "owner_name", "OWNER1",
-        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Owner2", "TAXPAYER", "MAIL_NAME",
+        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Current_Ow", "Owner1", "Owner2", "TAXPAYER", "MAIL_NAME",
+        "FullName", "Name", "FullAdd", "OwnerAdd1", "OwnerAdd2",
     ))
     parcel_id = _monahinga_v25_prop_value(props, (
-        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "TAXPIN", "PID",
-        "PARCELNO", "PropertyNu", "Map_Number", "Join1",
+        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "Accountnum", "TAXPIN", "PID",
+        "PARCELNO", "PropertyNu", "Map_Number", "Join1", "PPI", "Schedule", "ScheduleText", "PrimaryID", "SecondID", "Printkey", "SwisParID",
     ))
+    if owner and ("FullAdd" in props or "OwnerAdd1" in props or "PPI" in props) and "Owner name not exposed" not in owner:
+        out["MONAHINGA_OWNER_CONTEXT_NORMALIZED"] = owner
     if owner:
         out["MONAHINGA_OWNER_NORMALIZED"] = owner
     if parcel_id:
@@ -2353,12 +2490,13 @@ def _monahinga_v25_compact_parcel_geojson_for_run(geojson: dict, label: str, sou
 
     owner_fields, owner_value_count = _monahinga_v25_detect_fields(features, (
         "OWNER", "Owner", "owner", "OWNER_NAME", "OWNER_NAME1", "owner_name", "OWNER1",
-        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Owner2", "TAXPAYER", "MAIL_NAME",
-        "MONAHINGA_OWNER_NORMALIZED",
+        "Owner_Name_1", "Owner_Name_2", "CURRENT_OW", "Current_Ow", "Owner1", "Owner2", "TAXPAYER", "MAIL_NAME",
+        "FullName", "Name", "FullAdd", "OwnerAdd1", "OwnerAdd2", "OwnerCity", "OwnerState", "PostCode",
+        "MONAHINGA_OWNER_NORMALIZED", "MONAHINGA_OWNER_CONTEXT_NORMALIZED",
     ))
     parcel_fields, parcel_value_count = _monahinga_v25_detect_fields(features, (
-        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "TAXPIN", "PID",
-        "PARCELNO", "PropertyNu", "Map_Number", "Join1", "MONAHINGA_PARCEL_ID_NORMALIZED",
+        "PARCEL_ID", "PIN", "APN", "OBJECTID", "FID", "ACCOUNT", "Accountnum", "TAXPIN", "PID",
+        "PARCELNO", "PropertyNu", "Map_Number", "Join1", "PPI", "Schedule", "ScheduleText", "PrimaryID", "SecondID", "Printkey", "SwisParID", "MONAHINGA_PARCEL_ID_NORMALIZED",
     ))
 
     return {
