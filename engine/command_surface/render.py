@@ -40,6 +40,61 @@ def _terrain_sentence(summary: dict) -> str:
     return f"Terrain read: {strength}. Viewer trust: {trust}."
 
 
+
+def _no_strong_sit_reasons(decision_summary: dict) -> list[str]:
+    gate = (decision_summary or {}).get("huntability_gate_v2") or {}
+    samples = gate.get("sample_rejections") or []
+    reasons: list[str] = []
+    if isinstance(samples, list):
+        for item in samples:
+            if not isinstance(item, dict):
+                continue
+            raw = item.get("reasons") or item.get("reason") or item.get("reject_reasons") or []
+            if isinstance(raw, str):
+                raw_list = [raw]
+            elif isinstance(raw, list):
+                raw_list = [str(v) for v in raw if str(v).strip()]
+            else:
+                raw_list = []
+            for reason in raw_list:
+                clean = str(reason).replace("_", " ").strip()
+                if not clean:
+                    continue
+                label = clean[:1].upper() + clean[1:]
+                if label not in reasons:
+                    reasons.append(label)
+                if len(reasons) >= 3:
+                    return reasons
+    return reasons[:3]
+
+
+def _no_strong_sit_markup(decision_summary: dict) -> str:
+    if not bool((decision_summary or {}).get("no_strong_sit")):
+        return ""
+    gate = (decision_summary or {}).get("huntability_gate_v2") or {}
+    rejected = gate.get("rejected_candidates")
+    rejected_text = ""
+    if isinstance(rejected, int) and rejected > 0:
+        rejected_text = f" The gate rejected {rejected} candidate point(s) before refusing to force a bad setup."
+    reasons = _no_strong_sit_reasons(decision_summary)
+    reason_items = "".join(f"<li>{html.escape(reason)}</li>" for reason in reasons)
+    if not reason_items:
+        reason_items = "<li>Available candidates did not clear the field-realism threshold.</li><li>Legal signal alone was not enough to crown a safe sit.</li><li>Redraw or expand the box to include better terrain and access.</li>"
+    return (
+        '<div class="intel-row provider-warn">'
+        '<strong>No Strong Sit Found</strong>'
+        '<span>This is a smart refusal, not a failed run. Monahinga found legal/terrain signal, but no candidate cleared the huntability gate strongly enough to recommend as a primary sit.' + html.escape(rejected_text) + '</span>'
+        '</div>'
+        '<div class="intel-row provider-warn">'
+        '<strong>Why this box was rejected</strong>'
+        '<span><ul style="margin:6px 0 0 18px;padding:0;line-height:1.35">' + reason_items + '</ul></span>'
+        '</div>'
+        '<div class="intel-row provider-warn">'
+        '<strong>Next field move</strong>'
+        '<span>Expand or redraw the box toward reachable cover edges, benches, funnels, lower-pressure access, and verified public/legal ground. Do not force a sit from marginal terrain.</span>'
+        '</div>'
+    )
+
 def _wind_sentence(decision_summary: dict) -> str:
     current = str(decision_summary.get("current_wind") or "Not set")
     preferred = str(decision_summary.get("preferred_wind") or "Unknown")
@@ -402,6 +457,76 @@ def _provider_status_markup(notes: list[str]) -> str:
 
 
 
+def _future_hunt_plan_markup(operator_context: dict) -> str:
+    """Render Future Hunt Planner v2 guidance without changing terrain/scoring.
+
+    V2 gives Chris a clearer hunt-window read: timing, wind check, thermal check,
+    weather watch, and go/no-go reminder. It deliberately does not call a future
+    forecast API yet; that should remain a dedicated later engine pass.
+    """
+    ctx = operator_context or {}
+    window = str(ctx.get("hunt_plan_window") or "now").strip()
+    custom = str(ctx.get("hunt_plan_datetime") or "").strip()
+    preferred = str(ctx.get("wind_direction") or "").strip().upper()
+
+    labels = {
+        "now": "Current / live conditions",
+        "today_evening": "Today evening / last light",
+        "tomorrow_morning": "Tomorrow morning / first light",
+        "tomorrow_evening": "Tomorrow evening / last light",
+        "custom": "Custom hunt window",
+    }
+    label = labels.get(window, labels["now"])
+
+    custom_clean = custom.replace("T", " ").strip()
+    if custom_clean:
+        label = f"{label} — {custom_clean}"
+
+    window_text = f"Preferred wind: {preferred or 'not set'} — verify forecast and live wind before committing."
+
+    lowered = (window + " " + custom_clean).lower()
+    is_morning = "morning" in lowered or "05:" in lowered or "06:" in lowered or "07:" in lowered or "am" in lowered
+    is_evening = "evening" in lowered or "last" in lowered or "pm" in lowered
+
+    if window == "now" and not custom_clean:
+        timing = "Use current timing. Treat live wind as the final check before entering."
+        thermal = "Current thermals may override the map read; confirm at the access point."
+        weather = "Watch for sudden wind shifts, rain, or pressure changes before committing."
+        action = "Proceed only if wind and legal access still match the selected route."
+    elif is_morning:
+        timing = "Morning plan: prioritize first-light entry, quiet setup, and avoiding skylined approaches."
+        thermal = "Expect cold-air drainage and early thermals to pull downhill or along creek bottoms until sun warms slopes."
+        weather = "Check overnight low, dawn wind, fog, precipitation, and whether wind switches after sunrise."
+        action = "Best use: get in early, stay low-pressure, and abandon the sit if wind starts washing toward bedding or likely travel."
+    elif is_evening:
+        timing = "Evening plan: prioritize last-light movement, feeding transitions, and a clean exit route."
+        thermal = "Expect cooling thermals to settle downhill near dusk; avoid approaches that dump scent into the target basin or field edge."
+        weather = "Check sunset wind, gust drop-off, temperature fall, precipitation, and front timing before leaving."
+        action = "Best use: enter late enough to avoid burning the area, but early enough to settle before movement starts."
+    else:
+        timing = "Custom future plan: use the selected date/time as the decision window."
+        thermal = "Read slope, creek, and basin thermals against the chosen hour; verify with actual forecast before field use."
+        weather = "Check wind direction/speed, gusts, precipitation, temperature trend, and sunrise/sunset relationship."
+        action = "Treat the output as a planning read until the actual forecast and field wind agree."
+
+    rows = [
+        ("Future hunt plan", label, timing),
+        ("Forecast wind check", window_text, "If forecast wind disagrees with preferred wind, rerun or choose a lower-risk entry."),
+        ("Thermal/time read", thermal, "Morning and evening air movement can beat the simple wind arrow."),
+        ("Weather watch", weather, "Future Hunt v2 is forecast-aware in wording; full API-based reranking is a later engine pass."),
+        ("Go / no-go", action, "Seasons, tags, permission, access, and local rules still require verification."),
+    ]
+    return "".join(
+        '<div class="intel-row future-hunt-v2"><strong>'
+        + html.escape(title)
+        + '</strong><span>'
+        + html.escape(span)
+        + '</span><small class="micro-copy">'
+        + html.escape(small)
+        + '</small></div>'
+        for title, span, small in rows
+    )
+
 def _hunter_core_spotlight_markup(operator_context: dict) -> str:
     """Compact right-rail card upgraded for field-ready decision language."""
     intel = (operator_context or {}).get("hunt_intelligence") or {}
@@ -586,6 +711,8 @@ def render_command_surface(run_root: Path, contract: TerrainTruthContract) -> Pa
         default_padus_mode=resolved_padus_mode,
     )
     payload["defaultPadusMode"] = resolved_padus_mode
+    payload["selected_species"] = str((contract.operator_context or {}).get("selected_species") or "default")  # MONAHINGA_WILDLIFE_IDENTITY_POLISH_V1_2026_05_10
+    payload["species_gate_state"] = str((contract.operator_context or {}).get("species_gate_state") or "")
     payload["selection_polygon"] = (contract.operator_context or {}).get("selection_polygon") or []
     parcel_geojson = (contract.operator_context or {}).get("parcel_geojson") or None
     payload["parcel_geojson"] = parcel_geojson  # MONAHINGA_RENDER_PARCEL_HANDOFF_HARDENED_V26_2026_05_09
@@ -625,18 +752,28 @@ def render_command_surface(run_root: Path, contract: TerrainTruthContract) -> Pa
         else "Legal fill contained inside terrain bbox"
     )
 
+    no_strong_sit = bool(decision_summary.get("no_strong_sit"))
     primary_elevation_text = (
-        f"{primary.title} sits at about {int(round(primary.elevation_m))} meters "
-        f"and remains the lead setup."
+        "No primary sit was promoted because this box did not clear the huntability gate. "
+        "Use this as a redraw/expand signal rather than a field setup."
+        if no_strong_sit
+        else (
+            f"{primary.title} sits at about {int(round(primary.elevation_m))} meters "
+            f"and remains the lead setup."
+        )
     )
     box_status_title, box_status_body, box_status_tone = _box_status(
         decision_summary,
         float(legal_summary.get("legal_coverage_ratio") or 0.0),
     )
     pin_mode_text = (
-        "Strong verified legal hunting land. Primary and alternate pins are being drawn only from verified legal land inside your selected box."
-        if str(decision_summary.get("analysis_mode")) == "legal_hunt"
-        else "No verified legal hunting land. Terrain-only review mode is active, so pins are exploration guidance rather than verified legal hunting spots."
+        "No strong field setup passed the huntability gate. Legal/PAD-US signal may exist, but the app is refusing to force a bad primary sit."
+        if no_strong_sit
+        else (
+            "Strong verified legal hunting land. Primary and alternate pins are being drawn only from verified legal land inside your selected box."
+            if str(decision_summary.get("analysis_mode")) == "legal_hunt"
+            else "No verified legal hunting land. Terrain-only review mode is active, so pins are exploration guidance rather than verified legal hunting spots."
+        )
     )
 
     provider_markup = _provider_status_markup(contract.notes or [])
@@ -654,8 +791,10 @@ def render_command_surface(run_root: Path, contract: TerrainTruthContract) -> Pa
     hunting_read_markup = "".join(
         [
             _monetization_right_rail_markup(),
+            _no_strong_sit_markup(decision_summary),
             _hunter_core_markup(operator_context),
             f'<div class="intel-row"><strong>Analysis mode</strong><span>{html.escape((decision_summary.get("selected_species") or "General Terrain Read").replace("_"," ").title())}</span></div>',
+            _future_hunt_plan_markup(operator_context),
             f'<div class="intel-row"><strong>Species read</strong><span>{html.escape((decision_summary.get("species_profile") or {}).get("positive_hook",""))}</span></div>',
             f'<div class="intel-row"><strong>Cover read</strong><span>{html.escape(cover_read)}</span></div>',
             f'<div class="intel-row"><strong>Vegetation impact</strong><span>{html.escape(veg_impact)}</span></div>',
@@ -695,7 +834,13 @@ def render_command_surface(run_root: Path, contract: TerrainTruthContract) -> Pa
             str(operator_context.get("notes") or "No operator notes supplied for this run.")
         ),
         best_time_label=html.escape(str(decision_summary.get("best_time_label") or "Prime window")),
-        best_time_window=html.escape(str(decision_summary.get("best_time_window") or "Field-check timing.")),
+        best_time_window=html.escape(
+            str(
+                ("Future plan: " + (operator_context.get("hunt_plan_window") or "now").replace("_", " ").title())
+                if (operator_context.get("hunt_plan_window") or "now") != "now"
+                else (decision_summary.get("best_time_window") or "Field-check timing.")
+            )
+        ),
         primary_title=html.escape(primary.title),
         confidence_label=html.escape(str(decision_summary.get("confidence_label") or "Medium")),
         confidence=html.escape(str(decision_summary.get("confidence") or "")),

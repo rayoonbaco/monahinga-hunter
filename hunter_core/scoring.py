@@ -106,6 +106,58 @@ def _vegetation_adjustment(vegetation: str) -> tuple[int, list[str], list[str]]:
     return 5, ["Vegetation is unknown, so cover score stayed conservative."], ["Cover classification should be verified."]
 
 
+def _sit_realism_adjustment(zone: HuntZone, vegetation_classification: str) -> tuple[int, list[str], list[str]]:
+    """MONAHINGA_SIT_REALISM_LITE_V1: conservative field-realism downgrade.
+
+    Uses existing terrain/candidate signals only. Does not touch DEM, parcels,
+    PAD-US, polygons, 2D/3D rendering, or source fetching.
+    """
+    reasons: list[str] = []
+    risks: list[str] = []
+    penalty = 0
+    veg = str(vegetation_classification or "unknown").lower()
+
+    # MONAHINGA_CHALLENGE_SIT_ALGORITHM_V1: stronger realism penalties.
+    water_like = (
+        veg == "water"
+        or (zone.elevation_norm <= 0.18 and zone.drainage_signal >= 0.42 and zone.slope_norm <= 0.24)
+        or (zone.elevation_norm <= 0.14 and zone.relief_norm <= 0.20)
+    )
+    if water_like:
+        penalty -= 36
+        risks.append("Sit realism hard downgrade: candidate appears water-adjacent, floodplain-low, or water-dominant. Do not crown this as Primary Sit without field verification.")
+
+    extreme_slope = zone.slope_norm >= 0.78
+    if extreme_slope:
+        penalty -= 30
+        risks.append("Sit realism hard downgrade: candidate is too steep for a practical, safe, repeatable primary sit or access route.")
+
+    exposed_peak = zone.elevation_norm >= 0.94 and zone.slope_norm >= 0.38 and zone.bench_signal <= 0.36
+    if exposed_peak:
+        penalty -= 20
+        risks.append("Sit realism downgrade: exposed peak/top crown with weak bench value. Prefer reachable benches, shoulders, saddles, or edges below the crown.")
+
+    impenetrable_proxy = zone.relief_norm >= 0.88 and zone.slope_norm >= 0.62
+    if impenetrable_proxy:
+        penalty -= 18
+        risks.append("Sit realism downgrade: broken relief plus slope suggests impenetrable or punishing access. Hunter must be able to reach the setup quietly.")
+
+    flat_pressure_proxy = zone.slope_norm <= 0.18 and zone.relief_norm <= 0.22 and zone.edge_signal <= 0.32
+    if flat_pressure_proxy:
+        penalty -= 14
+        risks.append("Sit realism downgrade: flat low-relief ground can indicate road, field, lot, or human-pressure exposure. Verify distance from roads, buildings, and parking.")
+
+    boundary_pressure = min(zone.x, 1.0 - zone.x, zone.y, 1.0 - zone.y) <= 0.06
+    if boundary_pressure:
+        penalty -= 4
+        risks.append("Sit realism caution: candidate is close to the selected-box edge, so nearby roads, houses, water, or access conflicts may be outside the model view.")
+
+    if penalty == 0:
+        reasons.append("Sit realism check did not find a strong water/road/human-pressure warning from the available terrain signals.")
+
+    return penalty, reasons, risks
+
+
 def score_zone(
     *,
     zone: HuntZone,
@@ -145,11 +197,12 @@ def score_zone(
     food_water = _score_int(2.0 + zone.edge_signal * 3.0 + zone.drainage_signal * 2.0 + (1.0 - zone.elevation_norm) * 3.0, 10)
 
     pressure = _score_int(4.0 + zone.bench_signal * 3.0 + zone.relief_norm * 2.0 + zone.ridge_signal * 1.0, 10)
+    realism_adjustment, realism_reasons, realism_risks = _sit_realism_adjustment(zone, vegetation_classification)
 
     wind_score, wind_reasons, wind_risks = _wind_score(zone, parse_wind_degrees(wind_direction))
     veg_score, veg_reasons, veg_risks = _vegetation_adjustment(vegetation_classification)
-    reasoning.extend(wind_reasons + veg_reasons)
-    risks.extend(wind_risks + veg_risks)
+    reasoning.extend(wind_reasons + veg_reasons + realism_reasons)
+    risks.extend(wind_risks + veg_risks + realism_risks)
 
     scores = {
         "terrain_funnel": terrain_funnel,
@@ -160,6 +213,7 @@ def score_zone(
         "food_water_route": food_water,
         "pressure_avoidance": pressure,
         "cover_value": veg_score,
+        "sit_realism": _score_int(10 + realism_adjustment, 10),
     }
 
     raw_total = (
@@ -171,6 +225,7 @@ def score_zone(
         + food_water
         + pressure
         + veg_score
+        + realism_adjustment
     )
 
     # Convert 0-110-ish to clean 0-100 with a small terrain-bias correction.
@@ -184,7 +239,7 @@ def score_zone(
         reasoning.append("User notes were preserved for the downstream decision layer.")
 
     final_score = int(round(_clamp(raw_total * 0.92 + bias_bonus, 0.0, 100.0)))
-    confidence = int(round(_clamp(58 + zone.relief_norm * 14 + zone.edge_signal * 10 + zone.bench_signal * 8, 35, 92)))
+    confidence = int(round(_clamp(58 + zone.relief_norm * 14 + zone.edge_signal * 10 + zone.bench_signal * 8 + realism_adjustment * 0.55, 35, 92)))
 
     if thermal >= 11 and bedding >= 7:
         best_time = "first_90_minutes_or_last_90_minutes"

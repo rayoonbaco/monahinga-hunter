@@ -134,6 +134,8 @@ class RunRequest(BaseModel):
     notes: str = Field(default="")
     mode: str = Field(default="hunter")
     selected_species: str = Field(default="default")
+    hunt_plan_window: str = Field(default="now")  # MONAHINGA_FUTURE_HUNT_PLANNER_V1
+    hunt_plan_datetime: str = Field(default="")
     selection_polygon: list[list[float]] | None = Field(default=None)
     parcel_geojson: dict | None = Field(default=None)  # MONAHINGA_ACCEPT_PARCEL_GEOJSON_2026_05_06  # MONAHINGA_ACCEPT_SELECTION_POLYGON_2026_05_06
 
@@ -2549,10 +2551,43 @@ def _monahinga_v25_resolve_run_parcel_geojson(req: RunRequest, bbox: BBox) -> di
 
 
 
+# MONAHINGA_BACKEND_SPECIES_GATE_V1: final conservative species sanity check.
+def _monahinga_species_gate_state_for_bbox(bbox: BBox) -> str:
+    lon = (float(bbox.min_lon) + float(bbox.max_lon)) / 2.0
+    lat = (float(bbox.min_lat) + float(bbox.max_lat)) / 2.0
+    if -80.7 <= lon <= -74.6 and 39.6 <= lat <= 42.6: return "PA"
+    if -79.9 <= lon <= -71.7 and 40.3 <= lat <= 45.1: return "NY"
+    if -111.2 <= lon <= -104.0 and 40.9 <= lat <= 45.1: return "WY"
+    if -109.2 <= lon <= -101.9 and 36.8 <= lat <= 41.1: return "CO"
+    if -104.2 <= lon <= -96.3 and 42.3 <= lat <= 46.1: return "SD"
+    if -116.2 <= lon <= -104.0 and 44.2 <= lat <= 49.1: return "MT"
+    return ""
+
+
+def _monahinga_species_gate_for_bbox(bbox: BBox, selected: object) -> tuple[str, str]:
+    requested = str(selected or "default").strip() or "default"
+    state = _monahinga_species_gate_state_for_bbox(bbox)
+    allowed_by_state = {
+        "PA": {"default", "whitetail", "black_bear", "turkey", "coyote"},
+        "NY": {"default", "whitetail", "black_bear", "turkey", "coyote"},
+        "WY": {"default", "whitetail", "mule_deer", "elk", "moose", "bighorn", "pronghorn", "black_bear", "turkey", "coyote"},
+        "CO": {"default", "whitetail", "mule_deer", "elk", "moose", "bighorn", "pronghorn", "black_bear", "turkey", "coyote"},
+        "SD": {"default", "whitetail", "mule_deer", "pronghorn", "turkey", "coyote"},
+        "MT": {"default", "whitetail", "mule_deer", "elk", "moose", "bighorn", "pronghorn", "black_bear", "turkey", "coyote"},
+    }
+    allowed = allowed_by_state.get(state)
+    if not allowed or requested in allowed:
+        return requested, state
+    fallback = "whitetail" if "whitetail" in allowed else "default"
+    print(f"[species-gate] {requested!r} is not enabled for {state}; using {fallback!r} for this run")
+    return fallback, state
+
+
 @app.post("/run-terrain-truth")
 def run_terrain_truth(req: RunRequest):
     try:
         bbox = BBox.normalized(req.min_lon, req.min_lat, req.max_lon, req.max_lat)
+        gated_species, species_gate_state = _monahinga_species_gate_for_bbox(bbox, req.selected_species)
         parcel_geojson_for_run = _monahinga_v25_resolve_run_parcel_geojson(req, bbox)
 
         result = _run(
@@ -2563,8 +2598,12 @@ def run_terrain_truth(req: RunRequest):
                 "wind_direction": req.wind_direction,
                 "notes": req.notes,
                 "mode": req.mode or "hunter",
-                "selected_species": req.selected_species or "default",
-                "target_species": req.selected_species or "default",
+                "selected_species": gated_species or "default",
+                "target_species": gated_species or "default",
+                "species_gate_state": species_gate_state,
+                "species_gate_original": req.selected_species or "default",
+                "hunt_plan_window": req.hunt_plan_window or "now",  # MONAHINGA_FUTURE_HUNT_PLANNER_V1
+                "hunt_plan_datetime": req.hunt_plan_datetime or "",
                 "selection_polygon": req.selection_polygon,
                 "parcel_geojson": parcel_geojson_for_run,
             },

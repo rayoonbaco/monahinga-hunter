@@ -119,9 +119,77 @@ body.theme-default{--region-accent:#aef186;--region-cool:#83c9ff;--region-warm:#
 .viewer-micro-note{margin-top:6px;font-size:11px;line-height:1.35;color:#9eb0bf}
 .game-context-card{margin-top:8px;padding:9px 10px;border-radius:14px;border:1px solid rgba(127,216,113,.18);background:linear-gradient(180deg, rgba(127,216,113,.10), rgba(127,216,113,.03))}
 .game-context-card h3{margin-bottom:6px}
+
+/* MONAHINGA_WILDLIFE_IDENTITY_POLISH_V1_2026_05_10: compact selected-species badge in operator rail. */
+.viewer-species-badge{
+  margin-top:8px;
+  padding:10px 10px;
+  border-radius:16px;
+  border:1px solid rgba(245,211,138,.20);
+  background:linear-gradient(135deg, rgba(37,31,18,.74), rgba(6,13,20,.86));
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.viewer-species-icon{
+  flex:0 0 40px;
+  height:40px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  font-size:25px;
+  background:rgba(245,211,138,.12);
+  border:1px solid rgba(245,211,138,.18);
+}
+.viewer-species-copy{min-width:0;}
+.viewer-species-kicker{display:block;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#a9b5bd;margin-bottom:3px}
+.viewer-species-copy strong{display:block;color:#fff2d3;font-size:14px;line-height:1.1}
+.viewer-species-copy span{display:block;margin-top:5px;color:#c7d2d8;font-size:11px;line-height:1.35}
+.viewer-species-copy em{display:block;margin-top:5px;color:#f5d38a;font-style:normal;font-size:10px;line-height:1.32}
 .game-context-kicker{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9fe693;margin-bottom:5px}
 .game-context-primary{display:block;font-size:16px;line-height:1.15;font-weight:800;color:#eff8e5;margin-bottom:4px}
 .game-context-secondary{display:block;font-size:12px;line-height:1.4;color:#ccdbcf}
+
+/* MONAHINGA_TERRAIN_CONTROLS_DOCK_V1_2026_05_10: move terrain sliders to safe space below 3D panel. */
+.terrain-control-dock{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(143,208,255,.16);
+  background:linear-gradient(180deg, rgba(8,18,28,.78), rgba(4,8,14,.84));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035), 0 10px 24px rgba(0,0,0,.22);
+  display:grid;
+  grid-template-columns:repeat(2, minmax(160px, 1fr));
+  gap:10px 14px;
+  align-items:end;
+}
+.terrain-control-dock::before{
+  content:'Terrain view controls';
+  grid-column:1 / -1;
+  display:block;
+  font-size:10px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:#9fb8c6;
+}
+.terrain-control-dock .slider-group{margin:0;min-width:0;}
+.terrain-control-dock .slider-group label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#d7e3eb;}
+.terrain-control-dock input[type='range']{width:100%;}
+.terrain-control-dock .pin-help,
+.terrain-control-dock .focus-read-hint{
+  grid-column:1 / -1;
+  margin:0;
+  font-size:11px;
+  line-height:1.35;
+  color:#93a8b5;
+}
+.terrain-control-dock .focus-read-hint{
+  padding:7px 9px;
+  border-radius:10px;
+  border:1px solid rgba(174,241,134,.11);
+  background:rgba(174,241,134,.035);
+}
+@media (max-width: 980px){.terrain-control-dock{grid-template-columns:1fr;}}
 .field-map-card{margin-bottom:8px;border-color:rgba(143,208,255,.26);background:linear-gradient(180deg,rgba(8,18,28,.88),rgba(4,8,14,.88))}
 .field-map-wrap{position:relative;width:100%;aspect-ratio:1/1;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.10);background:radial-gradient(circle at 50% 45%,rgba(174,241,134,.10),transparent 34%),linear-gradient(180deg,rgba(16,34,46,.95),rgba(5,14,20,.96))}
 .field-map-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -3190,6 +3258,7 @@ function monahingaParcelSourceProofHtml(parcelGeoJson) {
 <div class="layout">
 <aside class="left">
   <div class="block"><h3>Operator Setup</h3><div class="kv"><div><label>Mode</label><strong>$mode</strong></div><div><label>Wind</label><strong id="operatorWindValue">$current_wind</strong></div><div><label>Preferred Wind</label><strong>$preferred_wind</strong></div><div><label>Readiness</label><strong>$readiness</strong></div></div></div>
+  <div id="viewerSpeciesBadge" class="viewer-species-badge" data-created-by="MONAHINGA_WILDLIFE_IDENTITY_POLISH_V1_2026_05_10"><div id="viewerSpeciesIcon" class="viewer-species-icon" aria-hidden="true">◇</div><div class="viewer-species-copy"><span class="viewer-species-kicker">Target read</span><strong id="viewerSpeciesTitle">Regional game context</strong><span id="viewerSpeciesBody">Species-aware movement context will appear here.</span><em id="viewerSpeciesTip">Verify seasons, tags, permission, and local rules.</em></div></div>
   $selected_box_status_markup
   <div class="block"><h3>Terrain Layers</h3><div class="layer-stack" id="terrainLayerStack">$layer_buttons</div><div class="note" style="margin-top:8px">Terrain stays realistic. Cover is now blended into the mountain as a soft read layer that influences movement instead of acting like a separate mode.</div><div class="slider-group"><label>Tilt</label><input id="tiltSlider" type="range" min="12" max="42" value="28"></div><div class="slider-group"><label>Depth Exaggeration</label><input id="depthSlider" type="range" min="55" max="125" value="72"></div><div class="pin-help">Click a ranked row or a 3D pin to focus the terrain.</div><div id="focusReadHint" class="focus-read-hint">Focus read: terrain stays live while the cover overlay quietly shows concealment pockets, edges, and exposed crossings.</div></div>
   <div class="block"><h3>PAD-US Display</h3><div class="mode-stack"><button class="mode-btn" data-padus-mode="hybrid">Hybrid</button><button class="mode-btn" data-padus-mode="lines">Lines</button><button class="mode-btn" data-padus-mode="fill">Fill</button></div><div class="note" style="margin-top:10px">Legal geometry is clipped to the terrain box before it reaches the viewer, and the viewer clamps any stray points as a final guardrail.</div></div>
@@ -3247,7 +3316,30 @@ function monahingaParcelSourceProofHtml(parcelGeoJson) {
 }
 </style>
 
-<div class="cursor-hud" id="cursorHud"><strong>Cursor terrain read</strong><div id="cursorCoords">Move over the terrain to read live GPS.</div><div class="micro-copy">Reads the current terrain point under your cursor.</div></div><div class="hud-strip"><div class="hud-card"><span class="label">Primary sit</span><strong>$primary_title</strong></div><div class="hud-card"><span class="label">Confidence</span><strong>$confidence_label</strong> · $confidence</div><div class="hud-card" id="selectedSiteHud"><span class="label">Selected sit coordinates</span><strong id="selectedSiteTitle">$primary_title</strong><div id="selectedSiteCoords">Loading coordinates…</div><button id="copyCoordsBtn" type="button">Copy coordinates</button></div><div class="hud-card" id="liveWindHud"><span class="label">Live wind near primary sit</span><strong id="liveWindHudSummary">Loading live wind…</strong><div id="liveWindHudMeta" class="micro-copy">Fetching current direction and speed.</div></div><div class="hud-card approach-hud" id="invisibleApproachHud"><span class="label">Invisible Approach</span><strong id="invisibleApproachSummary">Layer off</strong><div id="invisibleApproachMeta" class="micro-copy">Toggle to show approach risk from Access Entry to the selected sit.</div></div></div></div></section></div></main>
+<div class="cursor-hud" id="cursorHud"><strong>Cursor terrain read</strong><div id="cursorCoords">Move over the terrain to read live GPS.</div><div class="micro-copy">Reads the current terrain point under your cursor.</div></div><div class="hud-strip"><div class="hud-card"><span class="label">Primary sit</span><strong>$primary_title</strong></div><div class="hud-card"><span class="label">Confidence</span><strong>$confidence_label</strong> · $confidence</div><div class="hud-card" id="selectedSiteHud"><span class="label">Selected sit coordinates</span><strong id="selectedSiteTitle">$primary_title</strong><div id="selectedSiteCoords">Loading coordinates…</div><button id="copyCoordsBtn" type="button">Copy coordinates</button></div><div class="hud-card" id="liveWindHud"><span class="label">Live wind near primary sit</span><strong id="liveWindHudSummary">Loading live wind…</strong><div id="liveWindHudMeta" class="micro-copy">Fetching current direction and speed.</div></div><div class="hud-card approach-hud" id="invisibleApproachHud"><span class="label">Invisible Approach</span><strong id="invisibleApproachSummary">Layer off</strong><div id="invisibleApproachMeta" class="micro-copy">Toggle to show approach risk from Access Entry to the selected sit.</div></div></div></div><div id="terrainControlDock" class="terrain-control-dock" aria-label="Terrain view controls"></div></section></div></main>
+<script data-created-by="MONAHINGA_TERRAIN_CONTROLS_DOCK_V1_2026_05_10">
+(function(){
+  function moveTerrainControlsToDock(){
+    var dock = document.getElementById('terrainControlDock');
+    if (!dock || dock.dataset.ready === 'yes') return;
+    ['tiltSlider', 'depthSlider'].forEach(function(id){
+      var slider = document.getElementById(id);
+      var group = slider && slider.closest ? slider.closest('.slider-group') : null;
+      if (group) dock.appendChild(group);
+    });
+    var pinHelp = document.querySelector('.pin-help');
+    if (pinHelp) dock.appendChild(pinHelp);
+    var focusHint = document.getElementById('focusReadHint');
+    if (focusHint) dock.appendChild(focusHint);
+    dock.dataset.ready = 'yes';
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', moveTerrainControlsToDock);
+  } else {
+    moveTerrainControlsToDock();
+  }
+})();
+</script>
 <aside class="right"><div class="side-rail">$hunter_core_spotlight_markup<div class="block" id="fieldAnchorGuide" style="margin-bottom:8px;border-color:rgba(94,200,255,.22);background:rgba(8,18,28,.78)">
   <h3 style="margin-bottom:6px">Field Anchors</h3>
   <div class="note">
@@ -3284,6 +3376,35 @@ function monahingaParcelSourceProofHtml(parcelGeoJson) {
 (function() {
   const payload = $payload_json;
   window.__MONAHINGA_COMMAND_PAYLOAD = payload;
+  // MONAHINGA_WILDLIFE_IDENTITY_POLISH_V1_2026_05_10: selected-species operator badge.
+  const MONAHINGA_VIEWER_SPECIES_IDENTITY = {
+    default: {icon:'◇', title:'General terrain read', body:'Terrain, wind, access, legal context, and cover are being read without locking to one animal.', tip:'Good for broad scouting before choosing a species.'},
+    whitetail: {icon:'🦌', title:'Whitetail deer', body:'Bedding edges, side-hill travel, cover transitions, and low-pressure access drive this read.', tip:'Keep wind and entry route cleaner than the perfect-looking dot.'},
+    mule_deer: {icon:'🦌', title:'Mule deer', body:'Broken slopes, benches, open-to-cover transitions, and glassable terrain are emphasized.', tip:'Visibility and escape cover matter in western country.'},
+    elk: {icon:'🫎', title:'Elk', body:'Saddles, benches, timber edges, escape cover, and thermal/wind discipline shape the read.', tip:'Pressure and thermals can beat a high score.'},
+    moose: {icon:'🫎', title:'Moose', body:'Wet cover, browse edges, and low-pressure corridors matter where the state gate allows this species.', tip:'Highly area-specific; verify tags and local presence.'},
+    bighorn: {icon:'🐏', title:'Bighorn sheep', body:'Steep escape terrain, open visibility, and careful approach discipline shape the read.', tip:'Unit, tag, and terrain verification are mandatory.'},
+    pronghorn: {icon:'🦌', title:'Pronghorn', body:'Open-country visibility, approach concealment, and wind exposure dominate the read.', tip:'Use terrain breaks and avoid skyline exposure.'},
+    black_bear: {icon:'🐻', title:'Black bear', body:'Food edges, shaded drainages, thick cover, and quiet access are emphasized.', tip:'Verify season, bait rules, weapons, and local restrictions.'},
+    turkey: {icon:'🦃', title:'Wild turkey', body:'Roost-to-feed movement, ridge benches, field edges, and open timber shape this read.', tip:'PA turkey specialist: protect the roost, avoid crowding birds, and keep calling disciplined.'},
+    hog: {icon:'🐗', title:'Feral hog', body:'Water, cover, disturbed ground, and food edges matter only where hogs are realistically present.', tip:'The state gate should hide this outside plausible range.'},
+    coyote: {icon:'🐺', title:'Coyote', body:'Travel seams, downwind approach control, visibility, and human-pressure edges shape the read.', tip:'Wind and shooting lanes matter more than a pretty route.'},
+    javelina: {icon:'🐗', title:'Javelina', body:'Arid cover, washes, food patches, and warm-country habitat matter where present.', tip:'The state gate should hide this outside plausible range.'}
+  };
+  function monahingaPopulateViewerSpeciesBadge() {
+    const key = String(payload.selected_species || 'default');
+    const info = MONAHINGA_VIEWER_SPECIES_IDENTITY[key] || MONAHINGA_VIEWER_SPECIES_IDENTITY.default;
+    const state = String(payload.species_gate_state || '').trim();
+    const icon = document.getElementById('viewerSpeciesIcon');
+    const title = document.getElementById('viewerSpeciesTitle');
+    const body = document.getElementById('viewerSpeciesBody');
+    const tip = document.getElementById('viewerSpeciesTip');
+    if (icon) icon.textContent = info.icon;
+    if (title) title.textContent = info.title + (state ? ' · ' + state : '');
+    if (body) body.textContent = info.body;
+    if (tip) tip.textContent = info.tip + ' Verify seasons, tags, access, permission, and local rules.';
+  }
+  setTimeout(monahingaPopulateViewerSpeciesBadge, 0);
   const wildlifeAtmosphere = payload.wildlife_atmosphere || null;
   const viewer = document.getElementById('viewer');
   const tiltSlider = document.getElementById('tiltSlider');

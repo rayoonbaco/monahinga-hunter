@@ -1995,6 +1995,211 @@ def _select_trust_caution_tag(primary_record: dict, alternatives: list[dict], re
     return None
 
 
+
+# MONAHINGA_CHALLENGE_HUNTABILITY_GATE_V2
+# Specialists promoted for this pass:
+# - No-Good-Option Referee: prevents forced Primary Sit when the BBox has no clean option.
+# - Parcel Boundary Sentinel: blocks primary candidates inside available private parcel context.
+# - Water/Access Reality Engineer: rejects low/wet, steep, isolated, or physically dumb setup points.
+# - Species Field Biologist: preserves species/weather wording while making field realism the final gate.
+def _challenge_geojson_features(geojson: object) -> list[dict]:
+    if not isinstance(geojson, dict):
+        return []
+    if geojson.get("type") == "FeatureCollection":
+        return [f for f in (geojson.get("features") or []) if isinstance(f, dict)]
+    if geojson.get("type") == "Feature":
+        return [geojson]
+    if geojson.get("type") in {"Polygon", "MultiPolygon"}:
+        return [{"type": "Feature", "properties": {}, "geometry": geojson}]
+    return []
+
+
+def _challenge_point_in_ring(lon: float, lat: float, ring: object) -> bool:
+    if not isinstance(ring, list) or len(ring) < 3:
+        return False
+    inside = False
+    j = len(ring) - 1
+    for i, current in enumerate(ring):
+        previous = ring[j]
+        try:
+            xi, yi = float(current[0]), float(current[1])
+            xj, yj = float(previous[0]), float(previous[1])
+        except Exception:
+            j = i
+            continue
+        crosses = ((yi > lat) != (yj > lat)) and (lon < (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi)
+        if crosses:
+            inside = not inside
+        j = i
+    return inside
+
+
+def _challenge_point_in_polygon(lon: float, lat: float, coords: object) -> bool:
+    if not isinstance(coords, list) or not coords:
+        return False
+    if not _challenge_point_in_ring(lon, lat, coords[0]):
+        return False
+    for hole in coords[1:]:
+        if _challenge_point_in_ring(lon, lat, hole):
+            return False
+    return True
+
+
+def _challenge_geometry_contains(lon: float, lat: float, geom: object) -> bool:
+    if not isinstance(geom, dict):
+        return False
+    gtype = geom.get("type")
+    coords = geom.get("coordinates")
+    if gtype == "Polygon":
+        return _challenge_point_in_polygon(lon, lat, coords)
+    if gtype == "MultiPolygon" and isinstance(coords, list):
+        return any(_challenge_point_in_polygon(lon, lat, poly) for poly in coords)
+    return False
+
+
+def _challenge_publicish_owner(props: dict) -> bool:
+    text = " ".join(str(props.get(k) or "") for k in (
+        "owner", "Owner", "OWNER", "OWNER_NAME", "owner_name", "Name", "NAME",
+        "FullAdd", "OwnerAdd1", "OwnerAdd2", "OwnerCity", "OwnerState", "MiscChar", "source_name",
+    )).upper()
+    public_markers = (
+        "UNITED STATES", "U S ", " US ", "USDA", "FOREST SERVICE", "BUREAU OF LAND", "BLM",
+        "STATE OF", "COMMONWEALTH", "COUNTY", "TOWNSHIP", "BOROUGH", "CITY OF", "TOWN OF",
+        "GAME COMMISSION", "NATIONAL FOREST", "STATE FOREST", "PARK", "CONSERVATION EASEMENT",
+    )
+    return any(marker in text for marker in public_markers)
+
+
+def _challenge_point_in_private_parcel_context(lon: float, lat: float, parcel_geojson: object) -> tuple[bool, str]:
+    for feature in _challenge_geojson_features(parcel_geojson):
+        geom = feature.get("geometry")
+        if not _challenge_geometry_contains(lon, lat, geom):
+            continue
+        props = dict(feature.get("properties") or {})
+        if _challenge_publicish_owner(props):
+            return False, "public/agency-like parcel context"
+        owner_hint = ""
+        for key in ("OWNER", "Owner", "owner", "OWNER_NAME", "Name", "FullAdd", "OwnerAdd1"):
+            val = str(props.get(key) or "").strip()
+            if val:
+                owner_hint = val[:80]
+                break
+        return True, owner_hint or "private/unknown parcel context"
+    return False, ""
+
+
+def _challenge_decision_rejection_reasons(record: dict, sample: dict, terrain_read: dict, practical_read: dict, validity_read: dict, parcel_geojson: object) -> list[str]:
+    reasons: list[str] = []
+    lon = float(record.get("lon") or 0.0)
+    lat = float(record.get("lat") or 0.0)
+    elev_norm = float(record.get("elevation_norm") or 0.0)
+    slope_value = float(sample.get("slope") or 0.0)
+    local_relief = float(sample.get("local_relief") or 0.0)
+    slope_bias = str(record.get("slope_bias") or "").lower()
+
+    if parcel_geojson:
+        inside_private, owner_hint = _challenge_point_in_private_parcel_context(lon, lat, parcel_geojson)
+        if inside_private:
+            reasons.append(f"inside available private/unknown parcel context ({owner_hint}); verify permission or choose a non-private/PAD-US interior option")
+
+    validity_summary = str(validity_read.get("summary_reason") or "").lower()
+    validity_bits = " ".join(str(bit) for bit in (validity_read.get("reason_bits") or [])).lower()
+    if "flat terrain" in validity_summary or "relief is too flat" in validity_bits:
+        reasons.append("terrain reads too flat/featureless to crown as a serious setup")
+
+    water_like = (
+        (elev_norm <= 0.18 and slope_value <= 1.15 and local_relief <= 5.0)
+        or ("water" in validity_summary)
+        or ("flood" in validity_summary)
+    )
+    if water_like:
+        reasons.append("water/floodplain-low risk from terrain signals; do not force a sit here")
+
+    if slope_value >= 7.5 or "steeper" in slope_bias:
+        reasons.append("slope is too steep for a quiet, repeatable, safe primary sit")
+
+    if practical_read.get("hard_override"):
+        reasons.append("practical access gate says this is too isolated/peak-like/high-effort for a primary sit")
+
+    if practical_read.get("limited_practical_access") and practical_read.get("high_effort_access"):
+        reasons.append("access looks too punishing or noisy for a clean setup")
+
+    if terrain_read.get("edge_risk") and not terrain_read.get("interior_secure"):
+        reasons.append("legal/terrain edge is too tight; expand or redraw the box for a cleaner interior option")
+
+    cleaned: list[str] = []
+    for reason in reasons:
+        if reason not in cleaned:
+            cleaned.append(reason)
+    return cleaned
+
+
+def _challenge_no_strong_record(bbox: list[float], dem: object, dem_range: float, dem_min: float, reasons: list[dict], vegetation_profile: dict, species_profile: dict) -> dict:
+    min_lon, min_lat, max_lon, max_lat = [float(v) for v in bbox]
+    lon = (min_lon + max_lon) / 2.0
+    lat = (min_lat + max_lat) / 2.0
+    try:
+        sample = _sample_dem(dem, bbox, lon, lat)
+        elev_norm = max(0.0, min(1.0, (float(sample["elevation_m"]) - dem_min) / max(dem_range, 1.0)))
+        elevation_m = float(sample["elevation_m"])
+        slope_bias = _quantize_slope(float(sample.get("slope") or 0.0))
+    except Exception:
+        elev_norm = 0.5
+        elevation_m = 0.0
+        slope_bias = "unknown"
+    reason_text = "No high-quality sit passed the huntability gate in this box. Expand or redraw the box; do not force a setup from marginal ground."
+    if reasons:
+        sample_reasons = []
+        for item in reasons[:3]:
+            for reason in item.get("reasons", [])[:2]:
+                sample_reasons.append(str(reason))
+        if sample_reasons:
+            reason_text += " Main blockers: " + "; ".join(sample_reasons[:4]) + "."
+    return {
+        "lon": lon,
+        "lat": lat,
+        "elevation_m": elevation_m,
+        "elevation_norm": elev_norm,
+        "slope": 0.0,
+        "local_relief": 0.0,
+        "slope_bias": slope_bias,
+        "score": 38,
+        "source_name": "No strong sit found",
+        "legality_status": "scouting_only",
+        "reasoning": reason_text,
+        "preferred_wind": "VERIFY",
+        "best_time_window": "Redraw or expand box before hunting",
+        "best_time_label": "No strong sit found",
+        "travel_score": 30,
+        "bedding_score": 30,
+        "feeding_score": 30,
+        "confidence": 32,
+        "wind_fit": None,
+        "primary_tag": "No Strong Sit",
+        "support_tags": ["Redraw Box", "Field Verify"],
+        "all_tags": ["No Strong Sit", "Redraw Box", "Field Verify"],
+        "hard_override": True,
+        "edge_risk": True,
+        "interior_secure": False,
+        "bench_like": False,
+        "intercept_like": False,
+        "shoulder_like": False,
+        "funnel_like": False,
+        "convergence_like": False,
+        "limited_practical_access": True,
+        "high_effort_access": True,
+        "provider_reliability_reasons": [],
+        "vegetation_classification": vegetation_profile.get("classification", "unknown"),
+        "vegetation_trust_tag": "",
+        "features": {"ridge": False, "bench": False, "edge": False, "open": False, "cover": False},
+        "feature_readout": "No primary sit was crowned because the available candidates failed realism checks.",
+        "selected_species": species_profile.get("profile_id"),
+        "species_label": species_profile.get("label"),
+        "species_region_supported": bool(species_profile.get("region_supported", True)),
+        "species_tuning_note": "",
+        "no_strong_sit": True,
+    }
+
 def build_decision_artifact(
     terrain_truth_root: Path,
     bbox: list[float],
@@ -2035,6 +2240,8 @@ def build_decision_artifact(
 
     legal_candidates: list[dict] = []
     suppressed_candidates: list[dict] = []
+    challenge_rejections: list[dict] = []
+    parcel_geojson_for_gate = operator_context.get("parcel_geojson")
 
     for feat in legal_features:
         props = dict(feat.get("properties") or {})
@@ -2396,6 +2603,31 @@ def build_decision_artifact(
                 "species_tuning_note": species_note,
             }
 
+            challenge_reasons = _challenge_decision_rejection_reasons(
+                record,
+                sample,
+                terrain_read,
+                practical_read,
+                validity_read,
+                parcel_geojson_for_gate,
+            )
+            if challenge_reasons:
+                record["huntability_reject_reasons"] = challenge_reasons
+                challenge_rejections.append({
+                    "lon": record.get("lon"),
+                    "lat": record.get("lat"),
+                    "score": record.get("score"),
+                    "source_name": record.get("source_name"),
+                    "reasons": challenge_reasons,
+                })
+                suppressed = dict(record)
+                suppressed["score"] = min(int(suppressed.get("score") or 0), 44)
+                suppressed["confidence"] = min(int(suppressed.get("confidence") or 0), 42)
+                suppressed["legality_status"] = "suppressed_huntability"
+                suppressed["reasoning"] = "Suppressed by huntability gate: " + "; ".join(challenge_reasons[:3])
+                suppressed_candidates.append(suppressed)
+                continue
+
             legal_candidates.append(record)
 
     for feat in features:
@@ -2430,6 +2662,19 @@ def build_decision_artifact(
         )
 
     analysis_mode = "legal_hunt"
+    if not legal_candidates and challenge_rejections:
+        analysis_mode = "no_strong_sit"
+        legal_candidates = [
+            _challenge_no_strong_record(
+                bbox,
+                dem,
+                dem_range,
+                dem_min,
+                challenge_rejections,
+                vegetation_profile,
+                species_profile,
+            )
+        ]
     if not legal_candidates:
         analysis_mode = "terrain_only"
         fallback = []
@@ -2571,10 +2816,11 @@ def build_decision_artifact(
 
     def make_site(rank: int, tier: str, item: dict, title_prefix: str) -> SiteArtifact:
         subtitle = _descriptor(item["lon"], item["lat"], bbox)
+        site_title = "No Strong Sit Found — Redraw Box" if item.get("no_strong_sit") else f"{title_prefix} — {subtitle}"
         return SiteArtifact(
             rank=rank,
             tier=tier,
-            title=f"{title_prefix} — {subtitle}",
+            title=site_title,
             score=int(item["score"]),
             lon=float(item["lon"]),
             lat=float(item["lat"]),
@@ -2632,15 +2878,18 @@ def build_decision_artifact(
 
     primary_record = selected[0]
     challenger_record = selected[1] if len(selected) > 1 else {}
-    primary_record["reasoning"] = (
-        _forced_primary_visibility(primary_record, challenger_record, requested_wind)
-        + " "
-        + str(primary_record["reasoning"]).rstrip()
-        + " "
-        + _competitive_edge(primary_record, challenger_record)
-        + " "
-        + _conditional_outlook(primary_record, challenger_record, requested_wind)
-    ).strip()
+    if primary_record.get("no_strong_sit"):
+        primary_record["reasoning"] = str(primary_record.get("reasoning") or "No high-quality sit passed the huntability gate.")
+    else:
+        primary_record["reasoning"] = (
+            _forced_primary_visibility(primary_record, challenger_record, requested_wind)
+            + " "
+            + str(primary_record["reasoning"]).rstrip()
+            + " "
+            + _competitive_edge(primary_record, challenger_record)
+            + " "
+            + _conditional_outlook(primary_record, challenger_record, requested_wind)
+        ).strip()
     primary.reasoning = str(primary_record["reasoning"])
     confidence_value = int(primary_record["confidence"])
     readiness = _readiness_label(float(primary_record["score"]), float(confidence_value), primary_record["wind_fit"])
@@ -2661,6 +2910,7 @@ def build_decision_artifact(
         )
 
     legal_coverage_state = "strong" if analysis_mode == "legal_hunt" and len(selected) >= 3 else "partial" if analysis_mode == "legal_hunt" else "none"
+    no_strong_sit = bool(primary_record.get("no_strong_sit")) or analysis_mode == "no_strong_sit"
     provider_penalty_reasons = primary_record.get("provider_reliability_reasons") or []
     trust_tags = _derive_primary_trust_tags(primary_record, selected[1:3], requested_wind)
     if provider_penalty_reasons:
@@ -2669,8 +2919,16 @@ def build_decision_artifact(
 
     summary = {
         "analysis_mode": analysis_mode,
+        "no_strong_sit": no_strong_sit,
+        "huntability_gate_v2": {
+            "enabled": True,
+            "parcel_features_available": len(_challenge_geojson_features(parcel_geojson_for_gate)) if parcel_geojson_for_gate else 0,
+            "rejected_candidates": len(challenge_rejections),
+            "sample_rejections": challenge_rejections[:6],
+            "decision": "No Strong Sit Found" if no_strong_sit else "Primary sit passed huntability gate",
+        },
         "terrain_only_fallback": analysis_mode != "legal_hunt",
-        "mode": "terrain_only_exploration" if analysis_mode != "legal_hunt" else str(operator_context.get("mode") or "hunter"),
+        "mode": "no_strong_sit" if no_strong_sit else ("terrain_only_exploration" if analysis_mode != "legal_hunt" else str(operator_context.get("mode") or "hunter")),
         "legal_state": legal_coverage_state,
         "legal_state_label": "Strong verified legal hunting land" if legal_coverage_state == "strong" else "Partial verified legal hunting land" if legal_coverage_state == "partial" else "No verified legal hunting land",
         "preferred_wind": primary_record["preferred_wind"],
@@ -2679,7 +2937,7 @@ def build_decision_artifact(
         "confidence": confidence_value,
         "confidence_label": "High" if confidence_value >= 78 else "Medium" if confidence_value >= 62 else "Low",
         "trust_tags": trust_tags,
-        "readiness": readiness if analysis_mode == "legal_hunt" else "Terrain Review",
+        "readiness": "No Strong Sit Found" if no_strong_sit else (readiness if analysis_mode == "legal_hunt" else "Terrain Review"),
         "best_time_label": primary_record["best_time_label"],
         "best_time_window": primary_record["best_time_window"],
         "cluster_summary": cluster_summary,
@@ -2714,6 +2972,7 @@ def build_decision_artifact(
             "When no verified legal candidates exist inside the selected bbox, the system falls back to terrain-only review mode instead of crashing.",
             "Provider health now reduces confidence and score when terrain or legal data is degraded.",
             "Vegetation classification now meaningfully changes concealment, bedding confidence, and weak-cover penalties inside sit scoring.",
+            "Challenge Huntability Gate v2 blocks primary sits inside available private parcel context, water/floodplain-low terrain, steep or inaccessible slopes, exposed edge traps, and returns No Strong Sit Found instead of forcing a bad dot.",
         ],
         "summary": summary,
     }

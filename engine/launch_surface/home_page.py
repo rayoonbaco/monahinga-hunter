@@ -873,6 +873,51 @@ h1 + .card {
   opacity:.92;
 }
 
+/* MONAHINGA_WILDLIFE_IDENTITY_POLISH_V1_2026_05_10: compact selected-species card on launch page. */
+.species-identity-card{
+  margin-top:8px;
+  padding:9px 10px;
+  border-radius:14px;
+  border:1px solid rgba(174,241,134,.24);
+  background:linear-gradient(135deg, rgba(20,44,29,.72), rgba(7,15,22,.84));
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+.species-identity-icon{
+  flex:0 0 38px;
+  height:38px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  font-size:24px;
+  background:rgba(255,209,102,.12);
+  border:1px solid rgba(255,209,102,.18);
+}
+.species-identity-copy{min-width:0;}
+.species-identity-copy strong{
+  display:block;
+  font-size:13px;
+  color:#fff4dc;
+  line-height:1.1;
+}
+.species-identity-copy span{
+  display:block;
+  margin-top:4px;
+  font-size:11px;
+  line-height:1.35;
+  color:#cbd8dc;
+}
+.species-identity-copy em{
+  display:block;
+  margin-top:5px;
+  font-style:normal;
+  font-size:10px;
+  line-height:1.35;
+  color:#f5d38a;
+}
+
 /* MONAHINGA_PAGE1_PARCEL_SOURCE_STATUS_V2_2026_05_06 */
 .parcel-source-status{
   flex-basis:100%;
@@ -1177,6 +1222,31 @@ h1 + .card {
   <option value="coyote">Coyote</option>
   <option value="javelina">Javelina</option>
 </select>
+          <div id="species_identity_card" class="species-identity-card" data-created-by="MONAHINGA_WILDLIFE_IDENTITY_POLISH_V1_2026_05_10">
+            <div id="species_identity_icon" class="species-identity-icon" aria-hidden="true">◇</div>
+            <div class="species-identity-copy">
+              <strong id="species_identity_title">Regional game context</strong>
+              <span id="species_identity_body">Choose a species after the BBox is set. The list is gated by state and local plausibility.</span>
+              <em id="species_identity_tip">Seasons, tags, weapons, and permission still require verification.</em>
+            </div>
+          </div>
+        </div>
+
+        <!-- MONAHINGA_FUTURE_HUNT_PLANNER_V2: future-hunt planning context. -->
+        <div class="field">
+          <label>Hunt Timing Plan</label>
+          <select id="hunt_plan_window">
+            <option value="now">Current / live conditions</option>
+            <option value="today_evening">Today evening / last light forecast check</option>
+            <option value="tomorrow_morning">Tomorrow morning / first light forecast check</option>
+            <option value="tomorrow_evening">Tomorrow evening / last light forecast check</option>
+            <option value="custom">Custom date/time forecast check</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Custom Hunt Date/Time</label>
+          <input id="hunt_plan_datetime" type="datetime-local" autocomplete="off">
+          <small class="micro-copy">Example: 05/13/2026 05:30 AM. This v2 pass frames the hunt plan around the selected window; verify live forecast before field use.</small>
         </div>
 
         <div class="field full">
@@ -2471,6 +2541,94 @@ function deriveRegionIdentity(b) {
   }
   return { key:'appalachian', label:'Appalachian whitetail terrain', animals:'Whitetail · Turkey country', mood:'Terrain mood · shaded timber folds', story:'This box reads like Appalachian whitetail country: broken hills, shaded side-slopes, and decision points that reward disciplined access and terrain-aware setups.' };
 }
+// MONAHINGA_SPECIES_GATE_V1: conservative BBox/state species filter.
+const MONAHINGA_SPECIES_BY_STATE = {
+  PA: ['default','whitetail','black_bear','turkey','coyote'],
+  NY: ['default','whitetail','black_bear','turkey','coyote'],
+  WY: ['default','whitetail','mule_deer','elk','moose','bighorn','pronghorn','black_bear','turkey','coyote'],
+  CO: ['default','whitetail','mule_deer','elk','moose','bighorn','pronghorn','black_bear','turkey','coyote'],
+  SD: ['default','whitetail','mule_deer','pronghorn','turkey','coyote'],
+  MT: ['default','whitetail','mule_deer','elk','moose','bighorn','pronghorn','black_bear','turkey','coyote']
+};
+function monahingaStateFromBBox(bbox) {
+  const lon = (Number(bbox.minLon) + Number(bbox.maxLon)) / 2;
+  const lat = (Number(bbox.minLat) + Number(bbox.maxLat)) / 2;
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return '';
+  if (lon >= -80.7 && lon <= -74.6 && lat >= 39.6 && lat <= 42.6) return 'PA';
+  if (lon >= -79.9 && lon <= -71.7 && lat >= 40.3 && lat <= 45.1) return 'NY';
+  if (lon >= -111.2 && lon <= -104.0 && lat >= 40.9 && lat <= 45.1) return 'WY';
+  if (lon >= -109.2 && lon <= -101.9 && lat >= 36.8 && lat <= 41.1) return 'CO';
+  if (lon >= -104.2 && lon <= -96.3 && lat >= 42.3 && lat <= 46.1) return 'SD';
+  if (lon >= -116.2 && lon <= -104.0 && lat >= 44.2 && lat <= 49.1) return 'MT';
+  return '';
+}
+// MONAHINGA_WILDLIFE_IDENTITY_POLISH_V1_2026_05_10: species identity card helpers.
+const MONAHINGA_SPECIES_IDENTITY = {
+  default: {icon:'◇', title:'General terrain read', body:'Reads terrain, access, cover, wind, and legal-land context without locking to one animal.', tip:'Good for scouting a new BBox before choosing a species.'},
+  whitetail: {icon:'🦌', title:'Whitetail deer', body:'Prioritizes bedding edges, side-hill travel, cover transitions, and low-pressure access.', tip:'Best when wind, entry route, and evening or morning movement all agree.'},
+  mule_deer: {icon:'🦌', title:'Mule deer', body:'Looks for broken slopes, benches, open-to-cover transitions, and glassable terrain.', tip:'Western terrain read: visibility and escape cover matter.'},
+  elk: {icon:'🫎', title:'Elk', body:'Favors saddles, benches, timber edges, escape cover, and wind-safe approaches.', tip:'Keep thermals, pressure, and daylight movement windows in mind.'},
+  moose: {icon:'🫎', title:'Moose', body:'Wet cover, browse edges, and low-pressure corridors matter where this species is legal and present.', tip:'Only appears where the state gate allows it.'},
+  bighorn: {icon:'🐏', title:'Bighorn sheep', body:'Steep escape terrain, open visibility, and approach discipline drive the read.', tip:'Highly location-specific; verify unit, tags, and regulations.'},
+  pronghorn: {icon:'🦌', title:'Pronghorn', body:'Open-country visibility, approach concealment, and wind exposure dominate the read.', tip:'Use terrain breaks and avoid skyline exposure.'},
+  black_bear: {icon:'🐻', title:'Black bear', body:'Food edges, shaded drainages, thick cover, and quiet access become more important.', tip:'Verify season, bait rules, weapons, and local restrictions.'},
+  turkey: {icon:'🦃', title:'Wild turkey', body:'Roost-to-feed movement, ridge benches, field edges, and open timber shape the setup.', tip:'PA turkey specialist: morning setups should protect the roost, avoid crowding birds, and keep calling disciplined.'},
+  hog: {icon:'🐗', title:'Feral hog', body:'Water, cover, disturbed ground, and food edges matter only where hogs are realistically present.', tip:'State gate should hide this where not locally relevant.'},
+  coyote: {icon:'🐺', title:'Coyote', body:'Travel seams, downwind approach control, visibility, and human-pressure edges matter.', tip:'Keep wind and shooting lanes honest.'},
+  javelina: {icon:'🐗', title:'Javelina', body:'Arid cover, washes, food patches, and warm-country habitat matter where present.', tip:'State gate should hide this outside plausible range.'}
+};
+function monahingaUpdateSpeciesIdentityCard() {
+  const select = document.getElementById('target_species');
+  const card = document.getElementById('species_identity_card');
+  if (!select || !card) return;
+  const bbox = currentBBox();
+  const state = monahingaStateFromBBox(bbox);
+  const key = select.value || 'default';
+  const info = MONAHINGA_SPECIES_IDENTITY[key] || MONAHINGA_SPECIES_IDENTITY.default;
+  const icon = document.getElementById('species_identity_icon');
+  const title = document.getElementById('species_identity_title');
+  const body = document.getElementById('species_identity_body');
+  const tip = document.getElementById('species_identity_tip');
+  if (icon) icon.textContent = info.icon;
+  if (title) title.textContent = info.title + (state ? ' · ' + state : '');
+  if (body) body.textContent = info.body;
+  if (tip) {
+    const stateNote = state ? ' Species gate is active for ' + state + '.' : ' Species gate could not confidently identify the state from this BBox.';
+    tip.textContent = info.tip + stateNote + ' Verify seasons, tags, permission, and local rules.';
+  }
+}
+
+function monahingaApplySpeciesGate() {
+  const select = document.getElementById('target_species');
+  if (!select) return;
+  const bbox = currentBBox();
+  const state = monahingaStateFromBBox(bbox);
+  const allowedList = MONAHINGA_SPECIES_BY_STATE[state] || null;
+  let note = document.getElementById('species_gate_note');
+  if (!note && select.parentNode) {
+    note = document.createElement('div');
+    note.id = 'species_gate_note';
+    note.className = 'helper';
+    note.style.marginTop = '6px';
+    select.parentNode.appendChild(note);
+  }
+  if (!allowedList) {
+    Array.from(select.options).forEach(function(opt) { opt.disabled = false; opt.hidden = false; });
+    if (note) note.textContent = 'Species gate: state not confidently identified from this BBox. Verify local seasons, tags, and species availability.';
+    monahingaUpdateSpeciesIdentityCard();
+    return;
+  }
+  const allowed = new Set(allowedList);
+  Array.from(select.options).forEach(function(opt) {
+    const ok = allowed.has(opt.value);
+    opt.disabled = !ok;
+    opt.hidden = !ok;
+  });
+  if (!allowed.has(select.value)) select.value = allowed.has('whitetail') ? 'whitetail' : 'default';
+  if (note) note.textContent = 'Species gate: ' + state + ' BBox. Showing conservative in-state target options only. Seasons, tags, weapons, and permission still require verification.';
+  monahingaUpdateSpeciesIdentityCard();
+}
+
 function applyRegionIdentityFromCurrent() {
   const bbox = currentBBox();
   const identity = deriveRegionIdentity({
@@ -2521,6 +2679,7 @@ if (speciesSelect) {
       speciesSelect.value = 'whitetail';
     }
   }
+  monahingaApplySpeciesGate();
 }
 }
 
@@ -3287,6 +3446,7 @@ function storedSelectionPolygonForPayload() {
 }
 
 function payloadFromForm() {
+  monahingaApplySpeciesGate();
   const bounds = normalizeBoundsFromInputs();
   if (!bounds) throw new Error('Please enter or draw a valid bbox before running.');
   applyBBoxToForm(bounds);
@@ -3300,7 +3460,9 @@ function payloadFromForm() {
     wind_direction: String(document.getElementById('wind_direction').value || '').trim(),
     notes: String(document.getElementById('notes').value || '').trim(),
     mode: String(document.getElementById('mode').value || 'hunter').trim(),
-    selected_species: document.getElementById('target_species')?.value || 'default'
+    selected_species: document.getElementById('target_species')?.value || 'default',
+    hunt_plan_window: String(document.getElementById('hunt_plan_window')?.value || 'now').trim(),
+    hunt_plan_datetime: String(document.getElementById('hunt_plan_datetime')?.value || '').trim()
   };
 
   const selectionPolygon = storedSelectionPolygonForPayload() || selectionPolygonForPayload(bounds);
@@ -3458,6 +3620,8 @@ const speciesSelect = document.getElementById('target_species');
 if (speciesSelect) {
   speciesSelect.addEventListener('change', () => {
     speciesSelect.dataset.userSelected = "true";
+    monahingaApplySpeciesGate();
+    monahingaUpdateSpeciesIdentityCard();
   });
 }
 </script>

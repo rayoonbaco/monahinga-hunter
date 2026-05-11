@@ -79,6 +79,155 @@ def _label_family(label: object) -> str:
     return text or "unknown"
 
 
+
+
+# MONAHINGA_CHALLENGE_SIT_ALGORITHM_V1
+# Algorithm specialists:
+# - Access Reality Engineer: blocks sits a hunter cannot practically reach.
+# - Parcel Legality Sentinel: keeps primary sits off private parcel context when parcel data exists.
+# - Water/Slope Gatekeeper: rejects water, extreme slope, exposed peak-only crowns, and impenetrable terrain proxies.
+# - Wildlife Behavior Director: keeps PAD-US/legal signal as a qualifier, not the automatic winner.
+def _iter_geojson_features(geojson: object) -> list[dict[str, Any]]:
+    if not isinstance(geojson, dict):
+        return []
+    if geojson.get("type") == "FeatureCollection":
+        return [f for f in (geojson.get("features") or []) if isinstance(f, dict)]
+    if geojson.get("type") == "Feature":
+        return [geojson]
+    if geojson.get("type") in {"Polygon", "MultiPolygon"}:
+        return [{"type": "Feature", "properties": {}, "geometry": geojson}]
+    return []
+
+
+def _point_in_ring(lon: float, lat: float, ring: object) -> bool:
+    if not isinstance(ring, list) or len(ring) < 3:
+        return False
+    inside = False
+    j = len(ring) - 1
+    for i, current in enumerate(ring):
+        previous = ring[j]
+        try:
+            xi, yi = float(current[0]), float(current[1])
+            xj, yj = float(previous[0]), float(previous[1])
+        except Exception:
+            j = i
+            continue
+        crosses = ((yi > lat) != (yj > lat)) and (lon < (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi)
+        if crosses:
+            inside = not inside
+        j = i
+    return inside
+
+
+def _point_in_polygon_coords(lon: float, lat: float, coords: object) -> bool:
+    if not isinstance(coords, list) or not coords:
+        return False
+    outer = coords[0]
+    if not _point_in_ring(lon, lat, outer):
+        return False
+    for hole in coords[1:]:
+        if _point_in_ring(lon, lat, hole):
+            return False
+    return True
+
+
+def _geometry_contains_point(geom: object, lon: float, lat: float) -> bool:
+    if not isinstance(geom, dict):
+        return False
+    gtype = geom.get("type")
+    coords = geom.get("coordinates")
+    if gtype == "Polygon":
+        return _point_in_polygon_coords(lon, lat, coords)
+    if gtype == "MultiPolygon" and isinstance(coords, list):
+        return any(_point_in_polygon_coords(lon, lat, poly) for poly in coords)
+    return False
+
+
+def _point_in_parcel_context(lon: float, lat: float, parcel_geojson: object) -> bool:
+    for feature in _iter_geojson_features(parcel_geojson):
+        if _geometry_contains_point(feature.get("geometry"), lon, lat):
+            return True
+    return False
+
+
+def _zone_constraint_reasons(zone: object, parcel_geojson: object | None) -> list[str]:
+    reasons: list[str] = []
+    try:
+        lon = float(getattr(zone, "lon"))
+        lat = float(getattr(zone, "lat"))
+        elevation = float(getattr(zone, "elevation_norm"))
+        slope = float(getattr(zone, "slope_norm"))
+        relief = float(getattr(zone, "relief_norm"))
+        drainage = float(getattr(zone, "drainage_signal"))
+        bench = float(getattr(zone, "bench_signal"))
+        edge = float(getattr(zone, "edge_signal"))
+    except Exception:
+        return ["Rejected: candidate signals were not readable enough for the safety/reality gate."]
+
+    if parcel_geojson and _point_in_parcel_context(lon, lat, parcel_geojson):
+        reasons.append("Rejected: candidate falls inside available private-parcel context. Use PAD-US/public signal outside parcel context or verify permission manually.")
+
+    water_like = (
+        (elevation <= 0.16 and drainage >= 0.40 and slope <= 0.24)
+        or (elevation <= 0.12 and relief <= 0.22)
+    )
+    if water_like:
+        reasons.append("Rejected: candidate looks water/floodplain-low from the terrain signals.")
+
+    if slope >= 0.82:
+        reasons.append("Rejected: slope is too steep for a practical primary sit/access recommendation.")
+
+    if relief >= 0.88 and slope >= 0.68:
+        reasons.append("Rejected: broken relief and steepness suggest impenetrable or unsafe approach terrain.")
+
+    if elevation >= 0.96 and slope >= 0.42 and bench <= 0.34:
+        reasons.append("Rejected: exposed peak/top crown with weak bench signal; likely hard to reach and poor concealment.")
+
+    if edge <= 0.16 and bench <= 0.18 and slope >= 0.58:
+        reasons.append("Rejected: weak edge/bench value with hard slope; not enough hunting setup value for the effort.")
+
+    return reasons
+
+
+def _apply_challenge_sit_constraints(zones: list[Any], parcel_geojson: object | None) -> tuple[list[Any], dict[str, Any]]:
+    rejected: list[dict[str, Any]] = []
+    accepted: list[Any] = []
+    for zone in zones:
+        reasons = _zone_constraint_reasons(zone, parcel_geojson)
+        if reasons:
+            rejected.append({
+                "id": getattr(zone, "id", "unknown"),
+                "label": getattr(zone, "label", "unknown"),
+                "lon": getattr(zone, "lon", None),
+                "lat": getattr(zone, "lat", None),
+                "reasons": reasons,
+            })
+        else:
+            accepted.append(zone)
+
+    parcel_features = len(_iter_geojson_features(parcel_geojson)) if parcel_geojson else 0
+    warnings: list[str] = []
+    if parcel_features:
+        warnings.append("Private parcel context was available, so primary candidates inside parcel polygons were removed when alternatives existed.")
+    warnings.append("Challenge gate also screens obvious water/floodplain lows, extreme slopes, exposed peak crowns, and impenetrable terrain proxies.")
+
+    strict_enough = len(accepted) >= 3
+    if not strict_enough:
+        warnings.append("Strict sit gate found fewer than three clean candidates, so the model kept the original pool with stronger risk warnings. Treat this run as scouting-only until verified.")
+
+    return (accepted if strict_enough else zones), {
+        "enabled": True,
+        "version": "MONAHINGA_CHALLENGE_SIT_ALGORITHM_V1",
+        "parcel_features_available": parcel_features,
+        "original_candidates": len(zones),
+        "accepted_candidates": len(accepted),
+        "rejected_candidates": len(rejected),
+        "strict_filter_applied": strict_enough,
+        "warnings": warnings,
+        "sample_rejections": rejected[:6],
+    }
+
+
 def _curate_top_zones(scored: list[dict[str, Any]], *, limit: int = 5) -> list[dict[str, Any]]:
     """Pick hunt options that feel useful, not repetitive."""
     if not scored:
@@ -198,6 +347,7 @@ def run_hunter_core(
     notes: str = "",
     mode: str = "hunter",
     max_zones: int = 18,
+    parcel_geojson: dict | None = None,
 ) -> dict[str, Any]:
     """Run fast deterministic hunt intelligence before the legacy decision renderer."""
     started = time.perf_counter()
@@ -209,6 +359,7 @@ def run_hunter_core(
         heightmap_path=heightmap_path,
         max_zones=max_zones,
     )
+    zones_for_scoring, challenge_gate = _apply_challenge_sit_constraints(zones, parcel_geojson)
 
     scored = [
         score_zone(
@@ -218,7 +369,7 @@ def run_hunter_core(
             terrain_bias=terrain_bias,
             notes=notes,
         ).to_dict()
-        for zone in zones
+        for zone in zones_for_scoring
     ]
     scored.sort(key=lambda z: (int(z.get("score", 0)), int(z.get("confidence", 0))), reverse=True)
 
@@ -241,6 +392,7 @@ def run_hunter_core(
         },
         "summary": _plain_summary(top),
         "zones_considered": len(scored),
+        "challenge_sit_gate": challenge_gate,
         "top_zones": top,
         "all_zones": scored,
         "curation": {
@@ -257,9 +409,11 @@ def run_hunter_core(
             "food_water_route": "0-10",
             "pressure_avoidance": "0-10",
             "cover_value": "0-10",
+            "challenge_constraints": "hard gate before ranking",
         },
         "warnings": [
             "This is a decision-support layer, not legal or safety authority.",
             "Always verify land access, laws, wind, thermals, and animal sign in the field.",
-        ],
+            "Challenge sit gate blocks obvious private-parcel, water, extreme slope, exposed peak, and impenetrable-terrain candidates when alternatives exist.",
+        ] + list(challenge_gate.get("warnings") or []),
     }
