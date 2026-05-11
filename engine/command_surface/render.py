@@ -95,6 +95,23 @@ def _no_strong_sit_markup(decision_summary: dict) -> str:
         '</div>'
     )
 
+def _private_land_permission_markup(operator_context: dict, decision_summary: dict) -> str:
+    mode = str((operator_context or {}).get("private_land_mode") or ((decision_summary or {}).get("huntability_gate_v2") or {}).get("private_land_mode") or "avoid").strip().lower()
+    enabled = mode in {"permission_granted", "include_private", "include", "allowed", "allow"}
+    if enabled:
+        return (
+            '<div class="intel-row provider-warn">'
+            '<strong>Private parcel mode</strong>'
+            '<span>Permission granted mode is ON. Known private parcel context can remain in sit calculations, but landowner permission, boundaries, season rules, and access still require field verification.</span>'
+            '</div>'
+        )
+    return (
+        '<div class="intel-row provider-ok">'
+        '<strong>Private parcel mode</strong>'
+        '<span>Avoid known private parcels is ON. If the hunter has confirmed permission, rerun with Permission granted mode on Page 1.</span>'
+        '</div>'
+    )
+
 def _wind_sentence(decision_summary: dict) -> str:
     current = str(decision_summary.get("current_wind") or "Not set")
     preferred = str(decision_summary.get("preferred_wind") or "Unknown")
@@ -795,6 +812,7 @@ def render_command_surface(run_root: Path, contract: TerrainTruthContract) -> Pa
             _hunter_core_markup(operator_context),
             f'<div class="intel-row"><strong>Analysis mode</strong><span>{html.escape((decision_summary.get("selected_species") or "General Terrain Read").replace("_"," ").title())}</span></div>',
             _future_hunt_plan_markup(operator_context),
+            _private_land_permission_markup(operator_context, decision_summary),
             f'<div class="intel-row"><strong>Species read</strong><span>{html.escape((decision_summary.get("species_profile") or {}).get("positive_hook",""))}</span></div>',
             f'<div class="intel-row"><strong>Cover read</strong><span>{html.escape(cover_read)}</span></div>',
             f'<div class="intel-row"><strong>Vegetation impact</strong><span>{html.escape(veg_impact)}</span></div>',

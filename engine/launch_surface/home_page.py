@@ -1249,6 +1249,16 @@ h1 + .card {
           <small class="micro-copy">Example: 05/13/2026 05:30 AM. This v2 pass frames the hunt plan around the selected window; verify live forecast before field use.</small>
         </div>
 
+        <!-- MONAHINGA_PRIVATE_LAND_PERMISSION_MODE_V1: explicit private parcel scoring choice. -->
+        <div class="field">
+          <label>Private Parcel Scoring</label>
+          <select id="private_land_mode">
+            <option value="avoid" selected>Avoid known private parcels</option>
+            <option value="permission_granted">Permission granted — include private parcels</option>
+          </select>
+          <small class="micro-copy">Default is safest. Use permission mode only when the hunter has confirmed landowner permission and boundary confidence.</small>
+        </div>
+
         <div class="field full">
           <label>Operator Notes</label>
           <textarea id="notes" placeholder="Examples: trail cam near creek, suspected bedding on east shoulder, keep access low pressure"></textarea>
@@ -3462,7 +3472,8 @@ function payloadFromForm() {
     mode: String(document.getElementById('mode').value || 'hunter').trim(),
     selected_species: document.getElementById('target_species')?.value || 'default',
     hunt_plan_window: String(document.getElementById('hunt_plan_window')?.value || 'now').trim(),
-    hunt_plan_datetime: String(document.getElementById('hunt_plan_datetime')?.value || '').trim()
+    hunt_plan_datetime: String(document.getElementById('hunt_plan_datetime')?.value || '').trim(),
+    private_land_mode: String(document.getElementById('private_land_mode')?.value || 'avoid').trim()
   };
 
   const selectionPolygon = storedSelectionPolygonForPayload() || selectionPolygonForPayload(bounds);

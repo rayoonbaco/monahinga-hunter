@@ -2088,7 +2088,7 @@ def _challenge_point_in_private_parcel_context(lon: float, lat: float, parcel_ge
     return False, ""
 
 
-def _challenge_decision_rejection_reasons(record: dict, sample: dict, terrain_read: dict, practical_read: dict, validity_read: dict, parcel_geojson: object) -> list[str]:
+def _challenge_decision_rejection_reasons(record: dict, sample: dict, terrain_read: dict, practical_read: dict, validity_read: dict, parcel_geojson: object, private_land_mode: str = "avoid") -> list[str]:
     reasons: list[str] = []
     lon = float(record.get("lon") or 0.0)
     lat = float(record.get("lat") or 0.0)
@@ -2097,10 +2097,11 @@ def _challenge_decision_rejection_reasons(record: dict, sample: dict, terrain_re
     local_relief = float(sample.get("local_relief") or 0.0)
     slope_bias = str(record.get("slope_bias") or "").lower()
 
-    if parcel_geojson:
+    permission_mode = str(private_land_mode or "avoid").strip().lower() in {"permission_granted", "include_private", "include", "allowed", "allow"}
+    if parcel_geojson and not permission_mode:
         inside_private, owner_hint = _challenge_point_in_private_parcel_context(lon, lat, parcel_geojson)
         if inside_private:
-            reasons.append(f"inside available private/unknown parcel context ({owner_hint}); verify permission or choose a non-private/PAD-US interior option")
+            reasons.append(f"inside available private/unknown parcel context ({owner_hint}); enable permission mode only if landowner permission is confirmed")
 
     validity_summary = str(validity_read.get("summary_reason") or "").lower()
     validity_bits = " ".join(str(bit) for bit in (validity_read.get("reason_bits") or [])).lower()
@@ -2242,6 +2243,8 @@ def build_decision_artifact(
     suppressed_candidates: list[dict] = []
     challenge_rejections: list[dict] = []
     parcel_geojson_for_gate = operator_context.get("parcel_geojson")
+    private_land_mode = str(operator_context.get("private_land_mode") or "avoid").strip().lower()
+    private_land_permission_enabled = private_land_mode in {"permission_granted", "include_private", "include", "allowed", "allow"}
 
     for feat in legal_features:
         props = dict(feat.get("properties") or {})
@@ -2610,6 +2613,7 @@ def build_decision_artifact(
                 practical_read,
                 validity_read,
                 parcel_geojson_for_gate,
+                private_land_mode,
             )
             if challenge_reasons:
                 record["huntability_reject_reasons"] = challenge_reasons
@@ -2922,6 +2926,8 @@ def build_decision_artifact(
         "no_strong_sit": no_strong_sit,
         "huntability_gate_v2": {
             "enabled": True,
+            "private_land_mode": "permission_granted" if private_land_permission_enabled else "avoid",
+            "private_land_permission_enabled": bool(private_land_permission_enabled),
             "parcel_features_available": len(_challenge_geojson_features(parcel_geojson_for_gate)) if parcel_geojson_for_gate else 0,
             "rejected_candidates": len(challenge_rejections),
             "sample_rejections": challenge_rejections[:6],
@@ -2972,7 +2978,7 @@ def build_decision_artifact(
             "When no verified legal candidates exist inside the selected bbox, the system falls back to terrain-only review mode instead of crashing.",
             "Provider health now reduces confidence and score when terrain or legal data is degraded.",
             "Vegetation classification now meaningfully changes concealment, bedding confidence, and weak-cover penalties inside sit scoring.",
-            "Challenge Huntability Gate v2 blocks primary sits inside available private parcel context, water/floodplain-low terrain, steep or inaccessible slopes, exposed edge traps, and returns No Strong Sit Found instead of forcing a bad dot.",
+            "Challenge Huntability Gate v2 blocks primary sits inside available private parcel context unless explicit Permission Granted mode is enabled, plus water/floodplain-low terrain, steep or inaccessible slopes, exposed edge traps, and returns No Strong Sit Found instead of forcing a bad dot.",
         ],
         "summary": summary,
     }

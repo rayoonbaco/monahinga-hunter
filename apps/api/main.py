@@ -136,6 +136,7 @@ class RunRequest(BaseModel):
     selected_species: str = Field(default="default")
     hunt_plan_window: str = Field(default="now")  # MONAHINGA_FUTURE_HUNT_PLANNER_V1
     hunt_plan_datetime: str = Field(default="")
+    private_land_mode: str = Field(default="avoid")  # MONAHINGA_PRIVATE_LAND_PERMISSION_MODE_V1
     selection_polygon: list[list[float]] | None = Field(default=None)
     parcel_geojson: dict | None = Field(default=None)  # MONAHINGA_ACCEPT_PARCEL_GEOJSON_2026_05_06  # MONAHINGA_ACCEPT_SELECTION_POLYGON_2026_05_06
 
@@ -557,10 +558,16 @@ def _build_and_validate_once(
     return contract, terrain_validation
 
 
+def _monahinga_local_dev_free_runs_enabled() -> bool:
+    """Allow unlimited local testing only when the local starter explicitly opts in."""
+    value = (os.getenv("MONAHINGA_LOCAL_DEV_FREE_RUNS") or "").strip().lower()
+    return value in {"1", "true", "yes", "on", "local"}
+
+
 def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = None) -> dict:
     global RUN_COUNT
 
-    if RUN_COUNT >= MAX_RUNS:
+    if RUN_COUNT >= MAX_RUNS and not _monahinga_local_dev_free_runs_enabled():
         return {"redirect": "/checkout"}
 
     bbox.validate_us_hunting_box()
@@ -662,8 +669,8 @@ def instructions() -> str:
 
 @app.get("/checkout")
 def checkout() -> RedirectResponse:
-    payment_link = os.getenv("MONAHINGA_STRIPE_PAYMENT_LINK") or os.getenv("STRIPE_PAYMENT_LINK")
-    if not payment_link:
+    payment_link = (os.getenv("MONAHINGA_STRIPE_PAYMENT_LINK") or os.getenv("STRIPE_PAYMENT_LINK") or "").strip()
+    if payment_link.lower() in {"", "undefined", "null", "none"}:
         payment_link = "https://buy.stripe.com/8x2aEWb6f5qR7Td1mweEo00"
     return RedirectResponse(payment_link, status_code=303)
 
@@ -2604,6 +2611,7 @@ def run_terrain_truth(req: RunRequest):
                 "species_gate_original": req.selected_species or "default",
                 "hunt_plan_window": req.hunt_plan_window or "now",  # MONAHINGA_FUTURE_HUNT_PLANNER_V1
                 "hunt_plan_datetime": req.hunt_plan_datetime or "",
+                "private_land_mode": req.private_land_mode or "avoid",
                 "selection_polygon": req.selection_polygon,
                 "parcel_geojson": parcel_geojson_for_run,
             },
