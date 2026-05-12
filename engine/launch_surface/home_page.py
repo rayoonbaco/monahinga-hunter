@@ -1079,9 +1079,9 @@ h1 + .card {
 <body>
 <div id="not_huntable_overlay" class="not-huntable-overlay" role="alertdialog" aria-modal="true" aria-labelledby="not_huntable_title">
   <div class="not-huntable-box">
-    <h2 id="not_huntable_title">NOT HUNTABLE LAND</h2>
-    <p>Please select another BBox over real natural/legal hunting ground.</p>
-    <div class="small-copy">Monahinga blocks city blocks, suburbs, parking lots, roads, and non-hunting land so it does not generate a fake terrain read.</div>
+    <h2 id="not_huntable_title">NO PERMITTED SIT FOUND</h2>
+    <p>This selection did not pass the current land-permission and huntability checks.</p>
+    <div class="small-copy">If this is private land where the hunter has confirmed landowner permission, switch Private Parcel Scoring to Permission granted. Otherwise redraw over public/legal hunting ground or a better natural hunting area.</div>
     <button type="button" onclick="hideNotHuntableOverlay()">Return to BBox</button>
   </div>
 </div>
@@ -2845,8 +2845,8 @@ function applyPastedBBox() {
     if (blockedLand) {
       showNotHuntableOverlay();
       setStatus(
-        'NOT HUNTABLE LAND\n\n' +
-        'Please select another BBox over real natural/legal hunting ground.\n\n' +
+        'NO PERMITTED SIT FOUND\n\n' +
+        'This selection did not pass the current land-permission and huntability checks. If permission is confirmed, use Permission granted mode; otherwise redraw over public/legal hunting ground.\n\n' +
         message
       );
     } else {
@@ -3543,8 +3543,8 @@ async function runCustom() {
       if (isNotHuntableRunError(detail, res.status)) {
         showNotHuntableOverlay();
         setStatus(
-          'NOT HUNTABLE LAND\n\n' +
-          'Please select another BBox over real natural/legal hunting ground.\n\n' +
+          'NO PERMITTED SIT FOUND\n\n' +
+          'This selection did not pass the current land-permission and huntability checks. If permission is confirmed, use Permission granted mode; otherwise redraw over public/legal hunting ground.\n\n' +
           detail
         );
         return;
@@ -3564,8 +3564,8 @@ async function runCustom() {
     if (isNotHuntableRunError(message, 400)) {
       showNotHuntableOverlay();
       setStatus(
-        'NOT HUNTABLE LAND\n\n' +
-        'Please select another BBox over real natural/legal hunting ground.\n\n' +
+        'NO PERMITTED SIT FOUND\n\n' +
+        'This selection did not pass the current land-permission and huntability checks. If permission is confirmed, use Permission granted mode; otherwise redraw over public/legal hunting ground.\n\n' +
         message
       );
       return;

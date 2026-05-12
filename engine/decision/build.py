@@ -2057,6 +2057,86 @@ def _challenge_geometry_contains(lon: float, lat: float, geom: object) -> bool:
     return False
 
 
+# MONAHINGA_PRIMARY_SIT_BOUNDS_INTELLIGENCE_V1
+# Specialists promoted for this pass:
+# - Bounds Referee: primary/alternate sits must stay inside the drawn polygon when one exists.
+# - Polygon Truth Engineer: normalized Page 1 polygon points are converted back to lon/lat before scoring.
+# - Decision Integrity Auditor: if no candidate survives the active selection fence, the app returns No Strong Sit Found instead of forcing a dot.
+def _challenge_selection_polygon_to_lonlat(selection_polygon: object, bbox: list[float]) -> list[list[float]]:
+    """Convert Page 1 selection polygon into lon/lat points.
+
+    Page 1 normally stores normalized polygon points relative to the BBox:
+    [[0.12, 0.25], [0.62, 0.18], ...]
+    This helper also tolerates already-real lon/lat points for safety.
+    """
+    if not isinstance(selection_polygon, list) or len(selection_polygon) < 3:
+        return []
+    min_lon, min_lat, max_lon, max_lat = [float(v) for v in bbox]
+    width = max_lon - min_lon
+    height = max_lat - min_lat
+    converted: list[list[float]] = []
+    for pt in selection_polygon:
+        if not isinstance(pt, (list, tuple)) or len(pt) < 2:
+            continue
+        try:
+            x = float(pt[0])
+            y = float(pt[1])
+        except Exception:
+            continue
+        if -0.05 <= x <= 1.05 and -0.05 <= y <= 1.05:
+            lon = min_lon + width * max(0.0, min(1.0, x))
+            lat = min_lat + height * max(0.0, min(1.0, y))
+        else:
+            lon = x
+            lat = y
+        converted.append([lon, lat])
+    return converted if len(converted) >= 3 else []
+
+
+def _challenge_active_selection_ring(operator_context: dict, bbox: list[float]) -> list[list[float]]:
+    if not isinstance(operator_context, dict):
+        return []
+    return _challenge_selection_polygon_to_lonlat(operator_context.get("selection_polygon"), bbox)
+
+
+def _challenge_point_in_active_selection(lon: float, lat: float, bbox_obj: BBox, selection_ring: list[list[float]]) -> bool:
+    if not bbox_obj.contains(lon, lat):
+        return False
+    if selection_ring:
+        return _challenge_point_in_ring(lon, lat, selection_ring)
+    return True
+
+
+def _challenge_selection_centroid_or_bbox_center(bbox: list[float], selection_ring: list[list[float]]) -> tuple[float, float]:
+    min_lon, min_lat, max_lon, max_lat = [float(v) for v in bbox]
+    if selection_ring:
+        lon = sum(float(pt[0]) for pt in selection_ring) / len(selection_ring)
+        lat = sum(float(pt[1]) for pt in selection_ring) / len(selection_ring)
+        # A simple vertex-average can fall outside a concave polygon. If so, use BBox center
+        # only if it is inside the active selection; otherwise use the first polygon vertex.
+        if _challenge_point_in_ring(lon, lat, selection_ring):
+            return lon, lat
+        b_lon = (min_lon + max_lon) / 2.0
+        b_lat = (min_lat + max_lat) / 2.0
+        if _challenge_point_in_ring(b_lon, b_lat, selection_ring):
+            return b_lon, b_lat
+        return float(selection_ring[0][0]), float(selection_ring[0][1])
+    return (min_lon + max_lon) / 2.0, (min_lat + max_lat) / 2.0
+
+
+def _challenge_filter_to_active_selection(candidates: list[dict], bbox_obj: BBox, selection_ring: list[list[float]]) -> list[dict]:
+    kept: list[dict] = []
+    for item in candidates:
+        try:
+            lon = float(item.get("lon"))
+            lat = float(item.get("lat"))
+        except Exception:
+            continue
+        if _challenge_point_in_active_selection(lon, lat, bbox_obj, selection_ring):
+            kept.append(item)
+    return kept
+
+
 def _challenge_publicish_owner(props: dict) -> bool:
     text = " ".join(str(props.get(k) or "") for k in (
         "owner", "Owner", "OWNER", "OWNER_NAME", "owner_name", "Name", "NAME",
@@ -2070,22 +2150,107 @@ def _challenge_publicish_owner(props: dict) -> bool:
     return any(marker in text for marker in public_markers)
 
 
+# MONAHINGA_PRIVATE_MODE_STRICT_V2
+# Specialists promoted for this pass:
+# - Parcel Veto Referee: Avoid mode means no surfaced Primary Sit in known private/unknown parcel context.
+# - Permission Mode Steward: Permission mode allows private parcels only when explicitly selected.
+# - Chris Acceptance Tester: 1893 SR 44 N, Shinglehouse, PA 16748 private-only tests must refuse in Avoid mode and allow in Permission mode.
+def _challenge_geometry_bbox(geom: object) -> tuple[float, float, float, float] | None:
+    """Return a conservative lon/lat bbox for Polygon or MultiPolygon geometry."""
+    if not isinstance(geom, dict):
+        return None
+    coords = geom.get("coordinates")
+    points: list[tuple[float, float]] = []
+
+    def walk(obj: object) -> None:
+        if isinstance(obj, (list, tuple)) and len(obj) >= 2:
+            if all(isinstance(v, (int, float, str)) for v in obj[:2]):
+                try:
+                    points.append((float(obj[0]), float(obj[1])))
+                    return
+                except Exception:
+                    pass
+            for item in obj:
+                walk(item)
+
+    walk(coords)
+    if not points:
+        return None
+    xs = [p[0] for p in points]
+    ys = [p[1] for p in points]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _challenge_point_in_geom_bbox(lon: float, lat: float, geom: object) -> bool:
+    bbox = _challenge_geometry_bbox(geom)
+    if not bbox:
+        return False
+    min_lon, min_lat, max_lon, max_lat = bbox
+    pad_lon = max((max_lon - min_lon) * 0.002, 0.00003)
+    pad_lat = max((max_lat - min_lat) * 0.002, 0.00003)
+    return (min_lon - pad_lon) <= lon <= (max_lon + pad_lon) and (min_lat - pad_lat) <= lat <= (max_lat + pad_lat)
+
+
+def _challenge_private_owner_hint(props: dict) -> str:
+    for key in (
+        "OWNER", "Owner", "owner", "OWNER_NAME", "owner_name", "Owner_Name_1", "Owner1",
+        "Current_Ow", "CURRENT_OW", "Name", "FullName", "FullAdd", "OwnerAdd1", "Owner_Address_1",
+        "Parcel_ID", "PARCEL_ID", "PPI", "Schedule", "OBJECTID",
+    ):
+        val = str(props.get(key) or "").strip()
+        if val and val.lower() not in {"none", "null", "0"}:
+            return val[:80]
+    return "private/unknown parcel context"
+
+
 def _challenge_point_in_private_parcel_context(lon: float, lat: float, parcel_geojson: object) -> tuple[bool, str]:
+    """Return True only for private/unknown parcel context.
+
+    This is intentionally conservative in Avoid mode: exact polygon containment wins first;
+    bbox containment is used as a defensive fallback because some county parcel geometries
+    arrive simplified or with browser/map visual precision that can make a marker appear
+    inside a parcel even when the exact point test misses it.
+    """
     for feature in _challenge_geojson_features(parcel_geojson):
         geom = feature.get("geometry")
-        if not _challenge_geometry_contains(lon, lat, geom):
+        if not (_challenge_geometry_contains(lon, lat, geom) or _challenge_point_in_geom_bbox(lon, lat, geom)):
             continue
         props = dict(feature.get("properties") or {})
         if _challenge_publicish_owner(props):
             return False, "public/agency-like parcel context"
-        owner_hint = ""
-        for key in ("OWNER", "Owner", "owner", "OWNER_NAME", "Name", "FullAdd", "OwnerAdd1"):
-            val = str(props.get(key) or "").strip()
-            if val:
-                owner_hint = val[:80]
-                break
-        return True, owner_hint or "private/unknown parcel context"
+        return True, _challenge_private_owner_hint(props)
     return False, ""
+
+
+def _challenge_private_veto_filter(candidates: list[dict], parcel_geojson: object, permission_mode: bool) -> tuple[list[dict], list[dict]]:
+    """Filter surfaced sit candidates against private parcels when permission mode is off."""
+    if permission_mode or not parcel_geojson:
+        return candidates, []
+    kept: list[dict] = []
+    rejected: list[dict] = []
+    for item in candidates:
+        if item.get("no_strong_sit"):
+            kept.append(item)
+            continue
+        try:
+            lon = float(item.get("lon"))
+            lat = float(item.get("lat"))
+        except Exception:
+            rejected.append({"source_name": item.get("source_name"), "reasons": ["candidate had invalid coordinates during private parcel gate"]})
+            continue
+        inside_private, owner_hint = _challenge_point_in_private_parcel_context(lon, lat, parcel_geojson)
+        if inside_private:
+            reason = f"inside known private/unknown parcel context ({owner_hint}); switch to Permission granted mode only if permission is confirmed"
+            rejected.append({
+                "lon": lon,
+                "lat": lat,
+                "score": item.get("score"),
+                "source_name": item.get("source_name"),
+                "reasons": [reason],
+            })
+            continue
+        kept.append(item)
+    return kept, rejected
 
 
 def _challenge_decision_rejection_reasons(record: dict, sample: dict, terrain_read: dict, practical_read: dict, validity_read: dict, parcel_geojson: object, private_land_mode: str = "avoid") -> list[str]:
@@ -2135,10 +2300,9 @@ def _challenge_decision_rejection_reasons(record: dict, sample: dict, terrain_re
     return cleaned
 
 
-def _challenge_no_strong_record(bbox: list[float], dem: object, dem_range: float, dem_min: float, reasons: list[dict], vegetation_profile: dict, species_profile: dict) -> dict:
+def _challenge_no_strong_record(bbox: list[float], dem: object, dem_range: float, dem_min: float, reasons: list[dict], vegetation_profile: dict, species_profile: dict, active_selection_ring: list[list[float]] | None = None) -> dict:
     min_lon, min_lat, max_lon, max_lat = [float(v) for v in bbox]
-    lon = (min_lon + max_lon) / 2.0
-    lat = (min_lat + max_lat) / 2.0
+    lon, lat = _challenge_selection_centroid_or_bbox_center(bbox, active_selection_ring or [])
     try:
         sample = _sample_dem(dem, bbox, lon, lat)
         elev_norm = max(0.0, min(1.0, (float(sample["elevation_m"]) - dem_min) / max(dem_range, 1.0)))
@@ -2148,7 +2312,7 @@ def _challenge_no_strong_record(bbox: list[float], dem: object, dem_range: float
         elev_norm = 0.5
         elevation_m = 0.0
         slope_bias = "unknown"
-    reason_text = "No high-quality sit passed the huntability gate in this box. Expand or redraw the box; do not force a setup from marginal ground."
+    reason_text = "No high-quality sit passed the huntability gate in this box. Expand or redraw the box, or switch to Permission granted mode only when landowner permission is confirmed. Do not force a setup from marginal or unauthorized ground."
     if reasons:
         sample_reasons = []
         for item in reasons[:3]:
@@ -2245,6 +2409,7 @@ def build_decision_artifact(
     parcel_geojson_for_gate = operator_context.get("parcel_geojson")
     private_land_mode = str(operator_context.get("private_land_mode") or "avoid").strip().lower()
     private_land_permission_enabled = private_land_mode in {"permission_granted", "include_private", "include", "allowed", "allow"}
+    active_selection_ring = _challenge_active_selection_ring(operator_context, bbox)
 
     for feat in legal_features:
         props = dict(feat.get("properties") or {})
@@ -2257,7 +2422,7 @@ def build_decision_artifact(
         for idx, (fx, fy, weight) in enumerate(_candidate_offsets(), start=1):
             lon = min_lon + (max_lon - min_lon) * fx
             lat = min_lat + (max_lat - min_lat) * fy
-            if not bbox_obj.contains(lon, lat):
+            if not _challenge_point_in_active_selection(lon, lat, bbox_obj, active_selection_ring):
                 continue
             if not _feature_contains(lon, lat, geom):
                 continue
@@ -2666,6 +2831,9 @@ def build_decision_artifact(
         )
 
     analysis_mode = "legal_hunt"
+    # Final safety pass: no surfaced sit may escape the active polygon/BBox fence.
+    legal_candidates = _challenge_filter_to_active_selection(legal_candidates, bbox_obj, active_selection_ring)
+
     if not legal_candidates and challenge_rejections:
         analysis_mode = "no_strong_sit"
         legal_candidates = [
@@ -2677,6 +2845,7 @@ def build_decision_artifact(
                 challenge_rejections,
                 vegetation_profile,
                 species_profile,
+                active_selection_ring,
             )
         ]
     if not legal_candidates:
@@ -2693,6 +2862,8 @@ def build_decision_artifact(
         for idx, (fx, fy, name) in enumerate(sample_points, start=1):
             lon = box_min_lon + (box_max_lon - box_min_lon) * fx
             lat = box_min_lat + (box_max_lat - box_min_lat) * fy
+            if not _challenge_point_in_active_selection(lon, lat, bbox_obj, active_selection_ring):
+                continue
             sample = _sample_dem(dem, bbox, lon, lat)
             slope_bias = _quantize_slope(sample["slope"])
             elev_norm = max(0.0, min(1.0, (sample["elevation_m"] - dem_min) / dem_range))
@@ -2769,7 +2940,53 @@ def build_decision_artifact(
             )
         legal_candidates = fallback
 
+    if not legal_candidates:
+        analysis_mode = "no_strong_sit"
+        legal_candidates = [
+            _challenge_no_strong_record(
+                bbox,
+                dem,
+                dem_range,
+                dem_min,
+                challenge_rejections or [{"reasons": ["no candidate remained inside the active selected polygon/BBox"]}],
+                vegetation_profile,
+                species_profile,
+                active_selection_ring,
+            )
+        ]
+
     _apply_behavior_profiles_v2(legal_candidates, species_profile, bbox)
+
+    # Defense in depth: even after behavior re-ranking, keep every surfaced sit inside
+    # the active polygon/BBox fence.
+    legal_candidates = _challenge_filter_to_active_selection(legal_candidates, bbox_obj, active_selection_ring) or legal_candidates
+
+    # MONAHINGA_PRIVATE_MODE_STRICT_V2:
+    # Final hard gate. Avoid mode must not surface a Primary Sit inside available
+    # private/unknown parcel context. If the drawn polygon is private-only, return
+    # No Strong Sit Found rather than forcing a bad dot.
+    if parcel_geojson_for_gate and not private_land_permission_enabled:
+        legal_candidates, private_gate_rejections = _challenge_private_veto_filter(
+            legal_candidates,
+            parcel_geojson_for_gate,
+            private_land_permission_enabled,
+        )
+        if private_gate_rejections:
+            challenge_rejections.extend(private_gate_rejections)
+        if not legal_candidates:
+            analysis_mode = "no_strong_sit"
+            legal_candidates = [
+                _challenge_no_strong_record(
+                    bbox,
+                    dem,
+                    dem_range,
+                    dem_min,
+                    challenge_rejections or [{"reasons": ["active selection is private-only under Avoid known private parcels mode"]}],
+                    vegetation_profile,
+                    species_profile,
+                    active_selection_ring,
+                )
+            ]
 
     legal_candidates.sort(
         key=lambda item: (
@@ -2949,6 +3166,8 @@ def build_decision_artifact(
         "cluster_summary": cluster_summary,
         "operator_notes": str(operator_context.get("notes") or "").strip(),
         "bbox_enforced": True,
+        "active_selection_enforced": True,
+        "active_selection_polygon_points": len(active_selection_ring),
         "provider_reliability_reasons": provider_penalty_reasons,
         "vegetation_classification": str(operator_context.get("vegetation_classification") or "unknown"),
         "selected_species": species_profile.get("profile_id"),
@@ -2971,6 +3190,7 @@ def build_decision_artifact(
         "corridors": [asdict(item) for item in corridors],
         "notes": [
             "Selected bbox is enforced as a hard analysis fence before ranking and viewer payload generation.",
+            "Primary Sit Bounds Guard v1 enforces the active drawn polygon when present; no primary/alternate sit should surface outside the selected polygon truth area.",
             "Only legal areas can surface primary or alternate sits when verified legal candidates exist.",
             "Restricted and unknown areas remain visible as suppressed near-misses.",
             "Ranking now adds relative terrain trust logic so convergence, shoulder, funnel, bench, and edge reads come from the DEM instead of presentation-only phrasing.",

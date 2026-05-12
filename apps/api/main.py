@@ -564,16 +564,43 @@ def _monahinga_local_dev_free_runs_enabled() -> bool:
     return value in {"1", "true", "yes", "on", "local"}
 
 
+
+def _monahinga_permission_mode_enabled(operator_context: dict | None) -> bool:
+    """True only when the hunter explicitly chose Permission Granted mode.
+
+    Permission Granted is for known private land with confirmed landowner permission.
+    It bypasses public/PAD-US preflight only; it does not bypass terrain, water,
+    slope, BBox, polygon, or general huntability sanity checks.
+    """
+    try:
+        raw = ""
+        if isinstance(operator_context, dict):
+            raw = str(operator_context.get("private_land_mode") or "").strip().lower()
+        return any(token in raw for token in ("permission", "granted", "include", "allow"))
+    except Exception:
+        return False
+
 def _run(bbox: BBox, width: int, height: int, operator_context: dict | None = None) -> dict:
     global RUN_COUNT
 
     if RUN_COUNT >= MAX_RUNS and not _monahinga_local_dev_free_runs_enabled():
         return {"redirect": "/checkout"}
 
+    operator_context = dict(operator_context or {})
+
     bbox.validate_us_hunting_box()
     _enforce_huntability_guardrail(bbox)
-    _enforce_padus_huntability_preflight(bbox)
-    operator_context = dict(operator_context or {})
+
+    # MONAHINGA_PERMISSION_MODE_PADUS_BYPASS_V5:
+    # Avoid mode still requires public/legal/PAD-US-style land context.
+    # Permission Granted mode is for known private land with confirmed landowner permission,
+    # so it must not be blocked by the public-land preflight before terrain can run.
+    # Downstream decision gates still protect BBox/polygon bounds, terrain, water, slope,
+    # and other huntability checks.
+    if not _monahinga_permission_mode_enabled(operator_context):
+        _enforce_padus_huntability_preflight(bbox)
+    else:
+        print("[huntability] Permission Granted mode: bypassing PAD-US public-land preflight; terrain and decision gates still apply.")
 
     first_run_id = f"run_{uuid4().hex[:10]}"
     first_run_root = RUNS_DIR / first_run_id
